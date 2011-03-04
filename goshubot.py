@@ -8,7 +8,7 @@ http://danneh.net/maid/
 
 import hashlib
 import irclib
-irclib.DEBUG = True
+#irclib.DEBUG = True
 from gbot.bot import Bot
 
 # connection info
@@ -34,8 +34,7 @@ bot = Bot(server, password, prefix='.', indent=3)
 bot.load('modules')
 
 # enable bot to respond
-irc.add_global_handler('pubmsg', bot.handle)
-irc.add_global_handler('privmsg', bot.handle)
+irc.add_global_handler('all_events', bot.handle)
 
 # infinite loop
 irc.process_forever()

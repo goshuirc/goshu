@@ -77,6 +77,11 @@ class Bot(object):
 				command(connection, event)
 		except:
 			pass
+		try:
+			for command in self.commands['all_events']:
+					command(connection, event)
+		except:
+			pass
 	
 	def quit(self, message):
 		""" Quits, may accept a server/channel name later on, once it can join

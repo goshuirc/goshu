@@ -16,9 +16,7 @@ class Log(Module):
 	def __init__(self):
 		self.text_commands = {}
 		self.commands = {
-			'pubmsg' : [ self.log ],
-			'privmsg' : [ self.log ],
-			'privnotice' : [ self.log ],
+			'all_events' : [ self.log ],
 		}
 	
 	def log(self, connection, event):
@@ -26,5 +24,7 @@ class Log(Module):
 			print 'PUB: <'+event.source().split('!')[0]+'>',event.arguments()[0]
 		elif event.eventtype() == 'privmsg':
 			print 'PRI: <'+event.source().split('!')[0]+'>',event.arguments()[0]
-		else:
+		elif event.eventtype() == 'privnotice':
 			print event.arguments()[0]
+		else:
+			print "command: %s, source: %s, target: %s, arguments: %s" % (event.eventtype(), event.source(), event.target(), event.arguments())
