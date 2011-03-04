@@ -13,7 +13,6 @@ class Dice(Module):
 	name = "Quit"
 	
 	def __init__(self):
-		self.password = 'moemoekyun'
 		self.commands = {
 			'q' : self.quit,
 		}
@@ -23,5 +22,8 @@ class Dice(Module):
 			connection.privmsg(event.source().split('!')[0], 'QUIT SYNTAX: .q <password>')
 			return
 		
-		if line == self.password:
+		elif line == self.gbot.password:
 			self.gbot.quit('QUIT')
+		
+		else:
+			connection.privmsg(event.source().split('!')[0], 'QUIT: Password Incorrect')

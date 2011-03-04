@@ -13,9 +13,12 @@ import sys
 class Bot(object):
 	""" Handles Bot operations."""
 	
-	def __init__(self, prefix='.', indent=3):
+	def __init__(self, server, prefix='.', password='uhuehuehue', indent=3):
 		""" Sets up bot."""
+		self.server = server
+		
 		self.prefix = prefix
+		self.password = password
 		self.indent = indent
 		
 		self.module = None

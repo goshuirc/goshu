@@ -11,7 +11,7 @@ irclib.DEBUG = True
 from gbot.bot import Bot
 
 # connection info
-network = 'irc.rizon.net'
+network = '127.0.0.1'
 port = 6667
 channel = '#maid-rpg'
 nick = 'goshuuuu' #Goshujin-Sama
@@ -27,9 +27,8 @@ server.join(channel)
 
 server.privmsg(channel, nick+', reporting for duty')
 
-# modules
-bot = Bot(prefix='.', indent=3)
-bot.server = server
+# bot setup
+bot = Bot(server, prefix='.', password='uhuehuehue', indent=3)
 bot.load('modules')
 
 # enable bot to respond
