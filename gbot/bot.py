@@ -6,19 +6,21 @@ Copyright 2011 Daniel Oakley <danneh@danneh.net>
 http://danneh.net/maid/
 """
 
-from gbot.modules import ModuleLoader
 import os
 import sys
+import hashlib
+from gbot.modules import ModuleLoader
 
 class Bot(object):
 	""" Handles Bot operations."""
 	
-	def __init__(self, server, prefix='.', password='uhuehuehue', indent=3):
+	def __init__(self, server, password, prefix='.', indent=3):
 		""" Sets up bot."""
 		self.server = server
 		
 		self.prefix = prefix
-		self.password = password
+		self.password = hashlib.sha512()
+		self.password.update(password)
 		self.indent = indent
 		
 		self.module = None

@@ -6,6 +6,7 @@ Copyright 2011 Daniel Oakley <danneh@danneh.net>
 http://danneh.net/maid/
 """
 
+import hashlib
 import irclib
 irclib.DEBUG = True
 from gbot.bot import Bot
@@ -16,6 +17,7 @@ port = 6667
 channel = '#maid-rpg'
 nick = 'goshuuuu' #Goshujin-Sama
 name = 'goshu'
+password = raw_input("Enter bot password: ")
 
 # irc object
 irc = irclib.IRC()
@@ -28,7 +30,7 @@ server.join(channel)
 server.privmsg(channel, nick+', reporting for duty')
 
 # bot setup
-bot = Bot(server, prefix='.', password='uhuehuehue', indent=3)
+bot = Bot(server, password, prefix='.', indent=3)
 bot.load('modules')
 
 # enable bot to respond

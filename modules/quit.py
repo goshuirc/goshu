@@ -6,6 +6,7 @@ Copyright 2011 Daniel Oakley <danneh@danneh.net>
 http://danneh.net/maid/
 """
 
+import hashlib
 from gbot.modules import Module
 
 class Dice(Module):
@@ -16,13 +17,15 @@ class Dice(Module):
 		self.commands = {
 			'q' : self.quit,
 		}
+		self.temp_password = hashlib.md5()
 	
-	def quit(self, line, connection, event):
-		if line == '':
+	def quit(self, password, connection, event):
+		if password == '':
 			connection.privmsg(event.source().split('!')[0], 'QUIT SYNTAX: .q <password>')
 			return
 		
-		elif line == self.gbot.password:
+		self.temp_password.update(password)
+		if self.temp_password.digest() == self.gbot.password.digest():
 			self.gbot.quit('QUIT')
 		
 		else:
