@@ -45,7 +45,6 @@ class Bot(object):
 			for alias in module.text_commands[event]:
 				self.text_commands[event][alias] = module.text_commands[event][alias]
 		self.commands.update(module.commands)
-		print self.commands
 	
 	def handle(self, connection, event):
 		""" Handle messages"""
@@ -82,6 +81,12 @@ class Bot(object):
 					command(connection, event)
 		except:
 			pass
+	
+	def is_password(self, password):
+		if hashlib.sha512(password).hexdigest() == self.password.hexdigest():
+			return True
+		else:
+			return False
 	
 	def quit(self, message):
 		""" Quits, may accept a server/channel name later on, once it can join

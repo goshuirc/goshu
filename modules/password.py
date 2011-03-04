@@ -15,8 +15,9 @@ class Password(Module):
 	
 	def __init__(self):
 		self.text_commands = {
-			'privmsg' : { 'change_password' : self.change_password },
-			'pubmsg' : { 'change_password' : self.change_password },
+			'privmsg' : {
+				'change_password' : self.change_password
+			},
 		}
 		self.commands = {}
 	
@@ -24,10 +25,10 @@ class Password(Module):
 		try:
 			(current_pass, new_pass) = line.split(' ')
 		except:
-			connection.privmsg(event.source().split('!')[0], 'PASSWORD SYNTAX: .pass <current password> <new password>')
+			connection.privmsg(event.source().split('!')[0], 'PASSWORD SYNTAX: .change_password <current password> <new password>')
 			return
 		
-		if hashlib.sha512(current_pass).hexdigest() == self.gbot.password.hexdigest():
+		if self.gbot.is_password(current_pass):
 			del self.gbot.password
 			self.gbot.password = hashlib.sha512(new_pass)
 			connection.privmsg(event.source().split('!')[0], 'PASSWORD: Password Updated')

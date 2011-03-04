@@ -10,6 +10,7 @@ import hashlib
 import irclib
 #irclib.DEBUG = True
 from gbot.bot import Bot
+import getpass
 
 # connection info
 network = '127.0.0.1'
@@ -17,7 +18,7 @@ port = 6667
 channel = '#maid-rpg'
 nick = 'goshuuuu' #Goshujin-Sama
 name = 'goshu'
-password = raw_input("Enter bot password: ")
+password = getpass.getpass('Enter bot password: ')
 
 # irc object
 irc = irclib.IRC()
