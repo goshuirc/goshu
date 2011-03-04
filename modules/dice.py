@@ -14,9 +14,11 @@ class Dice(Module):
 	name = "Dice"
 	
 	def __init__(self):
-		self.commands = {
-			'd' : self.dice,
+		self.text_commands = {
+			'privmsg' : { 'd' : self.dice },
+			'pubmsg' : { 'd' : self.dice },
 		}
+		self.commands = {}
 	
 	def dice(self, iline, connection, event):
 		if iline == '':
@@ -77,5 +79,4 @@ class Dice(Module):
 			for li2 in li1:
 				result += int(li2)
 		
-		print 'Dice response:', result
-		connection.privmsg(event.target().split('!')[0], result)
+		connection.privmsg(event.target().split('!')[0], event.target().split('!')[0]+': '+iline+': '+result)

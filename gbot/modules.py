@@ -14,14 +14,18 @@ class Module(object):
 	
 	name = 'genericmodule'
 	""" The name of the module."""
-	alias = ''
-	""" The letter/word the module responds to."""
 	
 	def __init__(self):
-		""" The letter/word the module responds to."""
+		self.text_commands = {
+			#'pubmsg' : { 'a' : self.acommand },
+			#'privmsg' : { 'a' : self.acommand },
+		}
+		self.commands = {
+			#'pubmsg' : self.stalk_convo,
+		}
 
 class ModuleLoader(object):
-	""" Prepares a list of scenes for Bot to load."""
+	""" Prepares a list of modules."""
 	
 	def __init__(self, path):
 		self.path = path

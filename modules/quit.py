@@ -9,14 +9,16 @@ http://danneh.net/maid/
 import hashlib
 from gbot.modules import Module
 
-class Dice(Module):
+class Quit(Module):
 	
 	name = "Quit"
 	
 	def __init__(self):
-		self.commands = {
-			'q' : self.quit,
+		self.text_commands = {
+			'pubmsg' : { 'q' : self.quit },
+			'privmsg' : { 'q' : self.quit },
 		}
+		self.commands = {}
 	
 	def quit(self, password, connection, event):
 		if password == '':

@@ -14,9 +14,11 @@ class Password(Module):
 	name = "Password"
 	
 	def __init__(self):
-		self.commands = {
-			'change_password' : self.change_password,
+		self.text_commands = {
+			'privmsg' : { 'change_password' : self.change_password },
+			'pubmsg' : { 'change_password' : self.change_password },
 		}
+		self.commands = {}
 	
 	def change_password(self, line, connection, event):
 		try:

@@ -24,7 +24,11 @@ class Bot(object):
 		
 		self.module = None
 		self.modules = {}
-		self.commands = {}
+		self.text_commands = {
+			'privmsg' : {},
+			'pubmsg' : {},
+		} #commands responding to <prefix><command> <arg>
+		self.commands = {} #commands that respond to events
 		
 		self.load('modules')
 	
@@ -37,32 +41,42 @@ class Bot(object):
 		""" Appends a module to the bot."""
 		module.gbot = self
 		self.modules[module.name] = module
-		for alias in module.commands:
-			self.commands[alias] = module.commands[alias]
+		for event in module.text_commands:
+			for alias in module.text_commands[event]:
+				self.text_commands[event][alias] = module.text_commands[event][alias]
+		self.commands.update(module.commands)
+		print self.commands
 	
 	def handle(self, connection, event):
 		""" Handle messages"""
-		if event.arguments()[0].split(self.prefix)[0] == '': #command for us
-			command = event.arguments()[0].split(self.prefix)[1].split(' ')[0]
+		if event.eventtype() == 'privmsg' or event.eventtype() == 'pubmsg':
+			if event.arguments()[0].split(self.prefix)[0] == '': #command for us
+				command = event.arguments()[0].split(self.prefix)[1].split(' ')[0]
 			
-			arg_offset = 0
-			arg_offset += len(self.prefix)
-			arg_offset += len(command)
-			try:
-				event.arguments()[0].split(self.prefix)[1].split(' ')[1]
-				arg_offset += 1
-			except:
-				pass
+				arg_offset = 0
+				arg_offset += len(self.prefix)
+				arg_offset += len(command)
+				try:
+					event.arguments()[0].split(self.prefix)[1].split(' ')[1]
+					arg_offset += 1
+				except:
+					pass
 			
-			try: arg = event.arguments()[0][arg_offset:].strip()
-			except: arg = ''
+				try: arg = event.arguments()[0][arg_offset:].strip()
+				except: arg = ''
 			
-			try:
-				self.commands[command](arg, connection, event)
-			except:
-				print 'Bot handle: fail'
-				print ' command:',command
-				print ' arg:',arg
+				try:
+					self.text_commands[event.eventtype()][command](arg, connection, event)
+				except:
+					print 'Bot handle: fail'
+					print ' command:',command
+					print ' arg:',arg
+		
+		try:
+			for command in self.commands[event.eventtype()]:
+				command(connection, event)
+		except:
+			pass
 	
 	def quit(self, message):
 		""" Quits, may accept a server/channel name later on, once it can join
