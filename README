@@ -1,1 +1,12 @@
-Readme
+== Goshubot
+An extensible Bot Platform
+
+= TODO
+module functions:
+	If called like: logtext(None, None)
+	 then the function will output information about itself instead of running
+	Stuff like Name, Private, Password, Description, etc
+
+Logging Module:
+	Change name to Output Module, make it so you can turn on/off printing/logging
+	Rewrite to create the time, nick, message, and then runs them through print/log
