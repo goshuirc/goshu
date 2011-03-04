@@ -17,16 +17,14 @@ class Dice(Module):
 		self.commands = {
 			'q' : self.quit,
 		}
-		self.temp_password = hashlib.md5()
 	
 	def quit(self, password, connection, event):
 		if password == '':
 			connection.privmsg(event.source().split('!')[0], 'QUIT SYNTAX: .q <password>')
 			return
 		
-		self.temp_password.update(password)
-		if self.temp_password.digest() == self.gbot.password.digest():
-			self.gbot.quit('QUIT')
+		if hashlib.sha512(password).hexdigest() == self.gbot.password.hexdigest():
+			self.gbot.quit('QUIT issued by '+event.source().split('!')[0])
 		
 		else:
 			connection.privmsg(event.source().split('!')[0], 'QUIT: Password Incorrect')

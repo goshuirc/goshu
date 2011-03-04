@@ -19,8 +19,7 @@ class Bot(object):
 		self.server = server
 		
 		self.prefix = prefix
-		self.password = hashlib.sha512()
-		self.password.update(password)
+		self.password = hashlib.sha512(password)
 		self.indent = indent
 		
 		self.module = None
@@ -55,8 +54,8 @@ class Bot(object):
 			except:
 				pass
 			
-			arg = ''
-			arg += event.arguments()[0][arg_offset:]
+			try: arg = event.arguments()[0][arg_offset:].strip()
+			except: arg = ''
 			
 			try:
 				self.commands[command](arg, connection, event)
@@ -64,7 +63,6 @@ class Bot(object):
 				print 'Bot handle: fail'
 				print ' command:',command
 				print ' arg:',arg
-				#print ' arg_offset:',arg_offset
 	
 	def quit(self, message):
 		""" Quits, may accept a server/channel name later on, once it can join
