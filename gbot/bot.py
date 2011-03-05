@@ -8,14 +8,13 @@ http://danneh.net/maid/
 
 import os
 import sys
-import random
 import hashlib
 from gbot.modules import ModuleLoader
 
 class Bot(object):
 	""" Handles Bot operations."""
 	
-	def __init__(self, server, password, prefix='.', indent=3):
+	def __init__(self, server, password, prefix='.', indent=3, module_path='modules'):
 		""" Sets up bot."""
 		self.server = server
 		
@@ -24,6 +23,7 @@ class Bot(object):
 		
 		self.module = None
 		self.modules = {}
+		self.text_commands_info = {} #detailed info about text commands
 		self.text_commands = {
 			'privmsg' : {},
 			'pubmsg' : {},
@@ -34,7 +34,7 @@ class Bot(object):
 		self.ops = {
 			#'name/hostname' : <access level>,
 		}
-		self.load('modules')
+		self.load(module_path)
 	
 	def load(self, path):
 		""" Loads modules."""
@@ -44,14 +44,13 @@ class Bot(object):
 	
 	def append(self, module):
 		""" Appends a module to the bot."""
-		run = random.randint(0, 10000)
-		print 'Bot append:', run
 		module.gbot = self
 		self.modules[module.name] = module
 		for event in module.text_commands:
 			for alias in module.text_commands[event]:
 				self.text_commands[event][alias] = module.text_commands[event][alias]
-				print module.text_commands[event][alias](None, None, None) #module info
+				module_commands_info = module.text_commands[event][alias](None, None, None)
+				self.text_commands_info.update(module_commands_info)
 		self.commands.update(module.commands)
 	
 	def handle(self, connection, event):
@@ -59,7 +58,7 @@ class Bot(object):
 		if event.eventtype() == 'privmsg' or event.eventtype() == 'pubmsg':
 			if event.arguments()[0].split(self.prefix)[0] == '': #command for us
 				command = event.arguments()[0].split(self.prefix)[1].split(' ')[0]
-			
+				
 				arg_offset = 0
 				arg_offset += len(self.prefix)
 				arg_offset += len(command)
@@ -78,6 +77,8 @@ class Bot(object):
 					print 'Bot handle: fail'
 					print ' command:',command
 					print ' arg:',arg
+					self.text_commands[event.eventtype()][command](arg, connection, event)
+				
 		
 		try:
 			for command in self.commands[event.eventtype()]:
@@ -91,7 +92,7 @@ class Bot(object):
 		except:
 			pass
 	
-	def access(self, user):
+	def level(self, user):
 		try:
 			return self.ops[user]
 		except:

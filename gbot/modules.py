@@ -8,7 +8,6 @@ http://danneh.net/maid/
 
 import os
 import sys
-import random
 
 class Module(object):
 	""" Basic class that adds some functionality/command to the Bot."""
@@ -29,7 +28,6 @@ class ModuleLoader(object):
 	""" Prepares a list of modules."""
 	
 	def __init__(self, path):
-		self.run = random.randint(0, 10000)
 		self.path = path
 	
 	def __iter__(self):
@@ -42,6 +40,4 @@ class ModuleLoader(object):
 					__import__(name, None, None, [''])
 		
 		for module in Module.__subclasses__():
-			print 'ModuleLoader:', self.run, module.name #see whether both are
-													#being bound in the same Loader
 			yield module()

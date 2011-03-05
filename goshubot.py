@@ -31,8 +31,7 @@ server.join(channel)
 server.privmsg(channel, nick+', reporting for duty')
 
 # bot setup
-bot = Bot(server, password, prefix='.', indent=3)
-bot.load('modules')
+bot = Bot(server, password, prefix='.', indent=3, module_path='modules')
 
 # enable bot to respond
 irc.add_global_handler('all_events', bot.handle)
