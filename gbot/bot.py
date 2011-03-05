@@ -8,6 +8,7 @@ http://danneh.net/maid/
 
 import os
 import sys
+import random
 import hashlib
 from gbot.modules import ModuleLoader
 
@@ -19,7 +20,6 @@ class Bot(object):
 		self.server = server
 		
 		self.prefix = prefix
-		self.password = hashlib.sha512(password)
 		self.indent = indent
 		
 		self.module = None
@@ -30,20 +30,28 @@ class Bot(object):
 		} #commands responding to <prefix><command> <arg>
 		self.commands = {} #commands that respond to events
 		
+		self.password = hashlib.sha512(password)
+		self.ops = {
+			#'name/hostname' : <access level>,
+		}
 		self.load('modules')
 	
 	def load(self, path):
 		""" Loads modules."""
-		for module in ModuleLoader(path):
+		loader = ModuleLoader(path)
+		for module in loader:
 			self.append(module)
 	
 	def append(self, module):
 		""" Appends a module to the bot."""
+		run = random.randint(0, 10000)
+		print 'Bot append:', run
 		module.gbot = self
 		self.modules[module.name] = module
 		for event in module.text_commands:
 			for alias in module.text_commands[event]:
 				self.text_commands[event][alias] = module.text_commands[event][alias]
+				print module.text_commands[event][alias](None, None, None) #module info
 		self.commands.update(module.commands)
 	
 	def handle(self, connection, event):
@@ -76,11 +84,18 @@ class Bot(object):
 				command(connection, event)
 		except:
 			pass
+		
 		try:
 			for command in self.commands['all_events']:
 					command(connection, event)
 		except:
 			pass
+	
+	def access(self, user):
+		try:
+			return self.ops[user]
+		except:
+			return 0
 	
 	def is_password(self, password):
 		if hashlib.sha512(password).hexdigest() == self.password.hexdigest():
@@ -92,3 +107,4 @@ class Bot(object):
 		""" Quits, may accept a server/channel name later on, once it can join
 		    multiple servers/channels."""
 		self.server.disconnect(message)
+		# TODO: exit errything
