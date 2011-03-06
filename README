@@ -2,11 +2,11 @@
 An extensible Bot Platform
 
 = TODO
-module functions:
-	If called like: logtext(None, None)
-	 then the function will output information about itself instead of running
-	Stuff like Name, Private, Password, Description, etc
+goshubot.py
+	search for config file that contains server, channel, etc
+	 (think the JSON settings file similar to Za Geemu)
 
 Logging Module:
 	Change name to Output Module, make it so you can turn on/off printing/logging
 	Rewrite to create the time, nick, message, and then runs them through print/log
+	Make it able to intercept bot responses (modification to irclib may be needed)

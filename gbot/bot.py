@@ -73,12 +73,16 @@ class Bot(object):
 			
 				try:
 					self.text_commands[event.eventtype()][command](arg, connection, event)
+				except KeyError:
+					print 'Bot handle: fail - command not found'
+					print ' command:', command
+					print ' arg:', arg
+					print self.text_commands[event.eventtype()]
 				except:
 					print 'Bot handle: fail'
-					print ' command:',command
-					print ' arg:',arg
+					print ' command:', command
+					print ' arg:', arg
 					self.text_commands[event.eventtype()][command](arg, connection, event)
-				
 		
 		try:
 			for command in self.commands[event.eventtype()]:
@@ -108,4 +112,4 @@ class Bot(object):
 		""" Quits, may accept a server/channel name later on, once it can join
 		    multiple servers/channels."""
 		self.server.disconnect(message)
-		# TODO: exit errything
+		# TODO: exit bot
