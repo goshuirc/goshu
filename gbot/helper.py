@@ -13,7 +13,6 @@ def splitnum(line, split_num=1, split_char=' '):
 		list_out = []
 		
 		for i in range(split_num):
-			print i
 			list_out.append(temp_list_in[0])
 			del temp_list_in[0]
 		

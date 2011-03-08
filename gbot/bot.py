@@ -77,12 +77,13 @@ class Bot(object):
 					print 'Bot handle: fail - command not found'
 					print ' command:', command
 					print ' arg:', arg
-					print self.text_commands[event.eventtype()]
+					#print self.text_commands[event.eventtype()]
+					#self.text_commands[event.eventtype()][command](arg, connection, event)
 				except:
 					print 'Bot handle: fail'
 					print ' command:', command
 					print ' arg:', arg
-					self.text_commands[event.eventtype()][command](arg, connection, event)
+					#self.text_commands[event.eventtype()][command](arg, connection, event)
 		
 		try:
 			for command in self.commands[event.eventtype()]:
@@ -99,8 +100,13 @@ class Bot(object):
 	def level(self, user):
 		try:
 			return self.ops[user]
-		except:
-			return 0
+		except: pass
+		
+		try:
+			return self.ops[user.split('!')[0]]
+		except: pass
+		
+		return 0
 	
 	def is_password(self, password):
 		if hashlib.sha512(password).hexdigest() == self.password.hexdigest():

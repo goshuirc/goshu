@@ -28,8 +28,6 @@ server = irc.server()
 server.connect(network, port, nick, ircname=name)
 server.join(channel)
 
-server.privmsg(channel, nick+', reporting for duty')
-
 # bot setup
 bot = Bot(server, password, prefix='.', indent=3, module_path='modules')
 

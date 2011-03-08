@@ -32,8 +32,9 @@ class Modules(Module):
 		
 		largest_length = 0
 		for command in self.gbot.text_commands_info: # length/indent of commands
-			if len(command) > largest_length:
-				largest_length = len(command)
+			if self.gbot.level(event.source()) >= self.gbot.text_commands_info[command][0]:
+				if len(command) > largest_length:
+					largest_length = len(command)
 		
 		connection.privmsg(event.source().split('!')[0], 'Command List:')
 		for command in self.gbot.text_commands_info:
