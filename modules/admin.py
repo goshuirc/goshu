@@ -35,6 +35,7 @@ class Admin(Module):
 		if line == None and connection == None and event == None:
 			text_commands_info = {
 				"op owner" : [0, 0, 'make yourself a bot owner'],
+				"op add" : [10, 10, 'add someone else as a bot op'],
 			}
 			return (text_commands_info)
 			
@@ -51,7 +52,6 @@ class Admin(Module):
 			
 			if self.gbot.is_password(password):
 				nick = event.source().split('!')[0]
-				print self.waiting
 				try:
 					self.waiting[nick].append('owner')
 				except:
@@ -59,8 +59,16 @@ class Admin(Module):
 						'nickhost' : event.source(),
 						'privs' : ['owner'],
 					}
-				print self.waiting
 				self.gbot.server.whois([nick])
+			
+		elif command == 'add' and self.gbot.level(event.source(), 'op add') == True:
+			try:
+				(nick, level) = splitnum(line, 2)
+				self.gbot.ops[nick] = level
+				print nick, 'is now a bot op, level', level
+			except:
+				output = 'ADD: Command Failed'
+				print output
 	
 	def finish_waiting(self, connection, event):
 		""" Finishes waiting requests."""
@@ -81,26 +89,22 @@ class Admin(Module):
 		""" Updates op list in relation to nick changes."""
 		nick = event.source().split('!')[0]
 		host = event.source().split('!')[1]
+		nickhost = event.source()
 		nick_new = event.target()
 		
-		try:
-			priv_level = self.gbot.op[nick]
-			del self.gbot.op[nick]
+		if self.gbot.level(event.source()) != 0:
+			try: # registered nick
+				priv_level = self.gbot.ops[nick]
+				del self.gbot.ops[nick]
+			except:# unregistered nick
+				priv_level = self.gbot.ops[nickhost]
+				del self.gbot.ops[nickhost]
+				nick_new += '!'+host
 			
-			# check if new nick is +r as well
-		except:
-			pass
-		
-		try:
-			priv_level = self.gbot.op[nick+'!'+host]
-			del self.gbot.op[nick+'!'+host]
-			nick_new += '!'+host
-		except:
-			pass
-		
-		try:
-			self.gbot.op[nick_new] = priv_level
-			output = 'Bot owner updated from '+nick
-			connection.privmsg(nick_new, output)
-		except:
-			pass
+			self.gbot.ops[nick_new] = priv_level
+			
+			if '!' in nick_new:
+				nick_new = nick_new.split('!')[0]
+			
+			#output = 'Bot ops updated from '+nick
+			#connection.privmsg(nick_new.split('!')[0], output)

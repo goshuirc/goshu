@@ -97,7 +97,8 @@ class Bot(object):
 		except:
 			pass
 	
-	def level(self, user):
+	def level(self, user, command=None):
+		user_level = 0
 		try:
 			return self.ops[user]
 		except: pass
@@ -106,7 +107,18 @@ class Bot(object):
 			return self.ops[user.split('!')[0]]
 		except: pass
 		
-		return 0
+		if command == None:
+			return user_level
+		else:
+			try:
+				command_level = self.gbot.text_commands_info[command][0]
+			except:
+				print 'Bot.level: error: command info \'command\' not found'
+				return False
+			if user_level >= command_level:
+				return True
+			else:
+				return False
 	
 	def is_password(self, password):
 		if hashlib.sha512(password).hexdigest() == self.password.hexdigest():
