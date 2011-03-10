@@ -1,12 +1,5 @@
 == Goshubot
 An extensible Bot Platform
 
-= TODO
-goshubot.py
-	search for config file that contains server, channel, etc
-	 (think the JSON settings file similar to Za Geemu)
-
-Logging Module:
-	Change name to Output Module, make it so you can turn on/off printing/logging
-	Rewrite to create the time, nick, message, and then runs them through print/log
-	Make it able to intercept bot responses (modification to irclib may be needed)
+I'm currently in the midst of refactoring/rewriting the entire thing, so this
+may look quite bare for a while. Stay tuned for the glorious v2!
