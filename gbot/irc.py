@@ -37,11 +37,27 @@ class IRC:
 		self._servers[server_nickname] = current_server
 		return current_server
 	
+	def connect_dict(self, dictionary):
+		self.connect(dictionary['server_nickname'], dictionary['server'],
+					 dictionary['port'], dictionary['nickname'])
+	
 	def process_forever(self):
 		""" All's configured, pass control over to irclib."""
 		self._irc.process_forever()
 	
 	
+	def connection_prompt(self):
+		""" Prompt for server/channel connection details."""
+		connection = {}
+		connection['server_nickname'] = raw_input('Please enter a nickname for the server: ')
+		connection['server'] = raw_input('Server Address (irc.example.com): ')
+		port = raw_input('Port (6667): ')
+		connection['port'] = int(port)
+		connection['nickname'] = raw_input('Bot\'s nickname: ')
+		#prompt for everything
+		print connection
+		return connection
+		
 	def server_nick(self, server_connection):
 		""" Returns the server nickname of the given connection."""
 		for server in self._servers:
@@ -52,6 +68,14 @@ class IRC:
 	def add_handler(self, direction, command, handler):
 		try:
 			self._events[direction][command].append(handler)
+		except KeyError:
+			self._events[direction][command] = []
+			self._events[direction][command].append(handler)
+		except:
+			print "gbot.irc add_handler fail:"
+			print self.indent + 'direction:', direction
+			print self.indent + 'command:', command
+			print self.indent + 'handler:', handler
 	
 	def add_command(self, command, description, handler, access_level=0):
 		pass
