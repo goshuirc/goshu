@@ -11,22 +11,45 @@ import json
 
 bot = Bot()
 
+bot_settings_path = 'bot_settings.json'
+server_settings_path = 'server_settings.json'
+
+# bot settings
 try:
-	settings_file = open('settings.json', 'r')
-	settings = json.loads(settings_file.read())
+	settings_file = open(bot_settings_path, 'r')
+	bot_settings = json.loads(settings_file.read())
 	settings_file.close()
 except:
-	settings = None
+	bot_settings = None
 
-settings = bot.irc.connection_prompt(settings)
+bot_settings = bot.prompt_settings(bot_settings)
 
 try:
-	settings_file = open('settings.json', 'w')
-	settings_file.write(json.dumps(settings, sort_keys=True, indent=4))
+	settings_file = open(bot_settings_path, 'w')
+	settings_file.write(json.dumps(bot_settings, sort_keys=True, indent=4))
 	settings_file.close()
 except:
-	print 'Failed to save config file'
+	print 'Failed to save bot config file'
 
-bot.irc.connect_dict(settings)
+bot.process_settings(bot_settings)
+
+# server settings
+try:
+	settings_file = open(server_settings_path, 'r')
+	server_settings = json.loads(settings_file.read())
+	settings_file.close()
+except:
+	server_settings = None
+
+server_settings = bot.irc.connection_prompt(server_settings)
+
+try:
+	settings_file = open(server_settings_path, 'w')
+	settings_file.write(json.dumps(server_settings, sort_keys=True, indent=4))
+	settings_file.close()
+except:
+	print 'Failed to save server config file'
+
+bot.irc.connect_dict(server_settings)
 
 bot.irc.process_forever()

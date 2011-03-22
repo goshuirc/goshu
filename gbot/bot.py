@@ -13,7 +13,8 @@ import data
 class Bot(object):
 	""" Brings everything together."""
 	
-	def __init__(self, prefix='.', indent=3, module_path='modules'):
+	def __init__(self, nick='goshu', prefix='.', indent=3, module_path='modules'):
+		self.nick = nick
 		self.prefix = prefix
 		self.indent = indent
 		
@@ -25,3 +26,12 @@ class Bot(object):
 		self.modules.irc = self.irc
 		
 		self.modules.load(module_path)
+	
+	def prompt_settings(self, current_settings=None):
+		""" Prompts user for global bot settings."""
+		nick = raw_input("bot nick: ").split(' ')[0]
+		return { 'nick' : nick }
+	
+	def process_settings(self, settings):
+		""" Sets the settings defined by the given dictionary."""
+		self.nick = settings['nick']

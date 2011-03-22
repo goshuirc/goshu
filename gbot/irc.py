@@ -27,9 +27,10 @@ class IRC(object):
 		self._irc.add_global_handler('privmsg', self._handle_command)
 		self._irc.add_global_handler('pubmsg', self._handle_command)
 	
-	def connect(self, server_nickname, server, port, nickname, password=None,
+	def connect(self, server_nickname, server, port, password=None,
 				username=None, ircname=None, localaddress="", localport=0):
 		""" Connects to the given server."""
+		nickname = self.bot.nick
 		current_server = self._irc.server()
 		current_server.connect(server, port, nickname, password, username,
 							 ircname, localaddress, localport)
@@ -42,12 +43,13 @@ class IRC(object):
 			server_address = dictionary[server]['address']
 			server_ssl = dictionary[server]['ssl']
 			server_port = dictionary[server]['port']
-			bot_nick = dictionary[server]['bot_nick']
-			self.connect(server_nickname, server_address, server_port, bot_nick)
+			self.connect(server_nickname, server_address, server_port)
 	
 	def connection_prompt(self, dictionary=None):
 		""" Prompt for server/channel connection details."""
 		dictionary_out = {}
+		more_servers = True
+		
 		if dictionary != None:
 			dictionary_out.update(dictionary)
 			for server in dictionary:
@@ -68,6 +70,8 @@ class IRC(object):
 				more_servers = True
 			else:
 				more_servers = False
+		else:
+			more_servers = True
 		
 		while more_servers:
 			server_nickname = raw_input('Server Nickname: ')
@@ -97,9 +101,6 @@ class IRC(object):
 			else:
 				dictionary_out[server_nickname]['port'] = int(port)
 			
-			bot_nick = raw_input('Bot Nick: ')
-			dictionary_out[server_nickname]['bot_nick'] = bot_nick
-			
 			print server_nickname, 'configured'
 			
 			more = ''
@@ -120,7 +121,6 @@ class IRC(object):
 				return server
 		return None
 	
-	
 	def _handle_irclib(self, connection, event):
 		"""[Internal]"""
 		handler_functions = self.modules.handlers('in', event.eventtype())
@@ -138,14 +138,16 @@ class IRC(object):
 		for handler in handler_functions:
 			handler[0](args, connection, event)
 	
-	def _event(self, event):
-		pass
+	def _handle_out(self, event_type, target, arguments=None):
+		source = self.bot.nick
+		event = libs.irclib.Event(event_type, source, target, arguments)
 	
 	
 	def privmsg(self, server, target, message):
 		""" Send a private message to target, on given server."""
 		# call internal event
-		try:
+		
+		try: #overload target, so user can use event.source() directly
 			target = target.split('!')[0]
 		except:
 			pass
@@ -160,7 +162,14 @@ class IRC(object):
 	
 	def join(self, server, channel, password=None):
 		""" Join the given channel, on given server."""
-		self._servers[server].join(channel)
+		# call internal event
+		
+		try:
+			self._servers[server].join(channel)
+		except:
+			print "gbot.irc join fail:"
+			print self.indent + 'server:', server
+			print self.indent + 'channel:', channel
 	
 	
 	def process_forever(self):

@@ -27,4 +27,5 @@ class Log(Module):
 		pass
 	
 	def log_out(self, connection, event):
-		pass
+		print 'log_out:', connection, event
+		#pass
