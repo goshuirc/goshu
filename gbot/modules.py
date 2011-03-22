@@ -48,8 +48,13 @@ class ModuleLoader(object):
 class ModuleHandler(object):
 	""" Handles Modules."""
 	
-	def __init__(self):
-		self.events = {}
+	def __init__(self, bot):
+		self.bot = bot
+		self.events = {
+			'in' : {},
+			'out' : {},
+			'commands' : {},
+		}
 		self.modules = {}
 	
 	def load(self, path):
@@ -61,4 +66,23 @@ class ModuleHandler(object):
 	def append(self, module):
 		""" Appends the given module to the handler."""
 		self.modules[module.name] = module
-		print module.name, 'has been loaded'
+		module.bot = self.bot
+		for direction in module.events:
+			for command in module.events[direction]:
+				try:
+					self.events[direction][command].append([module.name, module.events[direction][command]])
+				except KeyError:
+					self.events[direction][command] = [[module.name, module.events[direction][command]]]
+		print module.name, 'module has been loaded'
+	
+	def handlers(self, direction, event):
+		""" Returns a list of handlers of the given event."""
+		handlers = []
+		for handler in self.events[direction]:
+			if handler == event:
+				for function in self.events[direction][handler]:
+					handlers.append(function[1])
+			elif handler == 'all_events':
+				for function in self.events[direction]['all_events']:
+					handlers.append(function[1])
+		return handlers

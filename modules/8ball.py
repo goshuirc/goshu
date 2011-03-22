@@ -18,7 +18,7 @@ class Ball(Module):
 			#'in' : {},
 			#'out' : {},
 			'commands' : {
-				'8ball' : self.ask,
+				'8ball' : [self.ask, 'ask a question, gain an answer', 0],
 			},
 		}
 		
@@ -37,12 +37,6 @@ class Ball(Module):
 						 ]
 	
 	def ask(self, question, connection, event):
-		if question == None and connection == None and event == None:
-			text_commands_info = {
-				"8ball" : [0, 0, 'ask a question, gain an answer'],
-			}
-			return (text_commands_info)
-		
 		if question == '':
 			output = '8BALL SYNTAX: .8ball <question>'
 			
@@ -54,3 +48,6 @@ class Ball(Module):
 		output = response+', '+event.source().split('!')[0]
 		
 		connection.privmsg(event.target().split('!')[0], output)
+	
+	def handler(self, lol):
+		pass

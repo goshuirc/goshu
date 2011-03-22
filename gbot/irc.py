@@ -6,31 +6,26 @@ Copyright 2011 Daniel Oakley <danneh@danneh.net>
 http://danneh.net/goshu/
 """
 
+from helper import splitnum
 import libs.irclib
 libs.irclib.DEBUG = True
 
 class IRC(object):
-	""" Acts as a wrapper for irclib."""
+	""" Acts as a wrapper for irclib. Highly convoluded wrapper, perhaps, but it
+		is required so we can trap outgoing events."""
 	
-	def __init__(self):
-		self._events = {
-			'in' : {
-				#'motd' : [modules.log, etc],
-			},
-			'out' : {
-				#'msg' : [modules.log, etc],
-			},
-			'commands' : {
-				#'8ball' : [modules.ball, etc],
-			},
-		}
+	def __init__(self, bot):
+		self.bot = bot
+		
 		""" Events affect all servers."""
 		self._irc = libs.irclib.IRC()
 		self._servers = {
-			#'example' : irclib_ServerConnection,
+			#'example' : irclib.ServerConnection,
 		}
 		""" List of servers we are currently connected to."""
 		self._irc.add_global_handler('all_events', self._handle_irclib)
+		self._irc.add_global_handler('privmsg', self._handle_command)
+		self._irc.add_global_handler('pubmsg', self._handle_command)
 	
 	def connect(self, server_nickname, server, port, nickname, password=None,
 				username=None, ircname=None, localaddress="", localport=0):
@@ -53,7 +48,27 @@ class IRC(object):
 	def connection_prompt(self, dictionary=None):
 		""" Prompt for server/channel connection details."""
 		dictionary_out = {}
-		more_servers = True
+		if dictionary != None:
+			dictionary_out.update(dictionary)
+			for server in dictionary:
+				print server+':'
+				print ' '+dictionary[server]['address']+':'+str(dictionary[server]['port'])
+				if dictionary[server]['ssl']:
+					ssl = 'Enabled'
+				else:
+					ssl = 'Disabled'
+				#print ' SSL', ssl #save for when ssl actually works
+				print ''
+			
+			more = ''
+			while more != 'y' and more != 'n':
+				more = raw_input('Would you like to configure more connections? ')
+			
+			if more == 'y':
+				more_servers = True
+			else:
+				more_servers = False
+		
 		while more_servers:
 			server_nickname = raw_input('Server Nickname: ')
 			dictionary_out[server_nickname] = {}
@@ -105,25 +120,25 @@ class IRC(object):
 				return server
 		return None
 	
-	def add_handler(self, direction, command, handler):
-		""" Add a function that handles an internal event."""
-		try:
-			self._events[direction][command].append(handler)
-		except KeyError:
-			self._events[direction][command] = []
-			self._events[direction][command].append(handler)
-		except:
-			print "gbot.irc add_handler fail:"
-			print self.indent + 'direction:', direction
-			print self.indent + 'command:', command
-			print self.indent + 'handler:', handler
-	
-	def add_command(self, command, description, handler, access_level=0):
-		""" Add a function that responds to a said command."""
-		pass
 	
 	def _handle_irclib(self, connection, event):
 		"""[Internal]"""
+		handler_functions = self.modules.handlers('in', event.eventtype())
+		for handler in handler_functions:
+			handler(connection, event)
+	
+	def _handle_command(self, connection, event):
+		"""[Internal]"""
+		(command, args) = (None, None)
+		if event.arguments()[0].split(self.bot.prefix)[0] == '': #command for us
+			command = event.arguments()[0].split(self.bot.prefix)[1]
+			(command, args) = splitnum(command, 1)
+			
+		handler_functions = self.modules.handlers('commands', command)
+		for handler in handler_functions:
+			handler[0](args, connection, event)
+	
+	def _event(self, event):
 		pass
 	
 	
@@ -131,12 +146,21 @@ class IRC(object):
 		""" Send a private message to target, on given server."""
 		# call internal event
 		try:
+			target = target.split('!')[0]
+		except:
+			pass
+		
+		try:
 			self._servers[server].privmsg(target, message)
 		except:
 			print "gbot.irc privmsg fail:"
 			print self.indent + 'server:', server
 			print self.indent + 'target:', target
 			print self.indent + 'message:', message
+	
+	def join(self, server, channel, password=None):
+		""" Join the given channel, on given server."""
+		self._servers[server].join(channel)
 	
 	
 	def process_forever(self):

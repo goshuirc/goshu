@@ -14,8 +14,11 @@ class Bot(object):
 	""" Brings everything together."""
 	
 	def __init__(self, prefix='.', indent=3, module_path='modules'):
-		self.irc = irc.IRC()
-		self.modules = modules.ModuleHandler()
+		self.prefix = prefix
+		self.indent = indent
+		
+		self.irc = irc.IRC(self)
+		self.modules = modules.ModuleHandler(self)
 		
 		#setting up links to each-other
 		self.irc.modules = self.modules
