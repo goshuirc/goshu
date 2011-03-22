@@ -9,6 +9,8 @@ http://danneh.net/goshu/
 from gbot.bot import Bot
 import json
 
+print 'Goshubot'
+
 bot = Bot()
 
 bot_settings_path = 'bot_settings.json'

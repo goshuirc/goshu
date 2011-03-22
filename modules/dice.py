@@ -94,9 +94,22 @@ class Dice(Module):
 				for li2 in li1:
 					result += int(li2)
 		
-			output = event.source().split('!')[0]+': '+iline+' = '+str(result)
+			output = nick+': '+iline+' = '+str(result)
+			
+			self.bot.irc.privmsg(server, channel, output)
 		
 		except:
-			output = event.source().split('!')[0]+': '+iline+' IS NOT A PROPER DICE STRING'
-		
-		connection.privmsg(event.target().split('!')[0], output)
+			output_lines = ['DICE SYNTAX: .d <dice>',
+							'<dice> is a string like d12+4d8-13',
+							'or any other permutation of rpg dice and numbers',]
+			
+			for i in range(0, len(output_lines)):
+				if i > 0:
+					output = ' ' * self.bot.indent
+				else:
+					output = ''
+				
+				output += output_lines[i]
+				
+				self.bot.irc.privmsg(server, nick, output)
+			return

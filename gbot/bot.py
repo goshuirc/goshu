@@ -29,8 +29,17 @@ class Bot(object):
 	
 	def prompt_settings(self, current_settings=None):
 		""" Prompts user for global bot settings."""
-		nick = raw_input("bot nick: ").split(' ')[0]
-		return { 'nick' : nick }
+		try:
+			current_nick = current_settings['nick']
+			nick = raw_input((' '*self.indent)+'Nick ['+current_nick+']: ').split(' ')[0]
+			if nick == '':
+				nick = current_nick
+		except:
+			nick = raw_input((' '*self.indent)+'Nick: ').split(' ')[0]
+		
+		return {
+			'nick' : nick,
+		}
 	
 	def process_settings(self, settings):
 		""" Sets the settings defined by the given dictionary."""

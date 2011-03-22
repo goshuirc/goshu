@@ -138,21 +138,24 @@ class IRC(object):
 		for handler in handler_functions:
 			handler[0](args, connection, event)
 	
-	def _handle_out(self, event_type, target, arguments=None):
+	def _handle_out(self, event_type, server, target, arguments=None):
 		source = self.bot.nick
 		event = libs.irclib.Event(event_type, source, target, arguments)
+		
+		handler_functions = self.modules.handlers('out', event_type)
+		for handler in handler_functions:
+			handler(self._servers[server], event)
 	
 	
 	def privmsg(self, server, target, message):
 		""" Send a private message to target, on given server."""
-		# call internal event
-		
 		try: #overload target, so user can use event.source() directly
 			target = target.split('!')[0]
 		except:
 			pass
 		
 		try:
+			self._handle_out('privmsg', server, target, message)
 			self._servers[server].privmsg(target, message)
 		except:
 			print "gbot.irc privmsg fail:"
@@ -162,9 +165,9 @@ class IRC(object):
 	
 	def join(self, server, channel, password=None):
 		""" Join the given channel, on given server."""
-		# call internal event
 		
 		try:
+			self._handle_out('join', server, channel)
 			self._servers[server].join(channel)
 		except:
 			print "gbot.irc join fail:"
