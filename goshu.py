@@ -17,6 +17,7 @@ bot_settings_path = 'bot_settings.json'
 server_settings_path = 'server_settings.json'
 
 # bot settings
+bot_settings = None
 try:
 	settings_file = open(bot_settings_path, 'r')
 	bot_settings = json.loads(settings_file.read())
@@ -36,6 +37,7 @@ except:
 bot.process_settings(bot_settings)
 
 # server settings
+server_settings = None
 try:
 	settings_file = open(server_settings_path, 'r')
 	server_settings = json.loads(settings_file.read())

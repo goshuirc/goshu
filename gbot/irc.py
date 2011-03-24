@@ -132,11 +132,17 @@ class IRC(object):
 		(command, args) = (None, None)
 		if event.arguments()[0].split(self.bot.prefix)[0] == '': #command for us
 			command = event.arguments()[0].split(self.bot.prefix)[1]
+			command = command.strip()
+			
 			(command, args) = splitnum(command, 1)
+			command = command.lower()
 			
 		handler_functions = self.modules.handlers('commands', command)
 		for handler in handler_functions:
-			handler[0](args, connection, event)
+			try:
+				handler[0](args, connection, event)
+			except:
+				print '===== Command Failed:', command
 	
 	def _handle_out(self, event_type, server, target, arguments=None):
 		source = self.bot.nick
@@ -162,10 +168,25 @@ class IRC(object):
 			print self.indent + 'server:', server
 			print self.indent + 'target:', target
 			print self.indent + 'message:', message
+			
+	def action(self, server, target, action):
+		""" Send a /me to the target."""
+		try: #overload target, so user can use event.source() directly
+			target = target.split('!')[0]
+		except:
+			pass
+		
+		try:
+			self._handle_out('action', server, target, action)
+			self._servers[server].action(target, action)
+		except:
+			print "gbot.irc action fail:"
+			print self.indent + 'server:', server
+			print self.indent + 'target:', target
+			print self.indent + 'message:', message
 	
 	def join(self, server, channel, password=None):
 		""" Join the given channel, on given server."""
-		
 		try:
 			self._handle_out('join', server, channel)
 			self._servers[server].join(channel)
@@ -173,6 +194,16 @@ class IRC(object):
 			print "gbot.irc join fail:"
 			print self.indent + 'server:', server
 			print self.indent + 'channel:', channel
+	
+	def quit(self, server, message):
+		""" Quit from the given server using the message provided."""
+		try:
+			self._handle_out('quit', server, None, message)
+			self._servers[server].quit(message)
+		except:
+			print "gbot.irc quit fail:"
+			print self.indent + 'server:', server
+			print self.indent + 'message:', message
 	
 	
 	def process_forever(self):

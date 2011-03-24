@@ -23,22 +23,23 @@ class Modules(Module):
 	
 	def list_commands(self, args, connection, event):
 		server = self.bot.irc.server_nick(connection)
-		channel = event.target().split('!')[0]
 		nick = event.source().split('!')[0]
 		
 		largest_length = 0
 		for command in self.bot.modules.events['commands']:
-			if len(command) > largest_length:
-				largest_length = len(command)
+			if self.bot.access(nick) >= self.bot.modules.events['commands'][command][0][1][2]:
+				if len(command) > largest_length:
+					largest_length = len(command)
 		
 		self.bot.irc.privmsg(server, nick, 'Command List:')
 		for command in self.bot.modules.events['commands']:
-			indent = largest_length - len(command)
-			indent = ' ' * indent
-			output = self.bot.indent * ' '
-			output += self.bot.prefix
-			output += command
-			output += indent
-			output += ' : '
-			output += self.bot.modules.events['commands'][command][0][1][1]
-			self.bot.irc.privmsg(server, nick, output)
+			if self.bot.access(nick) >= self.bot.modules.events['commands'][command][0][1][2]:
+				indent = largest_length - len(command)
+				indent = ' ' * indent
+				output = self.bot.indent * ' '
+				output += self.bot.prefix
+				output += command
+				output += indent
+				output += ' : '
+				output += self.bot.modules.events['commands'][command][0][1][1]
+				self.bot.irc.privmsg(server, nick, output)

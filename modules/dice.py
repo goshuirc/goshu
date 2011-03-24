@@ -24,6 +24,8 @@ class Dice(Module):
 		server = self.bot.irc.server_nick(connection)
 		channel = event.target().split('!')[0]
 		nick = event.source().split('!')[0]
+		if channel == self.bot.nick:
+			channel = nick
 		
 		if iline == '':
 			output_lines = ['DICE SYNTAX: .d <dice>',

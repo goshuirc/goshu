@@ -37,17 +37,23 @@ class Ball(Module):
 						 ]
 	
 	def ask(self, question, connection, event):
+		server = self.bot.irc.server_nick(connection)
+		channel = event.target().split('!')[0]
+		nick = event.source().split('!')[0]
+		if channel == self.bot.nick:
+			channel = nick
+		
 		if question == '':
 			output = '8BALL SYNTAX: .8ball <question>'
 			
-			connection.privmsg(event.source().split('!')[0], output)
+			self.bot.irc.privmsg(server, channel, output)
 			return
 		
 		response = self.responses[random.randint(0,len(self.responses)-1)]
 		
 		output = response+', '+event.source().split('!')[0]
 		
-		connection.privmsg(event.target().split('!')[0], output)
+		self.bot.irc.privmsg(server, channel, output)
 	
 	def handler(self, lol):
 		pass
