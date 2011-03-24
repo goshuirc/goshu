@@ -8,7 +8,7 @@ http://danneh.net/goshu/
 
 from helper import splitnum
 import libs.irclib
-libs.irclib.DEBUG = True
+#libs.irclib.DEBUG = True
 
 class IRC(object):
 	""" Acts as a wrapper for irclib. Highly convoluded wrapper, perhaps, but it
@@ -145,12 +145,15 @@ class IRC(object):
 				print '===== Command Failed:', command
 	
 	def _handle_out(self, event_type, server, target, arguments=None):
-		source = self.bot.nick
-		event = libs.irclib.Event(event_type, source, target, arguments)
+		try:
+			source = self.bot.nick
+			event = libs.irclib.Event(event_type, source, target, arguments)
 		
-		handler_functions = self.modules.handlers('out', event_type)
-		for handler in handler_functions:
-			handler(self._servers[server], event)
+			handler_functions = self.modules.handlers('out', event_type)
+			for handler in handler_functions:
+				handler(self._servers[server], event)
+		except:
+			pass
 	
 	
 	def privmsg(self, server, target, message):
@@ -165,9 +168,9 @@ class IRC(object):
 			self._servers[server].privmsg(target, message)
 		except:
 			print "gbot.irc privmsg fail:"
-			print self.indent + 'server:', server
-			print self.indent + 'target:', target
-			print self.indent + 'message:', message
+			print (' '*self.bot.indent) + 'server:', server
+			print (' '*self.bot.indent) + 'target:', target
+			print (' '*self.bot.indent) + 'message:', message
 			
 	def action(self, server, target, action):
 		""" Send a /me to the target."""
@@ -181,19 +184,19 @@ class IRC(object):
 			self._servers[server].action(target, action)
 		except:
 			print "gbot.irc action fail:"
-			print self.indent + 'server:', server
-			print self.indent + 'target:', target
-			print self.indent + 'message:', message
+			print (' '*self.bot.indent) + 'server:', server
+			print (' '*self.bot.indent) + 'target:', target
+			print (' '*self.bot.indent) + 'message:', message
 	
 	def join(self, server, channel, password=None):
 		""" Join the given channel, on given server."""
 		try:
-			self._handle_out('join', server, channel)
+			#self._handle_out('join', server, channel)
 			self._servers[server].join(channel)
 		except:
 			print "gbot.irc join fail:"
-			print self.indent + 'server:', server
-			print self.indent + 'channel:', channel
+			print (' '*self.bot.indent) + 'server:', server
+			print (' '*self.bot.indent) + 'channel:', channel
 	
 	def quit(self, server, message):
 		""" Quit from the given server using the message provided."""
@@ -202,8 +205,8 @@ class IRC(object):
 			self._servers[server].quit(message)
 		except:
 			print "gbot.irc quit fail:"
-			print self.indent + 'server:', server
-			print self.indent + 'message:', message
+			print (' '*self.bot.indent) + 'server:', server
+			print (' '*self.bot.indent) + 'message:', message
 	
 	
 	def process_forever(self):
