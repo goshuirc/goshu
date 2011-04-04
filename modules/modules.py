@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 modules.py - Goshubot module control Module
 Copyright 2011 Daniel Oakley <danneh@danneh.net>

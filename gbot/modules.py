@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 modules.py - Goshubot modules Handler
 Copyright 2011 Daniel Oakley <danneh@danneh.net>
@@ -60,10 +60,10 @@ class ModuleHandler(object):
 	def load(self, path):
 		""" Loads modules in the given path."""
 		loader = ModuleLoader(path)
-		print (' '*self.bot.indent)+'Modules:'+(' '*(self.bot.indent-1)),
+		print((' '*self.bot.indent)+'Modules:'+(' '*(self.bot.indent-1)), end=' ')
 		for module in loader:
 			self.append(module)
-		print ''
+		print('')
 	
 	def append(self, module):
 		""" Appends the given module to the handler."""
@@ -75,7 +75,7 @@ class ModuleHandler(object):
 					self.events[direction][command].append([module.name, module.events[direction][command]])
 				except KeyError:
 					self.events[direction][command] = [[module.name, module.events[direction][command]]]
-		print module.name+' :',
+		print(module.name+' :', end=' ')
 	
 	def handlers(self, direction, event):
 		""" Returns a list of handlers of the given event."""

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 helper.py - Goshubot helper functions
 Copyright 2011 Daniel Oakley <danneh@danneh.net>
@@ -7,7 +7,6 @@ http://danneh.net/goshu/
 """
 
 def splitnum(line, split_num=1, split_char=' '):
-	print line
 	temp_list_in = line.split(split_char)
 	
 	if split_num > 0:
@@ -19,7 +18,7 @@ def splitnum(line, split_num=1, split_char=' '):
 		
 		string_out = ''
 		for string in temp_list_in:
-			string_out += string + ' '
+			string_out += string + split_char
 		
 		string_out = string_out[:-1] # remove last char
 		

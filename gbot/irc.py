@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 irc.py - Goshubot irclib Wrapper
 Copyright 2011 Daniel Oakley <danneh@danneh.net>
@@ -6,9 +6,9 @@ Copyright 2011 Daniel Oakley <danneh@danneh.net>
 http://danneh.net/goshu/
 """
 
-from helper import splitnum
-import libs.irclib
-#libs.irclib.DEBUG = True
+from .helper import splitnum
+from .libs import irclib3
+#irclib3.DEBUG = True
 
 class IRC(object):
 	""" Acts as a wrapper for irclib. Highly convoluded wrapper, perhaps, but it
@@ -18,7 +18,7 @@ class IRC(object):
 		self.bot = bot
 		
 		""" Events affect all servers."""
-		self._irc = libs.irclib.IRC()
+		self._irc = irclib3.IRC()
 		self._servers = {
 			#'example' : irclib.ServerConnection,
 		}
@@ -53,18 +53,18 @@ class IRC(object):
 		if dictionary != None:
 			dictionary_out.update(dictionary)
 			for server in dictionary:
-				print server+':'
-				print ' '+dictionary[server]['address']+':'+str(dictionary[server]['port'])
+				print(server+':')
+				print(' '+dictionary[server]['address']+':'+str(dictionary[server]['port']))
 				if dictionary[server]['ssl']:
 					ssl = 'Enabled'
 				else:
 					ssl = 'Disabled'
 				#print ' SSL', ssl #save for when ssl actually works
-				print ''
+				print('')
 			
 			more = ''
 			while more != 'y' and more != 'n':
-				more = raw_input('Would you like to configure more connections? ')
+				more = input('Would you like to configure more connections? ')
 			
 			if more == 'y':
 				more_servers = True
@@ -74,14 +74,14 @@ class IRC(object):
 			more_servers = True
 		
 		while more_servers:
-			server_nickname = raw_input('Server Nickname: ')
+			server_nickname = input('Server Nickname: ')
 			dictionary_out[server_nickname] = {}
-			dictionary_out[server_nickname]['address'] = raw_input('Server Address (irc.example.com): ')
+			dictionary_out[server_nickname]['address'] = input('Server Address (irc.example.com): ')
 			
 			if False: #ssl not handled within irclib yet
 				ssl = ''
 				while ssl != 'y' and ssl != 'n':
-					ssl = raw_input('SSL? (y/n)')
+					ssl = input('SSL? (y/n)')
 			
 				if ssl == 'y':
 					dictionary_out[server_nickname]['ssl'] = True
@@ -94,18 +94,18 @@ class IRC(object):
 			
 			port = 'portnumberhere'
 			while port.isdigit() == False and port != '':
-				port = raw_input('Port ['+str(assumed_port)+']:')
+				port = input('Port ['+str(assumed_port)+']:')
 			
 			if port == '':
 				dictionary_out[server_nickname]['port'] = assumed_port
 			else:
 				dictionary_out[server_nickname]['port'] = int(port)
 			
-			print server_nickname, 'configured'
+			print(server_nickname, 'configured')
 			
 			more = ''
 			while more != 'y' and more != 'n':
-				more = raw_input('Would you like to configure more connections? ')
+				more = input('Would you like to configure more connections? ')
 			
 			if more == 'y':
 				more_servers = True
@@ -142,12 +142,12 @@ class IRC(object):
 			try:
 				handler[0](args, connection, event)
 			except:
-				print '===== Command Failed:', command
+				print('===== Command Failed:', command)
 	
 	def _handle_out(self, event_type, server, target, arguments=None):
 		try:
 			source = self.bot.nick
-			event = libs.irclib.Event(event_type, source, target, arguments)
+			event = irclib.Event(event_type, source, target, arguments)
 		
 			handler_functions = self.modules.handlers('out', event_type)
 			for handler in handler_functions:
@@ -167,10 +167,10 @@ class IRC(object):
 			self._handle_out('privmsg', server, target, message)
 			self._servers[server].privmsg(target, message)
 		except:
-			print "gbot.irc privmsg fail:"
-			print (' '*self.bot.indent) + 'server:', server
-			print (' '*self.bot.indent) + 'target:', target
-			print (' '*self.bot.indent) + 'message:', message
+			print("gbot.irc privmsg fail:")
+			print((' '*self.bot.indent) + 'server:', server)
+			print((' '*self.bot.indent) + 'target:', target)
+			print((' '*self.bot.indent) + 'message:', message)
 			
 	def action(self, server, target, action):
 		""" Send a /me to the target."""
@@ -183,10 +183,10 @@ class IRC(object):
 			self._handle_out('action', server, target, action)
 			self._servers[server].action(target, action)
 		except:
-			print "gbot.irc action fail:"
-			print (' '*self.bot.indent) + 'server:', server
-			print (' '*self.bot.indent) + 'target:', target
-			print (' '*self.bot.indent) + 'message:', message
+			print("gbot.irc action fail:")
+			print((' '*self.bot.indent) + 'server:', server)
+			print((' '*self.bot.indent) + 'target:', target)
+			print((' '*self.bot.indent) + 'message:', message)
 	
 	def join(self, server, channel, password=None):
 		""" Join the given channel, on given server."""
@@ -194,9 +194,9 @@ class IRC(object):
 			#self._handle_out('join', server, channel)
 			self._servers[server].join(channel)
 		except:
-			print "gbot.irc join fail:"
-			print (' '*self.bot.indent) + 'server:', server
-			print (' '*self.bot.indent) + 'channel:', channel
+			print("gbot.irc join fail:")
+			print((' '*self.bot.indent) + 'server:', server)
+			print((' '*self.bot.indent) + 'channel:', channel)
 	
 	def quit(self, server, message):
 		""" Quit from the given server using the message provided."""
@@ -204,9 +204,9 @@ class IRC(object):
 			self._handle_out('quit', server, None, message)
 			self._servers[server].quit(message)
 		except:
-			print "gbot.irc quit fail:"
-			print (' '*self.bot.indent) + 'server:', server
-			print (' '*self.bot.indent) + 'message:', message
+			print("gbot.irc quit fail:")
+			print((' '*self.bot.indent) + 'server:', server)
+			print((' '*self.bot.indent) + 'message:', message)
 	
 	
 	def process_forever(self):

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 goshubot.py - Goshubot
 Copyright 2011 Daniel Oakley <danneh@danneh.net>
@@ -6,4 +6,4 @@ Copyright 2011 Daniel Oakley <danneh@danneh.net>
 http://danneh.net/goshu/
 """
 
-import gbot.bot
+from . import bot
