@@ -362,7 +362,7 @@ class Log(Module):
 			indent = self.printable_len(output)
 			output += event_arguments[0]
 		
-		elif event_type in ['privmsg', ]:
+		elif event_type in ['privamsg', ]:
 			output += sep_blue
 			output += channel
 			output += sep_blue
@@ -414,6 +414,10 @@ class Log(Module):
 	def log(self, string, indent=0):
 		""" print/log the given string, with a hanging indent of given spaces."""
 		print(self.color_string_unescape(self.wrap(string, indent)))
+		output = '/{'+str(indent)+'}'+string+'\n'
+		outfile = open('log.txt', 'a')
+		outfile.write(output)
+		outfile.close()
 	
 	
 	def printable_len(self, in_string):

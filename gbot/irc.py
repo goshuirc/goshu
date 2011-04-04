@@ -143,6 +143,7 @@ class IRC(object):
 				handler[0](args, connection, event)
 			except:
 				print('===== Command Failed:', command)
+				handler[0](args, connection, event)
 	
 	def _handle_out(self, event_type, server, target, arguments=None):
 		try:
