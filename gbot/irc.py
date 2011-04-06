@@ -8,7 +8,7 @@ http://danneh.net/goshu/
 
 from .helper import splitnum
 from .libs import irclib3
-irclib3.DEBUG = True
+#irclib3.DEBUG = True
 
 class IRC(object):
 	""" Acts as a wrapper for irclib. Highly convoluded wrapper, perhaps, but it
@@ -205,6 +205,17 @@ class IRC(object):
 			print("gbot.irc quit fail:")
 			print((' '*self.bot.indent) + 'server:', server)
 			print((' '*self.bot.indent) + 'message:', message)
+	
+	def ctcp_reply(self, server, ip, string):
+		""" Send a CTCP Reply."""
+		try:
+			self._handle_out('ctcp', server, ip, [string])
+			self._servers[server].ctcp_reply(ip, string)
+		except:
+			print("gbot.irc ctcp_reply fail:")
+			print((' '*self.bot.indent) + 'server:', server)
+			print((' '*self.bot.indent) + 'ip:', ip)
+			print((' '*self.bot.indent) + 'string:', string)
 	
 	
 	def process_forever(self):

@@ -86,12 +86,13 @@ class Log(Module):
 		server = self.bot.irc.server_nick(connection)
 		
 		event_type = event.eventtype()
+		event_source = event.source()
 		event_arguments = []
 		#print('lol', event.arguments())
 		for argument in event.arguments():
 			event_arguments.append(self.color_string_escape(argument))
 		#print('klol', event_arguments)
-		event_target = self.color_string_escape(event.target())
+		event_target = event.target()
 		
 		sep_blue = self.Fore['BLUE']+'-'+self.Fore['RESET']
 		sep_green = self.Fore['GREEN']+'-'+self.Fore['RESET']
@@ -309,7 +310,7 @@ class Log(Module):
 			output += self.Fore['RESET_ALL']+self.Style['RESET_ALL']
 		
 		else:
-			output += "log_in: %s, source: %s, target: %s, arguments: %s" % (event.eventtype(), event.source(), event.target(), event.arguments()[0])
+			output += "log_in: %s, source: %s, target: %s, arguments: %s" % (event_type, event_source, event_target, event_arguments)
 		
 		self.log(output, indent)
 	
@@ -415,7 +416,7 @@ class Log(Module):
 	
 	def log(self, string, indent=0):
 		""" print/log the given string, with a hanging indent of given spaces."""
-		print(self.color_string_unescape(self.wrap(string, indent)))
+		print(self.color_string_unescape(self.wrap(string+self.Fore['RESET']+self.Style['RESET_ALL'], indent)))
 		
 		output = '/{'+str(indent)+'}'+string+'\n'
 		outfile = open('log.txt', 'a')
@@ -461,7 +462,7 @@ class Log(Module):
 				in_string = self.color_irc_parse(in_string)
 			except:
 				print('color_string_escape error')
-				print('  ', in_string)
+				print('  ', (in_string))
 				in_string = ''
 		else:
 			in_string = ''

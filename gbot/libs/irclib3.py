@@ -356,12 +356,10 @@ class ServerConnection(Connection):
 				command = m.group("command").lower()
 
 			if m.group("argument"):
-				print(('  arg1:', m.group("argument")))
 				a = m.group("argument").split(" :", 1)
 				arguments = a[0].split()
 				if len(a) == 2:
 					arguments.append(a[1])
-				print(('  args:', arguments))
 
 			# Translate numerics into more readable strings.
 			if command in numeric_events:
@@ -376,9 +374,7 @@ class ServerConnection(Connection):
 				self.real_nickname = arguments[0]
 
 			if command in ["privmsg", "notice"]:
-				print(('     argb:', arguments))
 				target, message = arguments[0], arguments[1]
-				print(('     arga:', message))
 				messages = _ctcp_dequote(message)
 
 				if command == "privmsg":
@@ -391,7 +387,7 @@ class ServerConnection(Connection):
 						command = "privnotice"
 
 				for m in messages:
-					if type(m) is 'Tuple':
+					if isinstance(m, tuple):
 						if command in ["privmsg", "pubmsg"]:
 							command = "ctcp"
 						else:
@@ -399,8 +395,8 @@ class ServerConnection(Connection):
 
 						m = list(m)
 						if DEBUG:
-							print("command: %s, source: %s, target: %s, arguments: %s" % (
-								command, prefix, target, m))
+							print(("command: %s, source: %s, target: %s, arguments: %s" % (
+								command, prefix, target, m)))
 						self._handle_event(Event(command, prefix, target, m))
 						if command == "ctcp" and m[0] == "ACTION":
 							self._handle_event(Event("action", prefix, target, m[1:]))
@@ -554,7 +550,7 @@ class ServerConnection(Connection):
 	
 	def part(self, channels, message=""):
 		"""Send a PART command."""
-		if type(channels) == types.StringType:
+		if isinstance(channels, str):
 			self.send_raw("PART " + channels + (message and (" " + message)))
 		else:
 			self.send_raw("PART " + ",".join(channels) + (message and (" " + message)))
@@ -880,7 +876,7 @@ class Event:
 
 _LOW_LEVEL_QUOTE = "\020"
 _CTCP_LEVEL_QUOTE = "\134"
-_CTCP_DELIMITER = "\x01"
+_CTCP_DELIMITER = "\001"
 
 _low_level_mapping = {
 	"0": "\000",
@@ -914,7 +910,6 @@ def irc_lower(s):
 
 def _ctcp_dequote(message):
 	"""[Internal] Dequote a message according to CTCP specifications."""
-	print(('                 _ctcpin:', message))
 	def _low_level_replace(match_obj):
 		ch = match_obj.group(1)
 
