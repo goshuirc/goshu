@@ -27,13 +27,13 @@ class IRC(object):
 		self._irc.add_global_handler('privmsg', self._handle_command)
 		self._irc.add_global_handler('pubmsg', self._handle_command)
 	
-	def connect(self, server_nickname, server, port, password=None,
-				username=None, ircname=None, localaddress="", localport=0):
+	def connect(self, server_nickname, server, port, password=None, username=None,
+				ircname=None, localaddress="", localport=0, sslsock=False, ipv6=False):
 		""" Connects to the given server."""
 		nickname = self.bot.nick
 		current_server = self._irc.server()
 		current_server.connect(server, port, nickname, password, username,
-							 ircname, localaddress, localport)
+							ircname, localaddress, localport, sslsock, ipv6)
 		self._servers[server_nickname] = current_server
 		return current_server
 	
@@ -43,12 +43,13 @@ class IRC(object):
 			server_address = dictionary[server]['address']
 			server_ssl = dictionary[server]['ssl']
 			server_port = dictionary[server]['port']
-			self.connect(server_nickname, server_address, server_port)
+			self.connect(server_nickname, server_address, server_port, sslsock=server_ssl)
 	
 	def connection_prompt(self, dictionary=None):
 		""" Prompt for server/channel connection details."""
 		dictionary_out = {}
 		more_servers = True
+		print() #\newline
 		
 		if dictionary != None:
 			dictionary_out.update(dictionary)
@@ -59,7 +60,7 @@ class IRC(object):
 					ssl = 'Enabled'
 				else:
 					ssl = 'Disabled'
-				#print ' SSL', ssl #save for when ssl actually works
+				print(' SSL', ssl)
 				print('')
 			
 			more = ''
@@ -78,33 +79,30 @@ class IRC(object):
 			dictionary_out[server_nickname] = {}
 			dictionary_out[server_nickname]['address'] = input('Server Address (irc.example.com): ')
 			
-			if False: #ssl not handled within irclib yet
-				ssl = ''
-				while ssl != 'y' and ssl != 'n':
-					ssl = input('SSL? (y/n)')
+			ssl = ''
+			while ssl != 'y' and ssl != 'n':
+				ssl = input('SSL? (y/n)')
 			
-				if ssl == 'y':
-					dictionary_out[server_nickname]['ssl'] = True
-					assumed_port = 6697
-				else:
-					dictionary_out[server_nickname]['ssl'] = False
-					assumed_port = 6667
-			dictionary_out[server_nickname]['ssl'] = False
-			assumed_port = 6667
+			if ssl == 'y':
+				dictionary_out[server_nickname]['ssl'] = True
+				assumed_port = 6697
+			else:
+				dictionary_out[server_nickname]['ssl'] = False
+				assumed_port = 6667
 			
 			port = 'portnumberhere'
 			while port.isdigit() == False and port != '':
-				port = input('Port ['+str(assumed_port)+']:')
+				port = input('Port ['+str(assumed_port)+']: ')
 			
 			if port == '':
 				dictionary_out[server_nickname]['port'] = assumed_port
 			else:
 				dictionary_out[server_nickname]['port'] = int(port)
 			
-			print(server_nickname, 'configured')
+			print(server_nickname, 'configured\n')
 			
-			more = ''
-			while more != 'y' and more != 'n':
+			more = 'test'
+			while more[0] not in ['y', 'n']:
 				more = input('Would you like to configure more connections? ')
 			
 			if more == 'y':
