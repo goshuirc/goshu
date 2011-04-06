@@ -87,8 +87,10 @@ class Log(Module):
 		
 		event_type = event.eventtype()
 		event_arguments = []
+		#print('lol', event.arguments())
 		for argument in event.arguments():
 			event_arguments.append(self.color_string_escape(argument))
+		#print('klol', event_arguments)
 		event_target = self.color_string_escape(event.target())
 		
 		sep_blue = self.Fore['BLUE']+'-'+self.Fore['RESET']
@@ -307,7 +309,7 @@ class Log(Module):
 			output += self.Fore['RESET_ALL']+self.Style['RESET_ALL']
 		
 		else:
-			output += "log_in: %s, source: %s, target: %s, arguments: %s" % (event.eventtype(), event.source(), event.target(), event.arguments())
+			output += "log_in: %s, source: %s, target: %s, arguments: %s" % (event.eventtype(), event.source(), event.target(), event.arguments()[0])
 		
 		self.log(output, indent)
 	
@@ -362,7 +364,7 @@ class Log(Module):
 			indent = self.printable_len(output)
 			output += event_arguments[0]
 		
-		elif event_type in ['privamsg', ]:
+		elif event_type in ['privmsg', ]:
 			output += sep_blue
 			output += channel
 			output += sep_blue
@@ -395,7 +397,7 @@ class Log(Module):
 				output += nick+' '
 				output += event.arguments()
 		
-			elif event.eventtype() in ['privmsg', ]:
+			elif event.eventtype() in ['privamsg', ]:
 				output += seperator
 				output += event.target()
 				output += seperator
@@ -414,42 +416,53 @@ class Log(Module):
 	def log(self, string, indent=0):
 		""" print/log the given string, with a hanging indent of given spaces."""
 		print(self.color_string_unescape(self.wrap(string, indent)))
+		
 		output = '/{'+str(indent)+'}'+string+'\n'
 		outfile = open('log.txt', 'a')
 		outfile.write(output)
 		outfile.close()
 	
 	
-	def printable_len(self, in_string):
+	def printable_len(self, in_string=None):
 		""" Gives how many printable characters long the string is."""
 		printable = 0
-		running = True
-		while running:
-			if in_string[0] == '/' and in_string[1] == '{':
-				(temp_first, temp_last) = splitnum(in_string, split_char='}')
-				in_string = temp_last
-			elif in_string[0] == '/' and in_string[1] == '/':
-				printable += 1
-				in_string = in_string[2:]
-			elif in_string[0] in string.printable: # change to work with unicode
-				printable += 1
-				in_string = in_string[1:]
-			if len(in_string) < 1:
-				running = False
+		if in_string:
+			running = True
+			while running:
+				if in_string[0] == '/' and in_string[1] == '{':
+					(temp_first, temp_last) = splitnum(in_string, split_char='}')
+					in_string = temp_last
+				elif in_string[0] == '/' and in_string[1] == '/':
+					printable += 1
+					in_string = in_string[2:]
+				elif in_string[0].isprintable():
+					printable += 1
+					in_string = in_string[1:]
+				if len(in_string) < 1:
+					running = False
 		return printable
 	
 	
-	def color_irc_parse(self, in_string):
+	def color_irc_parse(self, in_string=None):
 		""" Parse the given string and turn irc color codes into our color
 			codes."""
+		if in_string:
+			pass
+		else:
+			in_string = ''
 		return in_string
 	
 	def color_string_escape(self, in_string=None):
 		""" Escapes an irc string, so it'll work properly with the color
 			functions."""
 		if in_string:
-			in_string = in_string.replace('/', '//')
-			in_string = self.color_irc_parse(in_string)
+			try:
+				in_string = in_string.replace('/', '//')
+				in_string = self.color_irc_parse(in_string)
+			except:
+				print('color_string_escape error')
+				print('  ', in_string)
+				in_string = ''
 		else:
 			in_string = ''
 		return in_string

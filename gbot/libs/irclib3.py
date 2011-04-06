@@ -333,7 +333,6 @@ class ServerConnection(Connection):
 		for line in lines:
 			if DEBUG:
 				print("FROM SERVER:", line)
-				#print("MATCH:", _rfc_1459_command_regexp.match(line))
 
 			if not line:
 				continue
@@ -357,10 +356,12 @@ class ServerConnection(Connection):
 				command = m.group("command").lower()
 
 			if m.group("argument"):
+				print(('  arg1:', m.group("argument")))
 				a = m.group("argument").split(" :", 1)
 				arguments = a[0].split()
 				if len(a) == 2:
 					arguments.append(a[1])
+				print(('  args:', arguments))
 
 			# Translate numerics into more readable strings.
 			if command in numeric_events:
@@ -375,7 +376,9 @@ class ServerConnection(Connection):
 				self.real_nickname = arguments[0]
 
 			if command in ["privmsg", "notice"]:
+				print(('     argb:', arguments))
 				target, message = arguments[0], arguments[1]
+				print(('     arga:', message))
 				messages = _ctcp_dequote(message)
 
 				if command == "privmsg":
@@ -877,7 +880,7 @@ class Event:
 
 _LOW_LEVEL_QUOTE = "\020"
 _CTCP_LEVEL_QUOTE = "\134"
-_CTCP_DELIMITER = "\001"
+_CTCP_DELIMITER = "\x01"
 
 _low_level_mapping = {
 	"0": "\000",
@@ -911,6 +914,7 @@ def irc_lower(s):
 
 def _ctcp_dequote(message):
 	"""[Internal] Dequote a message according to CTCP specifications."""
+	print(('                 _ctcpin:', message))
 	def _low_level_replace(match_obj):
 		ch = match_obj.group(1)
 

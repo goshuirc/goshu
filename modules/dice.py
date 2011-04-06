@@ -27,42 +27,31 @@ class Dice(Module):
 		if channel == self.bot.nick:
 			channel = nick
 		
-		if iline == '':
-			output_lines = ['DICE SYNTAX: .d <dice>',
-							'<dice> is a string like d12+4d8-13',
-							'or any other permutation of rpg dice and numbers',]
-			
-			for i in range(0, len(output_lines)):
-				if i > 0:
-					output = ' ' * self.bot.indent
-				else:
-					output = ''
-				
-				output += output_lines[i]
-				
-				self.bot.irc.privmsg(server, nick, output)
-			return
-		
 		try:
+			if iline == '':
+				raise Exception
+			
 			if iline[0] == '-':
 				iline = '0' + iline # fixes negatives
 			oline = []
 			idice = []
 			odice = []
-		
+			out_dice_line = ''
+			
 			# split line into seperate parts
 			for split in iline.split('+'):
 				oline = oline + split.split('-')
-		
+			
 			for line in oline:
 				if('d' in line):
 					if line.split('d')[0].isdigit():
-						idice.append(line.split('d'))
+						if len(str(line.split('d')[1])) < 50:
+							idice.append(line.split('d'))
 					else:
 						idice.append(['1',line.split('d')[1]])
 				else:
 					idice.append(line.split('d'))
-		
+			
 			# negatives
 			i = 1
 			for char in iline:
@@ -74,7 +63,7 @@ class Dice(Module):
 					else:
 						idice[i][0] = str(-int(idice[i][0]))
 					i += 1
-		
+			
 			# run and construct random numbers
 			for split in idice:
 				dice = []
@@ -82,21 +71,30 @@ class Dice(Module):
 				if(len(split) == 2):
 					for i in range(int(split[0])):
 						if(int(split[1]) > 0):
-							dice.append(random.randint(1, int(split[1])))
+							result = random.randint(1, int(split[1]))
+							dice.append(result)
+							out_dice_line += str(result)+', '
 						else:
-							dice.append(random.randint(int(split[1]), -1))
+							result = random.randint(int(split[1]), -1)
+							dice.append(result)
+							out_dice_line += str(result)+', '
 				else:
 					dice += split
 			
 				odice.append(dice)
-		
+			
 			# use calculated numbers to form result
 			result = 0
 			for li1 in odice:
 				for li2 in li1:
 					result += int(li2)
-		
-			output = nick+': '+iline+' = '+str(result)
+			
+			output = nick+': '
+			output += iline+'  =  '+str(result)
+			if len(out_dice_line.split(',')) < 13:
+				output += '  =  '+out_dice_line[:-2]
+			else:
+				output += '  =  toomanydice'
 			
 			self.bot.irc.privmsg(server, channel, output)
 		

@@ -8,7 +8,7 @@ http://danneh.net/goshu/
 
 from .helper import splitnum
 from .libs import irclib3
-#irclib3.DEBUG = True
+irclib3.DEBUG = True
 
 class IRC(object):
 	""" Acts as a wrapper for irclib. Highly convoluded wrapper, perhaps, but it
@@ -146,15 +146,12 @@ class IRC(object):
 				handler[0](args, connection, event)
 	
 	def _handle_out(self, event_type, server, target, arguments=None):
-		try:
-			source = self.bot.nick
-			event = irclib.Event(event_type, source, target, arguments)
+		source = self.bot.nick
+		event = irclib3.Event(event_type, source, target, arguments)
 		
-			handler_functions = self.modules.handlers('out', event_type)
-			for handler in handler_functions:
-				handler(self._servers[server], event)
-		except:
-			pass
+		handler_functions = self.modules.handlers('out', event_type)
+		for handler in handler_functions:
+			handler(self._servers[server], event)
 	
 	
 	def privmsg(self, server, target, message):
@@ -165,7 +162,7 @@ class IRC(object):
 			pass
 		
 		try:
-			self._handle_out('privmsg', server, target, message)
+			self._handle_out('privmsg', server, target, [message])
 			self._servers[server].privmsg(target, message)
 		except:
 			print("gbot.irc privmsg fail:")
@@ -181,7 +178,7 @@ class IRC(object):
 			pass
 		
 		try:
-			self._handle_out('action', server, target, action)
+			self._handle_out('action', server, target, [action])
 			self._servers[server].action(target, action)
 		except:
 			print("gbot.irc action fail:")
@@ -202,7 +199,7 @@ class IRC(object):
 	def quit(self, server, message):
 		""" Quit from the given server using the message provided."""
 		try:
-			self._handle_out('quit', server, None, message)
+			self._handle_out('quit', server, None, [message])
 			self._servers[server].quit(message)
 		except:
 			print("gbot.irc quit fail:")
