@@ -70,16 +70,16 @@ class Log(Module):
 	def log_in(self, connection, event):
 		""" Logs incoming events."""
 		try:
-			nick = self.color_string_escape(event.source().split('!')[0])
-			host = self.color_string_escape(event.source().split('!')[1])
+			nick = self.string_escape(event.source().split('!')[0])
+			host = self.string_escape(event.source().split('!')[1])
 		except:
-			nick = self.color_string_escape(event.source())
+			nick = self.string_escape(event.source())
 			host = ''
 		
 		try:
-			channel = self.color_string_escape(event.target().split('!')[0])
+			channel = self.string_escape(event.target().split('!')[0])
 		except:
-			channel = self.color_string_escape(event.target())
+			channel = self.string_escape(event.target())
 		
 		if self.color_string_unescape(channel) == self.bot.nick:
 			channel = nick
@@ -90,7 +90,7 @@ class Log(Module):
 		event_arguments = []
 		#print('lol', event.arguments())
 		for argument in event.arguments():
-			event_arguments.append(self.color_string_escape(argument))
+			event_arguments.append(self.string_escape(argument))
 		#print('klol', event_arguments)
 		event_target = event.target()
 		
@@ -198,7 +198,7 @@ class Log(Module):
 			output += ' '
 			output += self.Style['DIM']+'['
 			output += self.Fore['CYAN']
-			output += self.color_string_escape(event.source().split('!')[1])
+			output += self.string_escape(event.source().split('!')[1])
 			output += self.Fore['RESET']
 			output += ']'+self.Style['RESET_ALL']
 			output += ' has joined '
@@ -215,7 +215,7 @@ class Log(Module):
 			output += self.Fore['RESET']
 			output += ' '
 			output += self.Style['DIM']+'['+self.Style['RESET_ALL']
-			output += self.color_string_escape(event.source().split('!')[1])
+			output += self.string_escape(event.source().split('!')[1])
 			output += self.Style['DIM']+']'+self.Style['RESET_ALL']
 			output += ' has quit '
 			output += self.Style['DIM']+'['+self.Style['RESET_ALL']
@@ -347,16 +347,16 @@ class Log(Module):
 	def log_out(self, connection, event):
 		""" Logs outgoing events."""
 		try:
-			nick = self.color_string_escape(event.source().split('!')[0])
-			host = self.color_string_escape(event.source().split('!')[1])
+			nick = self.string_escape(event.source().split('!')[0])
+			host = self.string_escape(event.source().split('!')[1])
 		except:
-			nick = self.color_string_escape(event.source())
+			nick = self.string_escape(event.source())
 			host = ''
 		
 		try:
-			channel = self.color_string_escape(event.target().split('!')[0])
+			channel = self.string_escape(event.target().split('!')[0])
 		except:
-			channel = self.color_string_escape(event.target())
+			channel = self.string_escape(event.target())
 		
 		if self.color_string_unescape(channel) == self.bot.nick:
 			channel = nick
@@ -365,8 +365,8 @@ class Log(Module):
 		event_type = event.eventtype()
 		event_arguments = []
 		for argument in event.arguments():
-			event_arguments.append(self.color_string_escape(argument))
-		event_target = self.color_string_escape(event.target())
+			event_arguments.append(self.string_escape(argument))
+		event_target = self.string_escape(event.target())
 		
 		sep_blue = self.Fore['BLUE']+'-'+self.Fore['RESET']
 		sep_green = self.Fore['GREEN']+'-'+self.Fore['RESET']
@@ -449,23 +449,134 @@ class Log(Module):
 	def color_irc_parse(self, in_string=None):
 		""" Parse the given string and turn irc color codes into our color
 			codes."""
+		out_string = ''
 		if in_string:
-			pass
+			bold = False
+			while len(in_string) > 0:
+				if in_string[0] == '\u0003':
+					in_string = in_string[1:]
+					fore = ''
+					back = ''
+					in_fore = True
+					
+					while 1:
+						try:
+							if in_string[0].isdigit():
+								digit = in_string[0]
+								in_string = in_string[1:]
+							
+								if in_fore:
+									fore += digit
+								else:
+									back += digit
+						
+							elif in_string[0] == ',':
+								in_string = in_string[1:]
+								if in_fore:
+									in_fore = False
+								else:
+									out_string += ','
+									break
+						
+							else:
+								if len(fore) < 1: #color reset
+									fore = 'reset'
+								break
+						except IndexError: #eol
+							break
+					
+					out_string += self.to_color(fore, back)
+				
+				else:
+					out_string += in_string[0]
+					in_string = in_string[1:]
+		
 		else:
-			in_string = ''
-		return in_string
+			out_string = ''
+		return out_string
 	
-	def color_string_escape(self, in_string=None):
+	def to_color(self, fore, back=''):
+		""" Take the given numbers and spit out the correct color responses."""
+		fore_colors = {
+			'0' : self.Fore['WHITE']+self.Style['BRIGHT'],
+			'1' : self.Fore['BLACK'],
+			'2' : self.Fore['BLUE'],
+			'3' : self.Fore['GREEN']+self.Style['DIM'],
+			'4' : self.Fore['RED']+self.Style['BRIGHT'],
+			'5' : self.Fore['RED'],
+			'6' : self.Fore['MAGENTA'],
+			'7' : self.Fore['YELLOW'],
+			'8' : self.Fore['YELLOW']+self.Style['BRIGHT'],
+			'9' : self.Fore['GREEN']+self.Style['BRIGHT'],
+			'10' : self.Fore['CYAN']+self.Style['DIM'],
+			'11' : self.Fore['CYAN']+self.Style['BRIGHT'],
+			'12' : self.Fore['BLUE']+self.Style['BRIGHT'],
+			'13' : self.Fore['MAGENTA']+self.Style['BRIGHT'],
+			'14' : self.Fore['BLACK']+self.Style['BRIGHT'],
+			'15' : self.Fore['WHITE']+self.Style['DIM'],
+			'reset' : self.Fore['RESET']+self.Style['RESET_ALL'],
+		}
+		
+		out_string = ''
+		
+		if fore != '':
+			if fore == 'reset':
+				out_string += fore_colors['reset']
+			else:
+				fore = str(int(fore))
+				while int(fore) > 15:
+					fore = str(int(fore) - 15)
+				if str(fore) in fore_colors:
+					out_string += fore_colors[str(fore)]
+				else:
+					out_string += 'unknown'+str((fore))+'unknown'
+		
+		if back != '':
+			back = str(int(back))
+			while int(back) > 15:
+				back = str(int(back) - 15)
+		
+		#out_string += 'kolor'+str((fore))+'kolor'
+		return out_string
+		
+	
+	def bold_irc_parse(self, in_string=None):
+		""" Parse the given string and turn irc bold codes into our bold
+			codes."""
+		out_string = ''
+		if in_string:
+			bold = False
+			for char in in_string:
+				if char == '\u0002':
+					if bold:
+						bold = False
+						out_string += self.Style['RESET_ALL']
+					else:
+						bold = True
+						out_string += self.Style['BRIGHT']
+				elif char == '\u000F':
+					out_string += self.Style['RESET_ALL']
+				else:
+					out_string += char
+			if bold:
+				out_string += self.Style['RESET_ALL']
+		
+		else:
+			out_string = ''
+		return out_string
+	
+	def string_escape(self, in_string=None):
 		""" Escapes an irc string, so it'll work properly with the color
 			functions."""
 		if in_string:
 			try:
 				in_string = in_string.replace('/', '//')
 				in_string = self.color_irc_parse(in_string)
+				in_string = self.bold_irc_parse(in_string)
 			except:
-				print('color_string_escape error')
+				print('string_escape error')
 				print('  ', (in_string))
-				in_string = ''
+				in_string = self.color_irc_parse(in_string)
 		else:
 			in_string = ''
 		return in_string

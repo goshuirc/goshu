@@ -52,7 +52,7 @@ class Bot(object):
 		
 		if get_new_pass == 'y':
 			new_pass = getpass.getpass((' '*self.indent)+'Password: ')
-			pass_hash = self.encrypt(new_pass)
+			pass_hash = self.encrypt(new_pass.encode('utf8'))
 		else:
 			pass_hash = current_settings['pass_hash']
 		
