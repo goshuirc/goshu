@@ -99,7 +99,7 @@ class Dice(Module):
 			self.bot.irc.privmsg(server, channel, output)
 		
 		except:
-			output_lines = ['DICE SYNTAX: .d <dice>',
+			output_lines = ['DICE SYNTAX: '+self.bot.prefix+'d <dice>',
 							'<dice> is a string like d12+4d8-13',
 							'or any other permutation of rpg dice and numbers',]
 			

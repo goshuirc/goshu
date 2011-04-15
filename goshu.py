@@ -11,7 +11,7 @@ import json
 
 print('Goshubot')
 
-bot = Bot()
+bot = Bot(prefix="'")
 
 bot_settings_path = 'bot_settings.json'
 server_settings_path = 'server_settings.json'

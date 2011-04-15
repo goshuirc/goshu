@@ -6,6 +6,7 @@ Copyright 2011 Daniel Oakley <danneh@danneh.net>
 http://danneh.net/goshu/
 """
 
+import sys
 from .helper import splitnum
 from .libs import irclib3
 #irclib3.DEBUG = True
@@ -26,6 +27,8 @@ class IRC(object):
 		self._irc.add_global_handler('all_events', self._handle_irclib)
 		self._irc.add_global_handler('privmsg', self._handle_command)
 		self._irc.add_global_handler('pubmsg', self._handle_command)
+		
+		self._nick_ignore_list = []
 	
 	def connect(self, server_nickname, server, port, password=None, username=None,
 				ircname=None, localaddress="", localport=0, sslsock=False, ipv6=False):
@@ -127,12 +130,15 @@ class IRC(object):
 	
 	def _handle_command(self, connection, event):
 		"""[Internal]"""
+		if event.source().split('!')[0] in self._nick_ignore_list:
+			return
+		
 		(command, args) = (None, None)
 		if event.arguments()[0].split(self.bot.prefix)[0] == '': #command for us
-			command = event.arguments()[0].split(self.bot.prefix)[1]
+			(nothing, command) = splitnum(event.arguments()[0], split_char=self.bot.prefix)
 			command = command.strip()
 			
-			(command, args) = splitnum(command, 1)
+			(command, args) = splitnum(command)
 			command = command.lower()
 			
 		handler_functions = self.modules.handlers('commands', command)
@@ -199,10 +205,15 @@ class IRC(object):
 		try:
 			self._handle_out('quit', server, None, [message])
 			self._servers[server].quit(message)
+			del self._servers[server]
 		except:
 			print("gbot.irc quit fail:")
 			print((' '*self.bot.indent) + 'server:', server)
 			print((' '*self.bot.indent) + 'message:', message)
+		
+		if len(self._servers) < 1:
+			print('goodbye')
+			sys.exit()
 	
 	def ctcp_reply(self, server, ip, string):
 		""" Send a CTCP Reply."""

@@ -21,6 +21,8 @@ class Commands(Module):
 				'quit' : [self.quit, 'quit', 10],
 				'msg' : [self.msg, 'msg', 10],
 				'me' : [self.me, 'me', 10],
+				'ignore' : [self.ignore, 'ignore', 10],
+				'unignore' : [self.unignore, 'unignore', 10],
 			},
 		}
 	
@@ -47,3 +49,28 @@ class Commands(Module):
 		
 		if self.bot.pass_hash == pass_hash:
 			self.bot.irc.action(server, target, message)
+	
+	def ignore(self, string, connection, event):
+		server = self.bot.irc.server_nick(connection)
+		nick = event.source().split('!')[0]
+		(password, nickhost) = splitnum(string)
+		pass_hash = self.bot.encrypt(password.encode('utf-8'))
+		
+		if self.bot.pass_hash == pass_hash:
+			nickhost = nickhost.split('!')[0]
+			self.bot.irc._nick_ignore_list.append(nickhost)
+			self.bot.irc.privmsg(server, nick, nickhost+' has been ignored')
+	
+	def unignore(self, string, connection, event):
+		server = self.bot.irc.server_nick(connection)
+		nick = event.source().split('!')[0]
+		(password, nickhost) = splitnum(string)
+		pass_hash = self.bot.encrypt(password.encode('utf-8'))
+		
+		if self.bot.pass_hash == pass_hash:
+			nickhost = nickhost.split('!')[0]
+			print('lol')
+			for i in range(len(self.bot.irc._nick_ignore_list)):
+				if self.bot.irc._nick_ignore_list[i] == nickhost:
+					del self.bot.irc._nick_ignore_list[i]
+			self.bot.irc.privmsg(server, nick, nickhost+' has been unignored')

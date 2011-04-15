@@ -94,6 +94,8 @@ class Log(Module):
 		#print('klol', event_arguments)
 		event_target = event.target()
 		
+		target = 'global'
+		
 		sep_blue = self.Fore['BLUE']+'-'+self.Fore['RESET']
 		sep_green = self.Fore['GREEN']+'-'+self.Fore['RESET']
 		ident_server = sep_blue+'!'+sep_blue+' '
@@ -107,8 +109,17 @@ class Log(Module):
 		
 		indent =  self.printable_len(output)
 		
-		if event_type in ['all_raw_messages', 'ping', ]:
+		if event_type in ['all_raw_messages', 'ping', 'ctcp', ]:
 			return
+		
+		elif event_type in ['action', ]:
+			output += sep_blue
+			output += channel
+			output += sep_blue
+			output += self.Style['BRIGHT']+'  * '
+			output += nick+' '+self.Style['RESET_ALL']
+			indent = self.printable_len(output)
+			output += event_arguments[0]
 		
 		elif event_type in ['privnotice', '439', ]:
 			output += self.Fore['GREEN']
@@ -187,6 +198,8 @@ class Log(Module):
 			output += self.Style['BRIGHT']
 			output += event_arguments[0]
 			output += self.Style['RESET_ALL']
+			
+			target = event_arguments[0]
 		
 		elif event_type in ['join', ]:
 			output += ident_server
@@ -205,6 +218,8 @@ class Log(Module):
 			output += self.Style['BRIGHT']
 			output += event_target
 			output += self.Style['RESET_ALL']
+			
+			target = event_target
 		
 		elif event_type in ['quit', ]:
 			output += ident_server
@@ -232,6 +247,8 @@ class Log(Module):
 			output += self.Fore['RESET']+self.Style['RESET_ALL']
 			output += ': '
 			output += event_arguments[1]
+			
+			target = event_arguments[0]
 		
 		elif event_type in ['topic', ]:
 			output += ident_server
@@ -246,6 +263,8 @@ class Log(Module):
 			output += self.Style['RESET_ALL']
 			output += ' to: '
 			output += event_arguments[0]
+			
+			target = event_target
 		
 		elif event_type in ['topicinfo', ]:
 			output += ident_server
@@ -273,6 +292,8 @@ class Log(Module):
 			output += self.Style['DIM']
 			output += '] '
 			output += self.Style['RESET_ALL']
+			
+			target = event_target
 		
 		elif event_type in ['paert', ]:
 			output += ident_server
@@ -290,18 +311,6 @@ class Log(Module):
 			output += channel
 			output += self.Style['RESET_ALL']
 		
-		elif event_type in ['quait', ]:
-			output += server_ident_print+' '
-			#output += Fore.CYAN+nick+Fore.RESET
-			output += ' '
-			output += Style.DIM+'['+Style.RESET_ALL
-			#output += event.source().split('!')[1]
-			output += Style.DIM+']'+Style.RESET_ALL
-			output += ' has quit '
-			output += Style.DIM+'['+Style.RESET_ALL
-			#output += event.arguments()[0]
-			output += Style.DIM+']'+Style.RESET_ALL
-		
 		elif event_type in ['pubmsg', ]:
 			output += sep_blue
 			output += channel
@@ -314,6 +323,8 @@ class Log(Module):
 			output += self.Style['DIM']+'> '+self.Style['RESET_ALL']
 			indent = self.printable_len(output)
 			output += event_arguments[0]
+			
+			target = channel
 		
 		elif event_type in ['privmsg', ]:
 			output += sep_blue
@@ -326,6 +337,8 @@ class Log(Module):
 			output += self.Style['DIM']+'> '+self.Style['RESET_ALL']
 			indent = self.printable_len(output)
 			output += event_arguments[0]
+			
+			target = nick
 		
 		elif event_type in ['nick', ]:
 			output += ident_server
@@ -341,8 +354,10 @@ class Log(Module):
 		
 		else:
 			output += "log_in: %s, source: %s, target: %s, arguments: %s" % (event_type, event_source, event_target, event_arguments)
+			
+			target = 'unidentified'
 		
-		self.log(output, indent)
+		self.log(output, indent, target)
 	
 	def log_out(self, connection, event):
 		""" Logs outgoing events."""
@@ -367,6 +382,8 @@ class Log(Module):
 		for argument in event.arguments():
 			event_arguments.append(self.string_escape(argument))
 		event_target = self.string_escape(event.target())
+		
+		target = 'global'
 		
 		sep_blue = self.Fore['BLUE']+'-'+self.Fore['RESET']
 		sep_green = self.Fore['GREEN']+'-'+self.Fore['RESET']
@@ -394,6 +411,8 @@ class Log(Module):
 			output += ' '
 			indent = self.printable_len(output)
 			output += event_arguments[0]
+			
+			target = channel
 		
 		elif event_type in ['privmsg', ]:
 			output += sep_blue
@@ -408,20 +427,25 @@ class Log(Module):
 			output += self.Style['DIM']+'> '+self.Style['RESET_ALL']
 			indent = self.printable_len(output)
 			output += event_arguments[0]
+			
+			target = channel
 		
 		else:
 			output += "log_out: %s, source: %s, target: %s, arguments: %s" % (event.eventtype(), event.source(), event.target(), event.arguments())
+			
+			target = 'unidentified'
 		
-		self.log(output, indent)
+		self.log(output, indent, target)
 	
 	
-	def log(self, string, indent=0):
+	def log(self, string, indent=0, target='global'):
 		""" print/log the given string, with a hanging indent of given spaces."""
 		string += self.Fore['RESET'] + self.Style['RESET_ALL']
 		print(self.color_string_unescape(self.wrap(string, indent)))
 		
 		output = '/{'+str(indent)+'}'+string+'\n'
-		outfile = open('log.txt', 'a')
+		path = 'logs/'+target+'.log'
+		outfile = open(path, 'a')
 		outfile.write(output)
 		outfile.close()
 	

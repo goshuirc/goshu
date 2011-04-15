@@ -37,7 +37,13 @@ class Gelbooru(Module):
 		})
 		url = 'http://gelbooru.com/index.php?page=dapi&s=post&q=index&%s' % (encoded_tags)
 		
-		search_results = urllib.request.urlopen(url)
+		try:
+			search_results = urllib.request.urlopen(url)
+		except:
+			output = '*** Gelbooru: Offline'
+			self.bot.irc.privmsg(server, channel, output)
+			return
+		
 		results_http = search_results.read().decode('utf-8')
 		
 		regex = re.compile('id="(\d+)"')

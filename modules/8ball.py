@@ -54,6 +54,3 @@ class Ball(Module):
 		output = response+', '+event.source().split('!')[0]
 		
 		self.bot.irc.privmsg(server, channel, output)
-	
-	def handler(self, lol):
-		pass
