@@ -36,7 +36,13 @@ class UrbanDictionary(Module):
 		})
 		url = 'http://www.urbandictionary.com/define.php?%s' % (encoded_query)
 		
-		search_results = urllib.request.urlopen(url)
+		try:
+			search_results = urllib.request.urlopen(url)
+		except:
+			output = '*** UrbanDictionary: Error'
+			self.bot.irc.privmsg(server, channel, output)
+			return
+			
 		results_http = search_results.read().decode('utf-8')
 		
 		# regex taken from https://github.com/raqqa/Supybot-Plugins
@@ -50,11 +56,12 @@ class UrbanDictionary(Module):
 			results_definition = ''
 			still_parsing = True
 			if results_regex[0][1] == '.':
-				if results_regex[0][1].isalpha():
-					results_definition = results_regex[0][0:3]
-					results_regex[0] = results_regex[0][3:]
+				if results_regex[0][0].isalpha():
+					results_definition = results_regex[0][0:2]
+					results_regex[0] = results_regex[0][2:]
 				else:
-					results_definition = results_regex[0][0:3]
+					results_regex[0] = results_regex[0][2:]
+				results_regex[0] = results_regex[0].strip()
 		
 			while still_parsing:
 				char = results_regex[0][0]

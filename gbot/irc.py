@@ -125,6 +125,7 @@ class IRC(object):
 	def _handle_irclib(self, connection, event):
 		"""[Internal]"""
 		handler_functions = self.modules.handlers('in', event.eventtype())
+		#event = irclib3.Event(event.event_type, event.source, event.target, event.arguments)
 		for handler in handler_functions:
 			handler(connection, event)
 	

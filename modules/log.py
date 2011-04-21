@@ -18,6 +18,8 @@ import os
 import sys
 import string
 
+valid_characters = string.ascii_letters + string.digits + '-_ []{}!^#'
+
 class Log(Module):
 	
 	name = "Log"
@@ -103,7 +105,7 @@ class Log(Module):
 		
 		output = ''
 		output += self.Style['DIM']
-		output += strftime("%H:%M", localtime())
+		output += strftime("%H:%M:%S", localtime())
 		output += self.Style['RESET_ALL']
 		output += ' '+sep_green+server+sep_green+' '
 		
@@ -392,7 +394,7 @@ class Log(Module):
 		
 		output = ''
 		output += self.Style['DIM']
-		output += strftime("%H:%M", localtime())
+		output += strftime("%H:%M:%S", localtime())
 		output += self.Style['RESET_ALL']
 		output += ' '+sep_green+server+sep_green+' '
 		
@@ -444,7 +446,14 @@ class Log(Module):
 		print(self.color_string_unescape(self.wrap(string, indent)))
 		
 		output = '/{'+str(indent)+'}'+string+'\n'
-		path = 'logs/'+target+'.log'
+		
+		target_escape = ''
+		for character in target:
+			if character in valid_characters:
+				target_escape += character
+			else:
+				target_escape += '_'
+		path = 'logs/'+target_escape+'.log'
 		outfile = open(path, 'a')
 		outfile.write(output)
 		outfile.close()

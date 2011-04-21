@@ -44,9 +44,9 @@ class Ball(Module):
 			channel = nick
 		
 		if question == '':
-			output = '8BALL SYNTAX: .8ball <question>'
+			output = '8BALL SYNTAX: '+self.bot.prefix+'8ball <question>'
 			
-			self.bot.irc.privmsg(server, channel, output)
+			self.bot.irc.privmsg(server, nick, output)
 			return
 		
 		response = self.responses[random.randint(0,len(self.responses)-1)]

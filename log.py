@@ -55,16 +55,6 @@ class Log:
 			(indent, string) = self.retrieve_indent(string)
 		print(self.color_string_unescape(self.wrap(string.strip(), indent)))
 	
-	def retrieve_indent(self, string):
-		""" Get indent from the beginning of the given string."""
-		try:
-			(indent_string, out_string) = splitnum(string, split_char='}')
-			indent = int(indent_string[2:])
-		except:
-			indent = 0
-			out_string = string
-		return (indent, out_string)
-	
 	def color_string_unescape(self, in_string=None):
 		""" Replace color sequences with the proper codes and text for output."""
 		if in_string:

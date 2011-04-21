@@ -12,6 +12,7 @@ import getpass
 from . import irc
 from . import modules
 from . import data
+from . import strings
 
 class Bot(object):
 	""" Brings everything together."""
