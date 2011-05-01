@@ -3,7 +3,7 @@
 commands.py - Goshubot commands Module
 Copyright 2011 Daniel Oakley <danneh@danneh.net>
 
-http://danneh.net/goshu/
+http://danneh.net/goshu
 """
 
 from gbot.modules import Module
@@ -15,7 +15,9 @@ class Commands(Module):
 	
 	def __init__(self):
 		self.events = {
-			#'in' : {},
+			'in' : {
+				'nick' : self.update_nick,
+			},
 			#'out' : {},
 			'commands' : {
 				'quit' : [self.quit, 'quit', 10],
@@ -57,8 +59,14 @@ class Commands(Module):
 		pass_hash = self.bot.encrypt(password.encode('utf-8'))
 		
 		if self.bot.pass_hash == pass_hash:
-			nickhost = nickhost.split('!')[0]
-			self.bot.irc._nick_ignore_list.append(nickhost)
+			ignore_nick = nickhost.split('!')[0]
+			self.bot.irc._nick_ignore_list.append(ignore_nick)
+			try:
+				ignore_host = nickhost.split('!')[1]
+				if ignore_host != '':
+					self.bot.irc._host_ignore_list.append(ignore_host)
+			except:
+				pass
 			self.bot.irc.privmsg(server, nick, nickhost+' has been ignored')
 	
 	def unignore(self, string, connection, event):
@@ -69,8 +77,27 @@ class Commands(Module):
 		
 		if self.bot.pass_hash == pass_hash:
 			nickhost = nickhost.split('!')[0]
-			print('lol')
 			for i in range(len(self.bot.irc._nick_ignore_list)):
 				if self.bot.irc._nick_ignore_list[i] == nickhost:
 					del self.bot.irc._nick_ignore_list[i]
+			try:
+				ignore_host = nickhost.split('!')[1]
+				if ignore_host != '':
+					for i in range(len(self.bot.irc._host_ignore_list)):
+						if self.bot.irc._host_ignore_list[i] == ignore_host:
+							del self.bot.irc._host_ignore_list[i]
+			except:
+				pass
 			self.bot.irc.privmsg(server, nick, nickhost+' has been unignored')
+	
+	def update_nick(self, connection, event):
+		nick = event.source().split('!')[0]
+		host = event.source().split('!')[1]
+		nickhost = event.source()
+		nick_new = event.target()
+		
+		if len(self.bot.irc._nick_ignore_list) > 0:
+			for i in range(0, len(self.bot.irc._nick_ignore_list)-1):
+				if self.bot.irc._nick_ignore_list[i] == nickhost:
+					del self.bot.irc._nick_ignore_list[i]
+		self.bot.irc._nick_ignore_list.append(nickhost)

@@ -3,7 +3,7 @@
 helper.py - Goshubot helper functions
 Copyright 2011 Daniel Oakley <danneh@danneh.net>
 
-http://danneh.net/goshu/
+http://danneh.net/goshu
 """
 
 def splitnum(line, split_num=1, split_char=' '):

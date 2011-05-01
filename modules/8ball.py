@@ -3,7 +3,7 @@
 8ball.py - Goshubot 8ball Module
 Copyright 2011 Daniel Oakley <danneh@danneh.net>
 
-http://danneh.net/goshu/
+http://danneh.net/goshu
 """
 
 from gbot.modules import Module

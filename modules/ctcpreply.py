@@ -3,7 +3,7 @@
 ctcpreply.py - Goshubot ctcpreply Module
 Copyright 2011 Daniel Oakley <danneh@danneh.net>
 
-http://danneh.net/goshu/
+http://danneh.net/goshu
 """
 
 from time import strftime, localtime, gmtime

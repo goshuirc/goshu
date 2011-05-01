@@ -3,7 +3,7 @@
 irc.py - Goshubot irclib Wrapper
 Copyright 2011 Daniel Oakley <danneh@danneh.net>
 
-http://danneh.net/goshu/
+http://danneh.net/goshu
 """
 
 import sys
@@ -29,12 +29,14 @@ class IRC(object):
 		self._irc.add_global_handler('pubmsg', self._handle_command)
 		
 		self._nick_ignore_list = []
+		self._host_ignore_list = []
 	
 	def connect(self, server_nickname, server, port, password=None, username=None,
 				ircname=None, localaddress="", localport=0, sslsock=False, ipv6=False):
 		""" Connects to the given server."""
 		nickname = self.bot.nick
 		current_server = self._irc.server()
+		username = 'imouto-b'
 		current_server.connect(server, port, nickname, password, username,
 							ircname, localaddress, localport, sslsock, ipv6)
 		self._servers[server_nickname] = current_server
@@ -133,6 +135,9 @@ class IRC(object):
 		"""[Internal]"""
 		if event.source().split('!')[0] in self._nick_ignore_list:
 			return
+		for host in self._host_ignore_list:
+			if event.source().split('!')[1] == host:
+				return
 		
 		(command, args) = (None, None)
 		if event.arguments()[0].split(self.bot.prefix)[0] == '': #command for us
