@@ -8,6 +8,7 @@ http://danneh.net/goshu
 
 from gbot.modules import Module
 from gbot.helper import splitnum
+import gbot.strings as strings
 from time import strftime, localtime, gmtime
 from colorama import init
 init() #colorama
@@ -109,7 +110,7 @@ class Log(Module):
 		output += self.Style['RESET_ALL']
 		output += ' '+sep_green+server+sep_green+' '
 		
-		indent =  self.printable_len(output)
+		indent =  strings.printable_len(output)
 		
 		if event_type in ['all_raw_messages', 'ping', 'ctcp', ]:
 			return
@@ -120,7 +121,7 @@ class Log(Module):
 			output += sep_blue
 			output += self.Style['BRIGHT']+'  * '
 			output += nick+' '+self.Style['RESET_ALL']
-			indent = self.printable_len(output)
+			indent = strings.printable_len(output)
 			output += event_arguments[0]
 		
 		elif event_type in ['privnotice', '439', ]:
@@ -136,14 +137,14 @@ class Log(Module):
 							'n_global', 'luserconns', 'luserunknown',
 							'motdstart', 'motd', 'endofmotd', ]:
 			output += ident_server
-			indent = self.printable_len(output)
+			indent = strings.printable_len(output)
 			
 			for message in event_arguments:
 				output += message+' '
 		
 		elif event_type in ['umode', ]:
 			output += ident_server
-			indent = self.printable_len(output)
+			indent = strings.printable_len(output)
 			
 			output += 'Mode change '
 			output += self.Style['DIM']+'['+self.Style['RESET_ALL']
@@ -155,7 +156,7 @@ class Log(Module):
 		
 		elif event_type in ['mode', ]:
 			output += ident_server
-			indent = self.printable_len(output)
+			indent = strings.printable_len(output)
 			
 			output += 'mode/'
 			output += self.Style['DIM']+self.Fore['CYAN']
@@ -178,7 +179,7 @@ class Log(Module):
 		
 		elif event_type in ['nicknameinuse', ]:
 			output += ident_server
-			indent = self.printable_len(output)
+			indent = strings.printable_len(output)
 			
 			try:
 				output += event_arguments[1]
@@ -191,7 +192,7 @@ class Log(Module):
 		
 		elif event_type in ['invite', ]:
 			output += ident_server
-			indent = self.printable_len(output)
+			indent = strings.printable_len(output)
 			
 			output += self.Style['BRIGHT']
 			output += nick
@@ -205,7 +206,7 @@ class Log(Module):
 		
 		elif event_type in ['join', ]:
 			output += ident_server
-			indent = self.printable_len(output)
+			indent = strings.printable_len(output)
 			
 			output += self.Style['BRIGHT']+self.Fore['CYAN']
 			output += nick
@@ -225,7 +226,7 @@ class Log(Module):
 		
 		elif event_type in ['quit', ]:
 			output += ident_server
-			indent = self.printable_len(output)
+			indent = strings.printable_len(output)
 			
 			output += self.Fore['CYAN']
 			output += nick
@@ -241,7 +242,7 @@ class Log(Module):
 		
 		elif event_type in ['currenttopic', ]:
 			output += ident_server
-			indent = self.printable_len(output)
+			indent = strings.printable_len(output)
 			
 			output += 'Topic for '
 			output += self.Style['DIM']+self.Fore['CYAN']
@@ -254,7 +255,7 @@ class Log(Module):
 		
 		elif event_type in ['topic', ]:
 			output += ident_server
-			indent = self.printable_len(output)
+			indent = strings.printable_len(output)
 			
 			output += self.Style['BRIGHT']
 			output += nick
@@ -270,7 +271,7 @@ class Log(Module):
 		
 		elif event_type in ['topicinfo', ]:
 			output += ident_server
-			indent = self.printable_len(output)
+			indent = strings.printable_len(output)
 			
 			output += 'Topic set by '
 			
@@ -299,7 +300,7 @@ class Log(Module):
 		
 		elif event_type in ['paert', ]:
 			output += ident_server
-			indent = self.printable_len(output)
+			indent = strings.printable_len(output)
 			
 			output += self.Fore['CYAN']
 			output += nick
@@ -323,7 +324,7 @@ class Log(Module):
 			output += nick
 			output += self.Fore['RESET']
 			output += self.Style['DIM']+'> '+self.Style['RESET_ALL']
-			indent = self.printable_len(output)
+			indent = strings.printable_len(output)
 			output += event_arguments[0]
 			
 			target = channel
@@ -337,14 +338,14 @@ class Log(Module):
 			output += nick
 			output += self.Fore['RESET']
 			output += self.Style['DIM']+'> '+self.Style['RESET_ALL']
-			indent = self.printable_len(output)
+			indent = strings.printable_len(output)
 			output += event_arguments[0]
 			
 			target = nick
 		
 		elif event_type in ['nick', ]:
 			output += ident_server
-			indent = self.printable_len(output)
+			indent = strings.printable_len(output)
 			
 			output += self.Fore['CYAN']
 			output += nick
@@ -398,7 +399,7 @@ class Log(Module):
 		output += self.Style['RESET_ALL']
 		output += ' '+sep_green+server+sep_green+' '
 		
-		indent = self.printable_len(output)
+		indent = strings.printable_len(output)
 		
 		if event_type in ['all_raw_messages', 'ping', ]:
 			pass
@@ -411,7 +412,7 @@ class Log(Module):
 			output += ' * '+nick
 			output += self.Style['RESET_ALL']
 			output += ' '
-			indent = self.printable_len(output)
+			indent = strings.printable_len(output)
 			output += event_arguments[0]
 			
 			target = channel
@@ -427,7 +428,7 @@ class Log(Module):
 			output += self.Style['RESET_ALL']
 			output += self.Fore['RESET']
 			output += self.Style['DIM']+'> '+self.Style['RESET_ALL']
-			indent = self.printable_len(output)
+			indent = strings.printable_len(output)
 			output += event_arguments[0]
 			
 			target = channel
@@ -443,7 +444,7 @@ class Log(Module):
 	def log(self, string, indent=0, target='global'):
 		""" print/log the given string, with a hanging indent of given spaces."""
 		string += self.Fore['RESET'] + self.Style['RESET_ALL']
-		print(self.color_string_unescape(self.wrap(string, indent)))
+		print(self.color_string_unescape(strings.wrap(string, indent)))
 		
 		output = '/{'+str(indent)+'}'+string+'\n'
 		
@@ -457,26 +458,6 @@ class Log(Module):
 		outfile = open(path, 'a')
 		outfile.write(output)
 		outfile.close()
-	
-	
-	def printable_len(self, in_string=None):
-		""" Gives how many printable characters long the string is."""
-		printable = 0
-		if in_string:
-			running = True
-			while running:
-				if in_string[0] == '/' and in_string[1] == '{':
-					(temp_first, temp_last) = splitnum(in_string, split_char='}')
-					in_string = temp_last
-				elif in_string[0] == '/' and in_string[1] == '/':
-					printable += 1
-					in_string = in_string[2:]
-				elif in_string[0].isprintable():
-					printable += 1
-					in_string = in_string[1:]
-				if len(in_string) < 1:
-					running = False
-		return printable
 	
 	
 	def color_irc_parse(self, in_string=None):
@@ -628,42 +609,6 @@ class Log(Module):
 			in_string = ''
 		return in_string
 	
-	def wrap(self, in_string, indent):
-		rows, columns = os.popen('stty size', 'r').read().split()
-		output = ''
-		running = True
-		i = 1
-		line = 0
-		while running:
-			char = in_string[0]
-			
-			if char == '/' and in_string[1] == '{':
-				(temp_first, temp_last) = splitnum(in_string, split_char='}')
-				output += temp_first+'}'
-				in_string = temp_last
-			elif char == '/' and in_string[1] == '/':
-				output += '//'
-				i += 1
-				in_string = in_string[2:]
-			elif char in string.printable:
-				output += char
-				i += 1
-				in_string = in_string[1:]
-			else:
-				output += char
-				in_string = in_string[1:]
-			
-			if int(i) > int(columns):
-				output += ' '*int(indent)
-				i = 1
-				if line == 0:
-					columns = int(columns) - int(indent)
-				line += 1
-			if len(in_string) < 1:
-				running = False
-		
-		return output
-	
 	
 	def nick_symbol(self, nick):
 		""" Returns the given nick's symbol, _/+/%/@/~/etc."""
@@ -684,268 +629,3 @@ class Log(Module):
 			self.nick_colors[nick] = color
 		nick_color = self.Fore[color]
 		return nick_color
-
-
-
-
-
-
-
-
-
-
-
-
-	def log_in_really(self, connection, event):
-		#print '<<'
-		server = self.bot.irc.server_nick(connection)
-		try:
-			nick = event.source().split('!')[0]
-			channel = event.target().split('!')[0]
-			if channel == self.bot.nick:
-				channel = nick
-		except:
-			nick = event.source()
-			channel = nick
-		seperator = Fore.BLUE+'-'+Fore.RESET
-		server_print = Fore.GREEN+'-'+Fore.RESET+server+Fore.GREEN+'-'+Fore.RESET
-		server_ident_print = seperator+'!'+seperator
-		output = Style.DIM+strftime("%H:%M", localtime())+Style.RESET_ALL
-		output += ' '+server_print+' '
-		#print event.eventtype()
-		indent = 0
-		
-		
-		if event.eventtype() in ['all_raw_messages', 'ping', ]:
-			pass
-		
-		elif event.eventtype() in ['privnotice', '439', ]:
-			#if event.source() == connection.get_server_name():
-			output += Fore.GREEN+event.source()+Fore.RESET+' '
-			for message in event.arguments():
-				output += message+' '
-			self.log(output, indent)
-		
-		elif event.eventtype() in ['welcome', 'yourhost', 'created', 'myinfo',
-								   'featurelist', 'luserclient', 'luserop',
-								   'luserchannels', 'luserme', 'n_local',
-								   'n_global', 'luserconns', 'motdstart',
-								   'motd', 'endofmotd', ]:
-			output += server_ident_print+' '
-			for message in event.arguments():
-				output += message+' '
-			self.log(output, indent)
-		
-		elif event.eventtype() in ['nicknameinuse', ]:
-			output += server_ident_print+' '
-			try:
-				output += event.arguments()[1]
-			except:
-				output += event.arguments()
-			self.log(output, indent)
-		
-		elif event.eventtype() in ['invite', ]:
-			output += server_ident_print+' '
-			output += nick
-			output += ' invites you to '
-			output += Style.DIM+Fore.CYAN+event.arguments()[0]+Fore.RESET+Style.RESET_ALL
-			self.log(output, indent)
-		
-		elif event.eventtype() in ['join', ]:
-			output += server_ident_print+' '
-			output += Style.BRIGHT+Fore.CYAN+nick+Fore.RESET+Style.RESET_ALL
-			output += ' '
-			output += Style.DIM+'['
-			output += Fore.CYAN
-			output += event.source().split('!')[1]
-			output += Fore.RESET
-			output += ']'+Style.RESET_ALL
-			output += ' has joined '
-			output += Style.BRIGHT+event.target()+Style.RESET_ALL
-			self.log(output, indent)
-		
-		elif event.eventtype() in ['part', ]:
-			output += server_ident_print+' '
-			output += Fore.CYAN+nick+Fore.RESET
-			output += ' '
-			output += Style.DIM+'['+Style.RESET_ALL
-			output += event.source().split('!')[1]
-			output += Style.DIM+']'+Style.RESET_ALL
-			output += ' has left '
-			output += Style.BRIGHT+event.target()+Style.RESET_ALL
-			self.log(output, indent)
-		
-		elif event.eventtype() in ['aquit', ]:
-			print('QUIT')
-			output += server_ident_print+' '
-			#output += Fore.CYAN+nick+Fore.RESET
-			output += ' '
-			output += Style.DIM+'['+Style.RESET_ALL
-			#output += event.source().split('!')[1]
-			output += Style.DIM+']'+Style.RESET_ALL
-			output += ' has quit '
-			output += Style.DIM+'['+Style.RESET_ALL
-			#output += event.arguments()[0]
-			output += Style.DIM+']'+Style.RESET_ALL
-			#print(output)
-			self.log(output, indent)
-		
-		elif event.eventtype() in ['currenttopic', ]:
-			output += server_ident_print+' '
-			output += 'Topic for '
-			output += Style.DIM+Fore.CYAN+event.arguments()[0]+Fore.RESET+Style.RESET_ALL
-			output += ': '
-			topic = self.colors_parse(event.arguments()[1])
-			output += topic
-			self.log(output, indent)
-		
-		elif event.eventtype() in ['topicinfo', ]:
-			output += server_ident_print+' '
-			output += 'Topic'# for '
-			#output += Style.DIM+Fore.CYAN+event.arguments()[0]+Fore.RESET+Style.RESET_ALL
-			output += ' set by '
-			output += Style.BRIGHT+event.arguments()[1].split('!')[0]+Style.RESET_ALL
-			output += Style.DIM+' ['+Style.RESET_ALL
-			output += event.arguments()[1].split('!')[1]
-			output += Style.DIM+'] '+Style.RESET_ALL
-			output += 'at'
-			output += Style.DIM+' ['+Style.RESET_ALL
-			output += strftime("%a %b %d, %H:%M:%S %Y", gmtime(int(event.arguments()[2])))
-			output += Style.DIM+'] '+Style.RESET_ALL
-			self.log(output, indent)
-		
-		elif event.eventtype() in ['nick', ]:
-			output += server_ident_print+' '
-			output += Style.DIM+Fore.CYAN+nick+Fore.RESET+Style.RESET_ALL
-			output += ' is now known as '
-			output += Style.BRIGHT+Fore.CYAN+event.target()+Fore.RESET+Style.RESET_ALL
-			self.log(output, indent)
-			self.nick_colors[event.target()] = self.nick_colors[nick]
-			del self.nick_colors[nick]
-		
-		elif event.eventtype() in ['umode', ]:
-			output += server_ident_print+' '
-			output += 'Mode change '
-			output += Style.DIM+'['+Style.RESET_ALL
-			output += event.arguments()[0]
-			output += Style.DIM+']'+Style.RESET_ALL
-			output += ' for user '
-			output += event.target()
-			self.log(output, indent)
-		
-		elif event.eventtype() in ['pubmsg', ]:
-			indent = 60
-			output += seperator
-			output += event.target()
-			output += seperator
-			output += Style.DIM+' <'+Style.RESET_ALL
-			output += self.nick_symbol(nick)
-			output += self.nick_color(nick)[0]
-			output += nick
-			output += Fore.RESET
-			output += Style.DIM+'> '+Style.RESET_ALL
-			output += event.arguments()[0]
-			self.log(output, indent)
-		
-		elif event.eventtype() in ['privmsg', ]:
-			output += seperator
-			output += nick
-			output += seperator
-			output += Style.DIM+' <'+Style.RESET_ALL
-			output += self.nick_color(nick)[0]
-			output += nick
-			output += Fore.RESET
-			output += Style.DIM+'> '+Style.RESET_ALL
-			output += event.arguments()[0]
-			self.log(output, indent)
-		
-		elif event.eventtype() in ['action', ]:
-			output += seperator
-			if event.target() == self.bot.nick:
-				target = nick
-			else:
-				target = event.target()
-			output += target
-			output += seperator
-			output += ' * '
-			#output += self.nick_color(nick)[0]
-			output += nick
-			output += ' '+event.arguments()[0]
-			self.log(output, indent)
-		
-		elif event.eventtype() in ['ctcp', ]:
-			if event.arguments()[0] in ['ACTION', ]:
-				pass
-			else:
-				self.log("log_in: %s, source: %s, target: %s, arguments: %s" % (event.eventtype(), event.source(), event.target(), event.arguments()))
-		
-		else:
-			self.log("log_in: %s, source: %s, target: %s, arguments: %s" % (event.eventtype(), event.source(), event.target(), event.arguments()))
-		#print '>>'
-	
-	def log_out_really(self, connection, event):
-		seperator = Fore.BLUE+'-'+Fore.RESET
-		server = self.bot.irc.server_nick(connection)
-		server_print = Fore.GREEN+'-'+Fore.RESET+server+Fore.GREEN+'-'+Fore.RESET
-		server_ident_print = seperator+'!'+seperator
-		output = Style.DIM+strftime("%H:%M", localtime())+Style.RESET_ALL
-		output += ' '+server_print+' '
-		nick = event.source()
-		target = event.target()
-		
-		if event.eventtype() == 'all_raw_messages':
-			pass
-		
-		elif event.eventtype() in ['action', ]:
-			output += seperator
-			output += event.target()
-			output += seperator
-			output += self.nick_symbol(nick)
-			output += self.nick_color(nick)[0]
-			output += nick+' '
-			output += event.arguments()
-			self.log(output, indent)
-		
-		elif event.eventtype() in ['privmsg', ]:
-			output += seperator
-			output += event.target()
-			output += seperator
-			output += Style.DIM+' <'+Style.RESET_ALL
-			output += self.nick_symbol(nick)
-			output += self.nick_color(nick)[0]
-			output += nick
-			output += Fore.RESET
-			output += Style.DIM+'> '+Style.RESET_ALL
-			output += event.arguments()
-			self.log(output, indent)
-		
-		else:
-			self.log("log_out: %s, source: %s, target: %s, arguments: %s" % (event.eventtype(), event.source(), event.target(), event.arguments()))
-		
-	def nick_color_really(self, nick):
-		""" Returns the nick's color, and generates a new one otherwise."""
-		if nick == self.bot.nick:
-			return ''
-		try:
-			color = self.nick_colors[nick]
-		except:
-			color_num = random.randint(1, len(self.colors)) - 1
-			color = list(self.colors.keys())[color_num]
-			self.nick_colors[nick] = color
-		nick_color = self.colors[color]
-		return nick_color
-	
-	def nick_symbol_really(self, nick):
-		""" Returns the given nick's symbol, _/+/%/@/~/etc."""
-		return ' '
-	
-	def log_really(self, string, indent):
-		""" Print/log the given string."""
-		#print string
-		
-		chars = ''
-		for character in string:
-			print(character)
-			if self.isprintable(character):
-				chars += character
-		print(chars)
