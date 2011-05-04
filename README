@@ -1,5 +1,4 @@
 == Goshubot
 An extensible Bot Platform
 
-I'm currently in the midst of refactoring/rewriting the entire thing, so this
-may look quite bare for a while. Stay tuned for the glorious v2!
+Coded in Python3, and designed to be totally modular
