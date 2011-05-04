@@ -86,7 +86,7 @@ class IRC(object):
 			
 			ssl = ''
 			while ssl != 'y' and ssl != 'n':
-				ssl = input('SSL? (y/n)')
+				ssl = input('SSL? (y/n): ')
 			
 			if ssl == 'y':
 				dictionary_out[server_nickname]['ssl'] = True
