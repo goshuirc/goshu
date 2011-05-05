@@ -9,10 +9,10 @@ http://danneh.net/goshu
 import hashlib
 import getpass
 
-from . import irc
-from . import modules
-from . import data
-from . import strings
+import irc
+import modules
+import data
+import strings
 
 class Bot(object):
 	""" Brings everything together."""
@@ -35,11 +35,11 @@ class Bot(object):
 		""" Prompts user for global bot settings."""
 		try:
 			current_nick = current_settings['nick']
-			nick = input((' '*self.indent)+'Nick ['+current_nick+']: ').split(' ')[0]
+			nick = raw_input((' '*self.indent)+'Nick ['+current_nick+']: ').split(' ')[0]
 			if nick == '':
 				nick = current_nick
 		except:
-			nick = input((' '*self.indent)+'Nick: ').split(' ')[0]
+			nick = raw_input((' '*self.indent)+'Nick: ').split(' ')[0]
 		
 		
 		get_new_pass = ''
@@ -47,7 +47,7 @@ class Bot(object):
 			current_pass_hash = current_settings['pass_hash']
 			get_new_pass = ''
 			while get_new_pass != 'n' and get_new_pass != 'y':
-				get_new_pass = input((' '*self.indent)+'New Password? ')[0]
+				get_new_pass = raw_input((' '*self.indent)+'New Password? ')[0]
 		except:
 			get_new_pass = 'y'
 		

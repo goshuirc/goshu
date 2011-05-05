@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 """
 __init__.py - Goshubot
 Copyright 2011 Daniel Oakley <danneh@danneh.net>
@@ -6,4 +6,4 @@ Copyright 2011 Daniel Oakley <danneh@danneh.net>
 http://danneh.net/goshu/
 """
 
-from . import irclib3
+import irclib

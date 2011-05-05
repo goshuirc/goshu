@@ -7,9 +7,9 @@ http://danneh.net/goshu
 """
 
 import sys
-from .helper import splitnum
-from .libs import irclib3
-#irclib3.DEBUG = True
+from helper import splitnum
+from libs import irclib
+#irclib.DEBUG = True
 
 class IRC(object):
 	""" Acts as a wrapper for irclib. Highly convoluded wrapper, perhaps, but it
@@ -19,7 +19,7 @@ class IRC(object):
 		self.bot = bot
 		
 		""" Events affect all servers."""
-		self._irc = irclib3.IRC()
+		self._irc = irclib.IRC()
 		self._servers = {
 			#'example' : irclib.ServerConnection,
 		}
@@ -38,7 +38,7 @@ class IRC(object):
 		current_server = self._irc.server()
 		username = 'imouto-b'
 		current_server.connect(server, port, nickname, password, username,
-							ircname, localaddress, localport, sslsock, ipv6)
+							ircname, localaddress, localport)#, sslsock, ipv6)
 		self._servers[server_nickname] = current_server
 		return current_server
 	
@@ -54,23 +54,23 @@ class IRC(object):
 		""" Prompt for server/channel connection details."""
 		dictionary_out = {}
 		more_servers = True
-		print() #\newline
+		print '' #\newline
 		
 		if dictionary != None:
 			dictionary_out.update(dictionary)
 			for server in dictionary:
-				print(server+':')
-				print(' '+dictionary[server]['address']+':'+str(dictionary[server]['port']))
+				print server+':'
+				print ' '+dictionary[server]['address']+':'+str(dictionary[server]['port'])
 				if dictionary[server]['ssl']:
 					ssl = 'Enabled'
 				else:
 					ssl = 'Disabled'
-				print(' SSL', ssl)
-				print('')
+				print ' SSL', ssl
+				print ''
 			
 			more = ''
 			while more != 'y' and more != 'n':
-				more = input('Would you like to configure more connections? ')
+				more = raw_input('Would you like to configure more connections? ')[0].lower()
 			
 			if more == 'y':
 				more_servers = True
@@ -80,13 +80,13 @@ class IRC(object):
 			more_servers = True
 		
 		while more_servers:
-			server_nickname = input('Server Nickname: ')
+			server_nickname = raw_input('Server Nickname: ')
 			dictionary_out[server_nickname] = {}
-			dictionary_out[server_nickname]['address'] = input('Server Address (irc.example.com): ')
+			dictionary_out[server_nickname]['address'] = raw_input('Server Address (irc.example.com): ')
 			
 			ssl = ''
 			while ssl != 'y' and ssl != 'n':
-				ssl = input('SSL? (y/n): ')
+				ssl = raw_input('SSL? (y/n): ')
 			
 			if ssl == 'y':
 				dictionary_out[server_nickname]['ssl'] = True
@@ -97,7 +97,7 @@ class IRC(object):
 			
 			port = 'portnumberhere'
 			while port.isdigit() == False and port != '':
-				port = input('Port ['+str(assumed_port)+']: ')
+				port = raw_input('Port ['+str(assumed_port)+']: ')
 			
 			if port == '':
 				dictionary_out[server_nickname]['port'] = assumed_port
@@ -108,7 +108,7 @@ class IRC(object):
 			
 			more = 'test'
 			while more[0] not in ['y', 'n']:
-				more = input('Would you like to configure more connections? ')
+				more = raw_input('Would you like to configure more connections? ')
 			
 			if more == 'y':
 				more_servers = True
@@ -152,7 +152,7 @@ class IRC(object):
 			try:
 				handler[0](args, connection, event)
 			except:
-				print('===== Command Failed:', command)
+				print '===== Command Failed:', command
 				handler[0](args, connection, event)
 	
 	def _handle_out(self, event_type, server, target, arguments=None):
@@ -175,10 +175,10 @@ class IRC(object):
 			self._handle_out('privmsg', server, target, [message])
 			self._servers[server].privmsg(target, message)
 		except:
-			print("gbot.irc privmsg fail:")
-			print((' '*self.bot.indent) + 'server:', server)
-			print((' '*self.bot.indent) + 'target:', target)
-			print((' '*self.bot.indent) + 'message:', message)
+			print "gbot.irc privmsg fail:"
+			print (' '*self.bot.indent) + 'server:', server
+			print (' '*self.bot.indent) + 'target:', target
+			print (' '*self.bot.indent) + 'message:', message
 			
 	def action(self, server, target, action):
 		""" Send a /me to the target."""
@@ -191,10 +191,10 @@ class IRC(object):
 			self._handle_out('action', server, target, [action])
 			self._servers[server].action(target, action)
 		except:
-			print("gbot.irc action fail:")
-			print((' '*self.bot.indent) + 'server:', server)
-			print((' '*self.bot.indent) + 'target:', target)
-			print((' '*self.bot.indent) + 'message:', message)
+			print "gbot.irc action fail:"
+			print (' '*self.bot.indent) + 'server:', server
+			print (' '*self.bot.indent) + 'target:', target
+			print (' '*self.bot.indent) + 'message:', message
 	
 	def join(self, server, channel, password=None):
 		""" Join the given channel, on given server."""
@@ -202,9 +202,9 @@ class IRC(object):
 			#self._handle_out('join', server, channel)
 			self._servers[server].join(channel)
 		except:
-			print("gbot.irc join fail:")
-			print((' '*self.bot.indent) + 'server:', server)
-			print((' '*self.bot.indent) + 'channel:', channel)
+			print "gbot.irc join fail:"
+			print (' '*self.bot.indent) + 'server:', server
+			print (' '*self.bot.indent) + 'channel:', channel
 	
 	def quit(self, server, message):
 		""" Quit from the given server using the message provided."""
@@ -213,9 +213,9 @@ class IRC(object):
 			self._servers[server].quit(message)
 			del self._servers[server]
 		except:
-			print("gbot.irc quit fail:")
-			print((' '*self.bot.indent) + 'server:', server)
-			print((' '*self.bot.indent) + 'message:', message)
+			print "gbot.irc quit fail:"
+			print (' '*self.bot.indent) + 'server:', server
+			print (' '*self.bot.indent) + 'message:', message
 		
 		if len(self._servers) < 1:
 			print('goodbye')
@@ -227,10 +227,10 @@ class IRC(object):
 			self._handle_out('ctcp', server, ip, [string])
 			self._servers[server].ctcp_reply(ip, string)
 		except:
-			print("gbot.irc ctcp_reply fail:")
-			print((' '*self.bot.indent) + 'server:', server)
-			print((' '*self.bot.indent) + 'ip:', ip)
-			print((' '*self.bot.indent) + 'string:', string)
+			print "gbot.irc ctcp_reply fail:"
+			print (' '*self.bot.indent) + 'server:', server
+			print (' '*self.bot.indent) + 'ip:', ip
+			print (' '*self.bot.indent) + 'string:', string
 	
 	
 	def process_forever(self):

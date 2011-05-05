@@ -9,7 +9,7 @@ http://danneh.net/goshu
 from time import strftime, localtime, gmtime
 from gbot.modules import Module
 from gbot.helper import splitnum
-from gbot.libs.irclib3 import nm_to_n
+from gbot.libs.irclib import nm_to_n
 
 class Ctcpreply(Module):
 	

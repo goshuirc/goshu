@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 """
 goshu.py - Goshubot
 Copyright 2011 Daniel Oakley <danneh@danneh.net>
@@ -9,7 +9,7 @@ http://danneh.net/goshu
 from gbot.bot import Bot
 import json
 
-print('Goshubot')
+print 'Goshubot'
 
 bot = Bot(prefix="'")
 
@@ -32,7 +32,7 @@ try:
 	settings_file.write(json.dumps(bot_settings, sort_keys=True, indent=4))
 	settings_file.close()
 except:
-	print('Failed to save bot config file')
+	print 'Failed to save bot config file'
 
 bot.process_settings(bot_settings)
 
@@ -52,7 +52,7 @@ try:
 	settings_file.write(json.dumps(server_settings, sort_keys=True, indent=4))
 	settings_file.close()
 except:
-	print('Failed to save server config file')
+	print 'Failed to save server config file'
 
 bot.irc.connect_dict(server_settings)
 

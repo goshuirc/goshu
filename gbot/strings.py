@@ -6,7 +6,7 @@ Copyright 2011 Daniel Oakley <danneh@danneh.net>
 http://danneh.net/goshu
 """
 
-from gbot.helper import splitnum
+from helper import splitnum
 
 def retrieve_indent(string):
 	""" Extracts indent from the beginning of the given string."""
