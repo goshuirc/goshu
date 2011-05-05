@@ -40,7 +40,27 @@ def printable_len(in_string=None):
 def split_line(in_string=''):
 	""" Splits line into an alternating string/list format, string for text and 
 		list for attributes to be used/parsed."""
-	return
+	split_line = []
+	while len(in_string) > 0:
+		if in_string[0] == '/':
+			if in_string[1] == '{': #attributes
+				attribute_line, in_string = splitnum(in_string, split_char = '}')
+				attributes = attribute_line[2:].split(',')
+				attributes_split = []
+				for attribute in attributes:
+					if ':' in attribute:
+						attribute = attribute.split(':')
+					attributes_split.append(attribute)
+				
+				split_line.append(attributes_split)
+				split_line.append('')
+			else:
+				split_line[-1] += in_string[0:2]
+				in_string = in_string[2:]
+		else:
+			split_line[-1] += in_string[0]
+			in_string = in_string[1:]
+	return split_line
 
 def wrap(in_string, indent):
 	try:
@@ -52,22 +72,20 @@ def wrap(in_string, indent):
 	i = 1
 	line = 0
 	while running:
-		char = in_string[0]
-		
-		if char == '/' and in_string[1] == '{':
+		if in_string[0] == '/' and in_string[1] == '{':
 			(temp_first, temp_last) = splitnum(in_string, split_char='}')
 			output += temp_first+'}'
 			in_string = temp_last
-		elif char == '/' and in_string[1] == '/':
-			output += '//'
+		elif in_string[0] == '/':
+			output += '/'+in_string[1]
 			i += 1
 			in_string = in_string[2:]
-		elif char in string.printable:
-			output += char
+		elif in_string[0] in string.printable:
+			output += in_string[0]
 			i += 1
 			in_string = in_string[1:]
 		else:
-			output += char
+			output += in_string[0]
 			in_string = in_string[1:]
 		
 		if int(i) > int(columns):

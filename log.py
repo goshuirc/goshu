@@ -8,6 +8,7 @@ http://danneh.net/goshu
 
 from gbot.modules import Module
 from gbot.helper import splitnum
+import gbot.strings as strings
 from time import strftime, localtime, gmtime
 from colorama import init
 init() #colorama
@@ -53,7 +54,7 @@ class Log:
 		""" Prints the given string."""
 		if indent == None:
 			(indent, string) = self.retrieve_indent(string)
-		print(self.color_string_unescape(self.wrap(string.strip(), indent)))
+		print(self.color_string_unescape(strings.wrap(string.strip(), indent)))
 	
 	def color_string_unescape(self, in_string=None):
 		""" Replace color sequences with the proper codes and text for output."""
@@ -68,42 +69,6 @@ class Log:
 		else:
 			in_string = ''
 		return in_string
-	
-	def wrap(self, in_string, indent):
-		rows, columns = os.popen('stty size', 'r').read().split()
-		output = ''
-		running = True
-		i = 1
-		line = 0
-		while running:
-			char = in_string[0]
-			
-			if char == '/' and in_string[1] == '{':
-				(temp_first, temp_last) = splitnum(in_string, split_char='}')
-				output += temp_first+'}'
-				in_string = temp_last
-			elif char == '/' and in_string[1] == '/':
-				output += '//'
-				i += 1
-				in_string = in_string[2:]
-			elif char in string.printable:
-				output += char
-				i += 1
-				in_string = in_string[1:]
-			else:
-				output += char
-				in_string = in_string[1:]
-			
-			if int(i) > int(columns):
-				output += ' '*int(indent)
-				i = 1
-				if line == 0:
-					columns = int(columns) - int(indent)
-				line += 1
-			if len(in_string) < 1:
-				running = False
-		
-		return output
 
 logger = Log()
 
