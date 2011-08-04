@@ -1,4 +1,6 @@
-goshu3
-=============
+Goshubot
+========
 
-Python3 IRC Bot
+New Version: _goshu3_
+
+Python3 IRC Bot, using the irclib3 and colorama libraries 
