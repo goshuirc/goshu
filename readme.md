@@ -25,11 +25,15 @@ Commands are represented like so: _8ball_
 **invite**: makes the bot auto-join any channel it's /invited to  
 **log_display**: prints/logs everything
 
-Events and IRC Libs
+girclib
 -------------------
-Events and Event Handlers comprise most of goshu3's operation. girclib is a custom-written irclib3 wrapper, written to allow incoming _and_ outgoing events to be handled
+irclib, while brilliant, lacks a number of features including: outgoing event trapping, info tracking, etc
 
-If you want to see how girclib works, looking through source code should help quite a bit. Otherwise, I'm always happy to help at danneh@danneh.net
+I've written this girclib wrapper to address these. girclib works similarly to irclib, in terms of commands and operations. However, if you plan on using it for your own projects you may need some guidance
+
+First off: Look at the source code. I know it may be obvious, but if you want to find out if you can do something, or how something's done, looking at either the girclib or gbot/irc.py source code will help quite a bit. If I haven't done it somewhere in there, chances are I haven't implimented it
+
+<docs here>
 
 License
 -------
@@ -43,3 +47,7 @@ Released under the Beer-Ware License; I don't drink, so soda instead of beer
 # this stuff is worth it, you can buy me a soda in return Daniel Oakley  
 # ----------------------------------------------------------------------------
 ```
+
+Contact
+-------
+If you do something cool with my code, or you have feature requests, please feel free to contact me at danneh@danneh.net
