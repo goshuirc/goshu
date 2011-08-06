@@ -6,7 +6,8 @@ Python3 IRC Bot, using the [irclib3](http://github.com/Danneh/python-irclib) and
 
 Modules
 -------
-goshu3 is very modular, and allows you to simply drop goshu3 modules into the modules/ folder, where they're automatically loaded at runtime. To disable any modules, simply delete them, or move them to a different folder (something like modules/disabled/ perhaps?). goshu3 already comes with a number of modules:
+goshu3 is very modular, and allows you to simply drop goshu3 modules into the modules/ folder, where they're automatically loaded at runtime. To disable any modules, simply delete them, or move them to a different folder (something like modules/disabled/ perhaps?)  
+goshu3 comes with a number of modules to help you get started:
 
 Modules are represented like so: **dice**  
 Commands are represented like so: _8ball_ 
@@ -27,6 +28,8 @@ Commands are represented like so: _8ball_
 Events and IRC Libs
 -------------------
 Events and Event Handlers comprise most of goshu3's operation. girclib is a custom-written irclib3 wrapper, written to allow incoming _and_ outgoing events to be handled
+
+If you want to see how girclib works, looking through source code should help quite a bit. Otherwise, I'm always happy to help at danneh@danneh.net
 
 License
 -------
