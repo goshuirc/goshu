@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-#
-# Copyright 2011 Daniel Oakley <danneh@danneh.net>
+# ----------------------------------------------------------------------------  
+# "THE BEER-WARE LICENSE" (Revision 42):  
+# <danneh@danneh.net> wrote this file. As long as you retain this notice you  
+# can do whatever you want with this stuff. If we meet some day, and you think  
+# this stuff is worth it, you can buy me a soda in return Daniel Oakley  
+# ----------------------------------------------------------------------------
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 
 # fix for Windows' shitty default cp1252 encoding unicode output errors

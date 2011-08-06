@@ -23,3 +23,20 @@ Commands are represented like so: _8ball_
 **info**: adds _info_, outputs testing info  
 **invite**: makes the bot auto-join any channel it's /invited to  
 **log_display**: prints/logs everything
+
+Events and IRC Libs
+-------------------
+Events and Event Handlers comprise most of goshu3's operation. girclib is a custom-written irclib3 wrapper, written to allow incoming _and_ outgoing events to be handled
+
+License
+-------
+Released under the Beer-Ware License; I don't drink, so soda instead of beer
+
+```python
+# ----------------------------------------------------------------------------  
+# "THE BEER-WARE LICENSE" (Revision 42):  
+# <danneh@danneh.net> wrote this file. As long as you retain this notice you  
+# can do whatever you want with this stuff. If we meet some day, and you think  
+# this stuff is worth it, you can buy me a soda in return Daniel Oakley  
+# ----------------------------------------------------------------------------
+```
