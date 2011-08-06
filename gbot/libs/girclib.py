@@ -207,9 +207,19 @@ class ServerConnection:
 			self.info['channels'][event.arguments[0]]['topic']['topic'] = event.arguments[1]
 		
 		elif event.type == 'nick':
-			...
-			#self.info['users'][event.target] = self.info['users'][event.source.split('!')[0]]
-			#del self.info['users'][event.source.split('!')[0]]
+			for channel in self.info['channels'].copy():
+				if event.source.split('!')[0] in self.info['channels'][channel]['users']:
+					self.info['channels'][channel]['users'][event.target] = self.info['channels'][channel]['users'][event.source.split('!')[0]]
+					del self.info['channels'][channel]['users'][event.source.split('!')[0]]
+			self.info['users'][event.target] = self.info['users'][event.source.split('!')[0]]
+			del self.info['users'][event.source.split('!')[0]]
+		
+		elif event.type == 'part':
+			del self.info['channels'][event.target]['users'][event.source.split('!')[0]]
+		
+		elif event.type == 'join':
+			self.create_user(event.source)
+			self.info['channels'][event.target]['users'][event.source.split('!')[0]] = ''
 			
 	def create_user(self, user):
 		user_nick = user.split('!')[0]

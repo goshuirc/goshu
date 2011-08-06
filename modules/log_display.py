@@ -4,6 +4,7 @@
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 
 from time import strftime, localtime, gmtime
+import random
 
 from colorama import init
 init() #colorama
@@ -18,9 +19,11 @@ class log_display(Module):
     def __init__(self):
         self.events = {
             'all' : {
-                'all' : [(0, self.log)],
+                'all' : [(-40, self.log)],
             }
         }
+        self.nick_colors = {}
+        random.seed()
     
     def log(self, event):
         if event.type == 'all_raw_messages':
@@ -37,6 +40,14 @@ class log_display(Module):
         
         if event.type == '':
             ...
+        
+        elif event.type in ['welcome', 'yourhost', 'created', 'myinfo',
+                            'featurelist', 'luserclient', 'luserop',
+                            'luserchannels', 'luserme', 'n_local',
+                            'n_global', 'luserconns', 'luserunknown',
+                            'motdstart', 'motd', 'endofmotd', ]:
+            for message in event.arguments:
+                output += message + ' '
             
         elif event.type in ['privnotice', '439', ]:
             output += '/c14-'
@@ -49,12 +60,66 @@ class log_display(Module):
                 output = output[:-1]
             output += '-/c '
             output += event.arguments[0]
+        
+        elif event.type in ['pubmsg', ]:
+            output += '/c3-/c'
+            output += event.target
+            output += '/c3- '
+            output += '/c14</c'
+            try:
+                if self.bot.irc.servers[event.server].info['channels'][event.target]['users'][event.source.split('!')[0]] == '': # prefix: +%@&~
+                    output += ' '
+                else:
+                    output += self.bot.irc.servers[event.server].info['channels'][event.target]['users'][event.source.split('!')[0]]
+            except:
+                output += ' '
+            output += self.nick_color(event.source.split('!')[0])
+            output += '/c14>/c '
+            output += event.arguments[0]
+        
+        elif event.type in ['privmsg', ]:
+            output += '/c3-/c'
+            if event.direction == 'in':
+                output += event.source.split('!')[0]
+            else:
+                output += event.target
+            output += '/c3- '
+            output += '/c14</c'
+            output += self.nick_color(event.source.split('!')[0])
+            output += '/c14>/c '
+            output += event.arguments[0]
+        
+        elif event.type in ['umode', ]:
+            output += 'Mode change '
+            output += '/c14[/c'
+            output += event.arguments[0]
+            output += '/c14]/c'
+            output += ' for user '
+            output += event.target
+        
+        elif event.type in ['mode', ]:
+            output += '/c6-/c!/c6-/c '
+            output += 'mode//'
+            output += '/c10' + event.target + '/c '
+            output += '/c14[/c'
+            for arg in event.arguments:
+                output += arg + ' '
+            output = output[:-1] #strip last space
+            output += '/c14]/c'
+            output += ' by /b'
+            output += event.source.split('!')[0]
             
         else:
             output += str(event.direction) + ' ' + str(event.type) + ' ' + str(event.source) + ' ' + str(event.target) + ' ' + str(event.arguments)
         
-        print(output)
-        print(display_unescape(output))
+        #print(output)
+        print(display_unescape(output + '/c'))
+    
+    def nick_color(self, nickhost):
+        nick = nickhost.split('!')[0]
+        if nick not in self.nick_colors:
+            self.nick_colors[nick] = random.randint(2,13)
+        return fore_colors[str(self.nick_colors[nick])] + nick
 
 def display_unescape(input):
     output = ''

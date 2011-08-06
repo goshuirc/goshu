@@ -52,6 +52,6 @@ class google(Module):
         except urllib.error.URLError:
             url_result = 'Connection Error'
         
-        response = '*** You/c4Tube/c: '+url_result
+        response = '*** You/c5Tube/c: '+url_result
         
         self.bot.irc.servers[event.server].privmsg(event.from_to, response)

@@ -59,3 +59,7 @@ class IRC(girclib.IRC):
 			
 			if 'nickserv_password' in info._store[name]['connection']:
 				s.privmsg('nickserv', 'identify '+info._store[name]['connection']['nickserv_password'])
+			
+			if 'autojoin_channels' in info._store[name]['connection']:
+				for channel in info._store[name]['connection']['autojoin_channels']:
+					s.join(channel)
