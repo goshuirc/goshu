@@ -3,7 +3,7 @@
 # "THE BEER-WARE LICENSE" (Revision 42):  
 # <danneh@danneh.net> wrote this file. As long as you retain this notice you  
 # can do whatever you want with this stuff. If we meet some day, and you think  
-# this stuff is worth it, you can buy me a soda in return Daniel Oakley  
+# this stuff is worth it, you can buy me a beer in return Daniel Oakley  
 # ----------------------------------------------------------------------------
 # Goshubot IRC Bot	-	http://danneh.net/goshu
 
@@ -68,12 +68,16 @@ class IRC:
 	
 	def _handle_irclib(self, connection, event):
 		if event.eventtype() in ['privmsg', 'pubmsg', 'privnotice', 'pubnotice', 'action', 'currenttopic',
-								 'motd', 'endofmotd', 'yourhost', 'endofnames', ]:
+								 'motd', 'endofmotd', 'yourhost', 'endofnames', 'ctcp', 'topic', 'quit',
+								 'part', 'kick', ]:
 			event_arguments = []
 			for arg in event.arguments():
 				event_arguments.append(escape(arg))
 		else:
-			event_arguments = event.arguments()
+			#event_arguments = event.arguments()
+			event_arguments = []
+			for arg in event.arguments():
+				event_arguments.append(escape(arg))
 		new_event = Event(self, self.name(connection), 'in', event.eventtype(), event.source(), event.target(), event_arguments)
 		self._handle_event(new_event)
 	

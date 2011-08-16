@@ -3,7 +3,7 @@
 # "THE BEER-WARE LICENSE" (Revision 42):  
 # <danneh@danneh.net> wrote this file. As long as you retain this notice you  
 # can do whatever you want with this stuff. If we meet some day, and you think  
-# this stuff is worth it, you can buy me a soda in return Daniel Oakley  
+# this stuff is worth it, you can buy me a beer in return Daniel Oakley  
 # ----------------------------------------------------------------------------
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 
@@ -116,14 +116,14 @@ class log_display(Module):
         else:
             output += str(event.direction) + ' ' + str(event.type) + ' ' + str(event.source) + ' ' + str(event.target) + ' ' + str(event.arguments)
         
-        #print(output)
+        print('    ' + output)
         print(display_unescape(output + '/c'))
     
     def nick_color(self, nickhost):
         nick = nickhost.split('!')[0]
         if nick not in self.nick_colors:
             self.nick_colors[nick] = random.randint(2,13)
-        return fore_colors[str(self.nick_colors[nick])] + nick
+        return '/c' + str(self.nick_colors[nick]) + nick
 
 def display_unescape(input):
     output = ''
@@ -167,8 +167,14 @@ def display_unescape(input):
                         break
                 
                 if fore != '':
+                    if int(fore) > 15:
+                        while int(fore) > 15:
+                            fore = str(int(fore) - 14)
                     output += fore_colors[str(int(fore))]
                     if back != '':
+                        if int(back) > 15:
+                            while int(back) > 15:
+                                back = str(int(back) - 14)
                         output += back_colors[str(int(back))]
                 
                 else:
