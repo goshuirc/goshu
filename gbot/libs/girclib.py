@@ -262,7 +262,7 @@ class Event:
 
 
 def escape(string):
-	"""Change IRC codes to goshu codes."""
+	"""Change IRC codes into goshu codes."""
 	string = string.replace('/', '//') # escape real slashes
 	string = string.replace('\x02', '/b') # bold
 	string = string.replace('\x03', '/c') # color
@@ -271,12 +271,29 @@ def escape(string):
 	string = string.replace('\x0f', '/r') # reset
 	return string
 
-def unescape(string):
+unescape_dict = {
+    '/' : '/', # unescape real slashes
+    'b' : '\x02', # bold
+    'c' : '\x03', # color
+    'i' : '\x1d', # italic
+    'u' : '\x1f', # underline
+    'r' : '\x0f', # reset
+}
+
+def unescape(in_string):
 	"""Change goshu codes into IRC codes."""
-	string = string.replace('//', '/') # unescape real slashes
-	string = string.replace('/b', '\x02') # bold
-	string = string.replace('/c', '\x03') # color
-	string = string.replace('/i', '\x1d') # italic
-	string = string.replace('/u', '\x1f') # underline
-	string = string.replace('/r', '\x0f') # reset
-	return string
+	out_string = ''
+	while 1:
+		if in_string[0] == '/':
+			if len(in_string) < 2:
+				break
+			if in_string[1] in unescape_dict:
+				print('lolk', in_string)
+				out_string += unescape_dict[in_string[1]]
+			in_string = in_string[2:]
+		else:
+			out_string += in_string[0]
+			in_string = in_string[1:]
+		if len(in_string) < 1:
+			break
+	return out_string
