@@ -62,9 +62,6 @@ class Modules:
 			return False
 	
 	def handle(self, event):
-		if event.type == 'privmsg' or event.type == 'pubmsg':
-			self.handle_command(event)
-		
 		called = []
 		for module in self.handlers:
 			if event.type in self.handlers[module][event.direction]:
@@ -87,6 +84,8 @@ class Modules:
 					if h[1] not in called:
 						called.append(h[1])
 						h[1](event)
+		if event.type == 'privmsg' or event.type == 'pubmsg':
+			self.handle_command(event)
 	
 	def handle_command(self, event):
 		if event.arguments[0].split(self.bot.settings._store['prefix'])[0] == '':

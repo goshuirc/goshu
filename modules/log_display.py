@@ -23,7 +23,7 @@ class log_display(Module):
     def __init__(self):
         self.events = {
             'all' : {
-                'all' : [(-40, self.log)],
+                'all' : [(-20, self.log)],
             }
         }
         self.nick_colors = {}
@@ -114,9 +114,9 @@ class log_display(Module):
             output += event.source.split('!')[0]
             
         else:
-            output += str(event.direction) + ' ' + str(event.type) + ' ' + str(event.source) + ' ' + str(event.target) + ' ' + str(event.arguments)
+            output += str(event.direction) + ' ' + str(event.type) + ' ' + str(event.source) + ' ' + str(event.target) + ' ' + escape(str(event.arguments))
+            #print('    unknown:', output)
         
-        print('    ' + output)
         print(display_unescape(output + '/c'))
     
     def nick_color(self, nickhost):
