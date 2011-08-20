@@ -288,8 +288,9 @@ def unescape(in_string):
 			if len(in_string) < 2:
 				break
 			if in_string[1] in unescape_dict:
-				print('lolk', in_string)
 				out_string += unescape_dict[in_string[1]]
+			else:
+				out_string += in_string[0] + '?' + in_string[1] + '?'
 			in_string = in_string[2:]
 		else:
 			out_string += in_string[0]

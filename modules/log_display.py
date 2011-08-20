@@ -212,6 +212,9 @@ def display_unescape(input):
             elif len(input) > 1 and input[1] in ['b', 'i', 'u', 'r']:
                 input = input[2:]
             
+            elif len(input) >= 2:
+                input = input[2:]
+            
         elif len(input) > 0:
             output += input[0]
             if len(input) > 0:
