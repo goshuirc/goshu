@@ -89,6 +89,10 @@ class Modules:
 	
 	def handle_command(self, event):
 		if event.arguments[0].split(self.bot.settings._store['prefix'])[0] == '':
+			if len(event.arguments[0].split(self.bot.settings._store['prefix'])[1].strip()) < 1:
+				return # empty
+			elif len(event.arguments[0].split(self.bot.settings._store['prefix'])[1].split()[0]) < 1:
+				return # no command
 			command_name = event.arguments[0][1:].split()[0]
 			try:
 				command_args = event.arguments[0][1:].split(' ', 1)[1]
