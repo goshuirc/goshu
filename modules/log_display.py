@@ -10,6 +10,10 @@
 from time import strftime, localtime, gmtime
 import random
 
+import os
+import string
+valid_characters = string.ascii_letters + string.digits + '-_ []{}!^#' # valid filename chars
+
 from colorama import init
 init() #colorama
 from colorama import Fore, Back, Style
@@ -23,13 +27,13 @@ class log_display(Module):
     def __init__(self):
         self.events = {
             'all' : {
-                'all' : [(-20, self.log)],
+                'all' : [(-20, self.handler)],
             }
         }
         self.nick_colors = {}
         random.seed()
     
-    def log(self, event):
+    def handler(self, event):
         if event.type == 'all_raw_messages':
             return
         
@@ -42,6 +46,8 @@ class log_display(Module):
         output += event.server
         output += '/c2-/c '
         
+        targets = ['all']
+        
         if event.type == '':
             ...
         
@@ -49,11 +55,12 @@ class log_display(Module):
                             'featurelist', 'luserclient', 'luserop',
                             'luserchannels', 'luserme', 'n_local',
                             'n_global', 'luserconns', 'luserunknown',
-                            'motdstart', 'motd', 'endofmotd', ]:
+                            'motdstart', 'motd', 'endofmotd', '042', ]:
             for message in event.arguments:
                 output += message + ' '
             
         elif event.type in ['privnotice', '439', ]:
+            targets.append(event.source.split('!')[0])
             output += '/c14-'
             output += '/c13' + event.source.split('!')[0]
             try:
@@ -66,6 +73,7 @@ class log_display(Module):
             output += event.arguments[0]
         
         elif event.type in ['pubmsg', ]:
+            targets.append(event.target)
             output += '/c3-/c'
             output += event.target
             output += '/c3- '
@@ -85,8 +93,10 @@ class log_display(Module):
             output += '/c3-/c'
             if event.direction == 'in':
                 output += event.source.split('!')[0]
+                targets.append(event.source.split('!')[0])
             else:
                 output += event.target
+                targets.append(event.target)
             output += '/c3- '
             output += '/c14</c'
             output += self.nick_color(event.source.split('!')[0])
@@ -102,6 +112,7 @@ class log_display(Module):
             output += event.target
         
         elif event.type in ['mode', ]:
+            targets.append(event.target)
             output += '/c6-/c!/c6-/c '
             output += 'mode//'
             output += '/c10' + event.target + '/c '
@@ -114,10 +125,27 @@ class log_display(Module):
             output += event.source.split('!')[0]
             
         else:
+            targets.append('tofix')
             output += str(event.direction) + ' ' + str(event.type) + ' ' + str(event.source) + ' ' + str(event.target) + ' ' + escape(str(event.arguments))
             #print('    unknown:', output)
         
         print(display_unescape(output + '/c'))
+        self.log(output, event.server, targets)
+    
+    def log(self, output, server='global', targets=['global']):
+        server_escape = filename_escape(server)
+        targets_escape = []
+        for target in targets:
+            targets_escape.append(filename_escape(target))
+        for target in targets_escape:
+            if not os.path.exists('logs'):
+                os.makedirs('logs')
+            if not os.path.exists('logs/'+server):
+                os.makedirs('logs/'+server)
+            path = 'logs/'+server+'/'+target+'.log'
+            outfile = open(path, 'a', encoding='utf-8')
+            outfile.write(output + '\n')
+            outfile.close()
     
     def nick_color(self, nickhost):
         nick = nickhost.split('!')[0]
@@ -249,3 +277,12 @@ back_colors = {
     '14' : '',
     '15' : '',
 }
+
+def filename_escape(unsafe, replace_char='_'):
+    safe = ''
+    for character in unsafe:
+        if character in valid_characters:
+            safe += character
+        else:
+            safe += replace_char
+    return safe
