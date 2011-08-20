@@ -17,7 +17,7 @@ class ctcp_reply(Module):
     def __init__(self):
         self.events = {
             'in' : {
-                'ctcp' : [(0, self.ctcp_reply)],
+                'ctcp' : [(-30, self.ctcp_reply)],
             },
         }
     

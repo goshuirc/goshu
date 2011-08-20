@@ -108,6 +108,10 @@ class Info(Manager):
 			prompt += server + ' '
 			prompt += old_store[server]['connection']['address'] + ':'
 			prompt += str(old_store[server]['connection']['port']) + ' '
+			if 'ssl' in old_store[server]['connection'] and old_store[server]['connection']['ssl'] == True:
+				prompt += 'ssl '
+			if 'ipv6' in old_store[server]['connection'] and old_store[server]['connection']['ipv6'] == True:
+				prompt += 'ipv6 '
 			prompt += '- ok? [y]: '
 			if helper.is_ok(prompt, True, True):
 				new_store[server] = old_store[server]
@@ -144,9 +148,10 @@ class Info(Manager):
 		
 		new_server['connection'] = {}
 		self._update_attribute(old_server, new_server, 'connection.address', 'server address')
+		self._update_attribute(old_server, new_server, 'connection.ipv6', 'ipv6', truefalse=True)
 		self._update_attribute(old_server, new_server, 'connection.ssl', 'ssl', truefalse=True)
 		if new_server['connection']['ssl']:
-			assumed_port = 6679
+			assumed_port = 6697
 		else:
 			assumed_port = 6667
 		self._update_attribute(old_server, new_server, 'connection.port', 'port', old_value=assumed_port)
