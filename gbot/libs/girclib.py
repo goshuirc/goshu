@@ -181,7 +181,7 @@ class ServerConnection:
 	
 	def join(self, channel, key=''):
 		self.connection.join(channel, key)
-		self.irc._handle_event(Event(self.irc, self.name, 'out', 'join', self.info['connection']['nick'], channel, [key]))
+		#self.irc._handle_event(Event(self.irc, self.name, 'out', 'join', self.info['connection']['nick'], channel, [key]))
 	
 	def pong(self, target):
 		self.connection.pong(target)
@@ -189,7 +189,11 @@ class ServerConnection:
 	
 	def privmsg(self, target, message):
 		self.connection.privmsg(target, unescape(message))
-		self.irc._handle_event(Event(self.irc, self.name, 'out', 'privmsg', self.info['connection']['nick'], target, [message]))
+		if irclib3.is_channel(target):
+			command = 'pubmsg'
+		else:
+			command = 'privmsg'
+		self.irc._handle_event(Event(self.irc, self.name, 'out', command, self.info['connection']['nick'], target, [message]))
 	
 	
 	def update_info(self, event):

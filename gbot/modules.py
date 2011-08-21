@@ -38,6 +38,7 @@ class Modules:
 		self.bot = bot
 		self.modules = {}
 		self.handlers = {}
+		self.handlers_priority_sorted = {} # handlers sorted using priority nums
 	
 	def load(self, path):
 		loader = ModuleLoader(path)

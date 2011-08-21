@@ -11,8 +11,6 @@ from time import strftime, localtime, gmtime
 import random
 
 import os
-import string
-valid_characters = string.ascii_letters + string.digits + '-_ []{}!^#' # valid filename chars
 
 from colorama import init
 init() #colorama
@@ -144,7 +142,7 @@ class log_display(Module):
                 os.makedirs('logs/'+server)
             path = 'logs/'+server+'/'+target+'.log'
             outfile = open(path, 'a', encoding='utf-8')
-            outfile.write(output + '\n')
+            outfile.write(unescape(output) + '\n')
             outfile.close()
     
     def nick_color(self, nickhost):
@@ -281,10 +279,11 @@ back_colors = {
     '15' : '',
 }
 
-def filename_escape(unsafe, replace_char='_'):
+import string
+def filename_escape(unsafe, replace_char='_', valid_chars=string.ascii_letters+string.digits+'- '):
     safe = ''
     for character in unsafe:
-        if character in valid_characters:
+        if character in valid_chars:
             safe += character
         else:
             safe += replace_char
