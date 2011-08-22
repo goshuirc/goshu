@@ -227,7 +227,10 @@ class ServerConnection:
 			del self.info['users'][event.source.split('!')[0]]
 		
 		elif event.type == 'part':
-			del self.info['channels'][event.target]['users'][event.source.split('!')[0]]
+			try:
+				del self.info['channels'][event.target]['users'][event.source.split('!')[0]]
+			except:
+				...
 		
 		elif event.type == 'join':
 			self.create_user(event.source)
