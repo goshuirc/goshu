@@ -65,6 +65,11 @@ class responses(Module):
             output = []
         
         response_num = random.randint(1, len(responses[num])) - 1
+        response = responses[num][response_num]
+        if num + 'pre' in responses:
+            response =  responses[num + 'pre'] + response
+        if num + 'post' in responses:
+            response += responses[num + 'post']
         output.append(responses[num][response_num])
         
         for outline in output:

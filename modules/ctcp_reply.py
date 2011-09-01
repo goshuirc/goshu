@@ -36,7 +36,7 @@ class ctcp_reply(Module):
                 self.bot.irc.servers[event.server].ctcp_reply(nm_to_n(event.source), "USERINFO :%s" % userinfostring)
         
         elif event.arguments[0] == 'CLIENTINFO':
-            self.bot.irc.servers[event.server].ctcp_reply(nm_to_n(event.source), 'CLIENTINFO ') # to be continued
+            self.bot.irc.servers[event.server].ctcp_reply(nm_to_n(event.source), 'Understood CTCP Pairs: CLIENTINFO, ERRMSG, PING, SOURCE, TIME, USERINFO, VERSION')
         
         elif event.arguments[0] == 'ERRMSG':
             #self.bot.irc.servers[event.server].ctcp_reply(nm_to_n(event.source, 'ERRMSG '+event.arguments()[1]+':ERRMSG echo, no error has occured') #could be bad, errmsg-storm, anyone?
