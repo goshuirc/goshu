@@ -29,6 +29,7 @@ class log_display(Module):
             }
         }
         self.nick_colors = {}
+        self.logfiles_open = []
         random.seed()
     
     def handler(self, event):
@@ -141,6 +142,11 @@ class log_display(Module):
             if not os.path.exists('logs/'+server):
                 os.makedirs('logs/'+server)
             path = 'logs/'+server+'/'+target+'.log'
+            
+            if target not in self.logfiles_open or not os.path.exists(path):
+                output = '/c14 Logfile Opened ' + strftime("%A %B %d, %H:%M:%S %Y", localtime()) + '\n' + output
+                self.logfiles_open.append(target)
+            
             outfile = open(path, 'a', encoding='utf-8')
             outfile.write(unescape(output) + '\n')
             outfile.close()
@@ -280,7 +286,7 @@ back_colors = {
 }
 
 import string
-def filename_escape(unsafe, replace_char='_', valid_chars=string.ascii_letters+string.digits+'- '):
+def filename_escape(unsafe, replace_char='_', valid_chars=string.ascii_letters+string.digits+'#._- '):
     safe = ''
     for character in unsafe:
         if character in valid_chars:
