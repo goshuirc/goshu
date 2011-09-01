@@ -24,6 +24,9 @@ class google(Module):
         }
     
     def google_search(self, event, command):
+        if command.arguments == '':
+            return
+        
         encoded_query = urllib.parse.urlencode({b'q' : unescape(command.arguments)})
         url = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&%s' % (encoded_query)
         try:
@@ -41,6 +44,9 @@ class google(Module):
         self.bot.irc.servers[event.server].privmsg(event.from_to, response)
     
     def youtube_search(self, event, command):
+        if command.arguments == '':
+            return
+        
         encoded_query = urllib.parse.urlencode({b'q' : unescape(command.arguments)})
         url = 'http://gdata.youtube.com/feeds/api/videos?alt=jsonc&v=2&max-results=1&%s' % (encoded_query)
         

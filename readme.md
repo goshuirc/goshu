@@ -24,6 +24,7 @@ Commands are represented like so: _8ball_
 **list**: adds _list_, lists current commands and help for commands  
 **pokemon**: adds _pokemon_ and _pokedex_, returns random pokemon  
 **suggest**: adds _suggest_, allows users to make suggestions  
+**urbandictionary**: adds _ud_, returns definition from urbandictionary  
 
 ### Backend  (only modify/remove these if you know what you're doing)
 **ctcp_reply**: handles the basic CTCP requests - stuff like PING, VER, TIME  
