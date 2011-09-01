@@ -42,6 +42,7 @@ First off: Look at the source code. I know it may be obvious, but if you want to
 License
 -------
 Released under the Beer-Ware License
+
 ```python
 # ----------------------------------------------------------------------------  
 # "THE BEER-WARE LICENSE" (Revision 42):  
