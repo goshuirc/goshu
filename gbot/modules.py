@@ -12,6 +12,16 @@ import sys
 class Module:
 	"""Module to add commands/functionality to the bot."""
 	...
+	
+	def commands(self):
+		command_list = {}
+		if 'commands' not in self.events:
+			return command_list
+		
+		for command in self.events['commands']:
+			command_list[command] = self.events['commands'][command]
+			
+		return command_list
 
 class ModuleLoader:
 	"""Prepares a list of modules."""

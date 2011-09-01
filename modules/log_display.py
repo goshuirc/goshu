@@ -29,7 +29,7 @@ class log_display(Module):
             }
         }
         self.nick_colors = {}
-        self.logfiles_open = []
+        self.logfiles_open = {}
         random.seed()
     
     def handler(self, event):
@@ -144,8 +144,11 @@ class log_display(Module):
             path = 'logs/'+server+'/'+target+'.log'
             
             if target not in self.logfiles_open or not os.path.exists(path):
-                output = '/c14 Logfile Opened ' + strftime("%A %B %d, %H:%M:%S %Y", localtime()) + '\n' + output
-                self.logfiles_open.append(target)
+                output = '/c14 Logfile Opened - ' + strftime("%A %B %d, %H:%M:%S %Y", localtime()) + '\n' + output
+                self.logfiles_open[target] = strftime("%A %B %d", localtime())
+            elif self.logfiles_open[target] != strftime("%A %B %d", localtime()):
+                output = '/c14 New Day - ' + strftime("%A %B %d, %H:%M:%S %Y", localtime()) + '\n' + output
+                self.logfiles_open[target] = strftime("%A %B %d", localtime())
             
             outfile = open(path, 'a', encoding='utf-8')
             outfile.write(unescape(output) + '\n')

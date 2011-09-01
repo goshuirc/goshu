@@ -23,7 +23,29 @@ class responses(Module):
                 'privmsg' : [(0, self.combined_call)],
             },
         }
+        self.responses_path = 'modules/responses'
         random.seed()
+    
+    def commands(self):
+        output = Module.commands(self)
+        for (dirpath, dirs, files) in os.walk(self.responses_path):
+            for file in files:
+                try:
+                    info = json.loads(open(self.responses_path+'/'+file).read())
+                except ValueError:
+                    continue
+                
+                if 'description' in info:
+                    command_description = info['description']
+                else:
+                    command_description = ''
+                if 'permission' in info:
+                    command_permission = info['permission']
+                else:
+                    command_permission = 0
+                
+                output[file] = [self.combined, command_description, command_permission]
+        return output
 
         # /s means source, the nick of whoever did the command
         # /t means target, either whoever they write afterwards, or the current self nick
@@ -40,11 +62,11 @@ class responses(Module):
             self.combined(event, Command(command_name, command_args))
     
     def combined(self, event, command):
-        if not os.path.exists('modules/responses/'+filename_escape(command.command)):
+        if not os.path.exists(self.responses_path+'/'+filename_escape(command.command)):
             return
         
         try:
-            responses = json.loads(open('modules/responses/'+filename_escape(command.command)).read())
+            responses = json.loads(open(self.responses_path+'/'+filename_escape(command.command)).read())
         except ValueError:
             return
         

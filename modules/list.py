@@ -16,37 +16,37 @@ class list(Module):
     def __init__(self):
         self.events = {
             'commands' : {
-                'list' : [self.list, "['command] --- list commands/if 'command is present, display info on that command~", 0],
+                'list' : [self.list, "[command] --- list all commands; if command is present, display info on that command instead~", 0],
             },
         }
     
     def list(self, event, command):
-        return
+        bot_commands = []
         
-        commands = []
-        for module in self.bot.modules.handlers:
-            for command_name in self.bot.modules.handlers[module]['commands']:
-                command_description = self.bot.modules.handlers[module]['commands'][command_name][1]
-                command_permission = self.bot.modules.handlers[module]['commands'][command_name][2]
-                commands.append([command_name, command_description, command_permission])
+        for module in self.bot.modules.modules:
+            module_commands = self.bot.modules.modules[module].commands()
+            for command_name in module_commands:
+                command_description = module_commands[command_name][1]
+                command_permission = module_commands[command_name][2]
+                if command_permission <= 0:
+                    bot_commands.append([command_name, command_description, command_permission])
+        bot_commands = sorted(bot_commands)
         
-        if command.arguments != '' and command.arguments[0] == self.bot.settings._store['prefix']:
-            # info about specific command
-            for command_list in commands:
-                if command_list[0] == command.arguments[1:]:
+        if command.arguments:
+            # single command info
+            for bot_command in bot_commands:
+                if bot_command[0] == command.arguments.split()[0]:
                     output = '*** Command:  '
-                    output += command_list[0]
-                    output += ' '
-                    output += command_list[1]
+                    output += bot_command[0] + ' '
+                    output += bot_command[1]
                     
                     self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], output)
         
         else:
-            # command list
+            # list commands
             output = '*** Commands: '
-            for command_list in sorted(commands):
-                if command_list[2] == 0:
-                    output += command_list[0] + ', '
+            for bot_command in bot_commands:
+                output += bot_command[0] + ', '
             output = output[:-2] # remove last ', '
             
             self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], output)
