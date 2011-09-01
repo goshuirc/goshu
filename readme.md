@@ -34,7 +34,7 @@ Commands are represented like so: _8ball_
 
 ### Responses Module
 This module loads commands from the _modules/responses_ directory. That directory contains a multitude of files, each one providing a single command. The command-files are stored in json, and here are what the different keys do:  
-**info**: sentence-long string describing the command  
+**description**: sentence-long string describing the command  
 **permission**: number representing the lowest permission level requirement required to access the command  
 **initial**: string to process before getting randomised string  
 **1**, **2**: list of strings to randomly pick from and process  
