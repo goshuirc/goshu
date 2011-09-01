@@ -12,34 +12,39 @@ from gbot.libs.girclib import escape, unescape
 import urllib.request, urllib.parse, urllib.error
 import json
 
-class urbandictionary(Module):
-    name = 'urbandictionary'
+class wikipedia(Module):
+    name = 'wikipedia'
     
     def __init__(self):
         self.events = {
             'commands' : {
-                'ud' : [self.ud_search, '<query> --- see UrbanDictionary definition', 0],
+                'wiki' : [self.wikipedia_search, '<query> --- get Wikipedia article', 0],
             },
         }
     
-    def ud_search(self, event, command):
+    def wikipedia_search(self, event, command):
         if command.arguments == '':
             return
         
-        encoded_query = urllib.parse.urlencode({b'term' : unescape(command.arguments)})
-        url = 'http://www.urbandictionary.com/iphone/search/define?%s' % (encoded_query)
+        query = {
+            b'action' : 'query',
+            b'list' : 'search',
+            b'format' : 'json',
+            b'srsearch' : unescape(command.arguments),
+        }
+        
+        encoded_query = urllib.parse.urlencode(query)
+        url = 'https://secure.wikimedia.org/wikipedia/en/w/api.php?%s' % (encoded_query)
         try:
             search_results = urllib.request.urlopen(url)
             json_result = json.loads(search_results.read().decode('utf-8'))
             try:
-                url_result = escape(str(json_result['list'][0]['word'])).replace('\r', '').replace('\n', ' ').strip()
-                url_result += ' --- '
-                url_result += escape(str(json_result['list'][0]['definition'])).replace('\r', '').replace('\n', ' ').strip()
+                url_result = escape('https://secure.wikimedia.org/wikipedia/en/wiki/') + escape(json_result['query']['search'][0]['title'])
             except:
                 url_result = 'No Results'
         except urllib.error.URLError:
             url_result = 'Connection Error'
         
-        response = '*** UrbanDictionary: ' + url_result
+        response = '*** Wikipedia: ' + url_result
         
-        self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], response)
+        self.bot.irc.servers[event.server].privmsg(event.from_to, response)
