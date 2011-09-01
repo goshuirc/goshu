@@ -48,9 +48,9 @@ class google(Module):
             search_results = urllib.request.urlopen(url)
             json_result = json.loads(search_results.read().decode('utf-8'))
             try:
-                url_result = json_result['data']['items'][0]['title']
+                url_result = escape(json_result['data']['items'][0]['title'])
                 url_result += escape(' - http://youtu.be/')
-                url_result += json_result['data']['items'][0]['id']
+                url_result += escape(json_result['data']['items'][0]['id'])
             except:
                 url_result = 'No Results'
         except urllib.error.URLError:

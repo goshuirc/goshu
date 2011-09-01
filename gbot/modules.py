@@ -37,8 +37,6 @@ class Modules:
 	def __init__(self, bot):
 		self.bot = bot
 		self.modules = {}
-		self.handlers = {}
-		self.handlers_priority_sorted = {} # handlers sorted using priority nums
 	
 	def load(self, path):
 		loader = ModuleLoader(path)
@@ -56,7 +54,6 @@ class Modules:
 			for direction in ['in', 'out', 'commands', 'all']:
 				if direction not in module.events:
 					module.events[direction] = {}
-			self.handlers[module.name] = module.events
 			module.bot = self.bot
 			return True
 		else:
@@ -64,24 +61,24 @@ class Modules:
 	
 	def handle(self, event):
 		called = []
-		for module in self.handlers:
-			if event.type in self.handlers[module][event.direction]:
-				for h in self.handlers[module][event.direction][event.type]:
+		for module in self.modules:
+			if event.type in self.modules[module].events[event.direction]:
+				for h in self.modules[module].events[event.direction][event.type]:
 					if h[1] not in called:
 						called.append(h[1])
 						h[1](event)
-			if 'all' in self.handlers[module][event.direction]:
-				for h in self.handlers[module][event.direction]['all']:
+			if 'all' in self.modules[module].events[event.direction]:
+				for h in self.modules[module].events[event.direction]['all']:
 					if h[1] not in called:
 						called.append(h[1])
 						h[1](event)
-			if event.type in self.handlers[module]['all']:
-				for h in self.handlers[module]['all'][event.type]:
+			if event.type in self.modules[module].events['all']:
+				for h in self.modules[module].events['all'][event.type]:
 					if h[1] not in called:
 						called.append(h[1])
 						h[1](event)
-			if 'all' in self.handlers[module]['all']:
-				for h in self.handlers[module]['all']['all']:
+			if 'all' in self.modules[module].events['all']:
+				for h in self.modules[module].events['all']['all']:
 					if h[1] not in called:
 						called.append(h[1])
 						h[1](event)
@@ -94,16 +91,16 @@ class Modules:
 				return # empty
 			elif len(event.arguments[0].split(self.bot.settings._store['prefix'])[1].split()[0]) < 1:
 				return # no command
-			command_name = event.arguments[0][1:].split()[0]
+			command_name = event.arguments[0][1:].split()[0].lower()
 			try:
 				command_args = event.arguments[0][1:].split(' ', 1)[1]
 			except IndexError:
 				command_args = ''
 			called = []
-			for module in self.handlers:
-				if 'commands' in self.handlers[module]:
+			for module in self.modules:
+				if 'commands' in self.modules[module].events:
 					try:
-						self.handlers[module]['commands'][command_name][0](event, Command(command_name, command_args))
+						self.modules[module].events['commands'][command_name][0](event, Command(command_name, command_args))
 					except KeyError:
 						...
 

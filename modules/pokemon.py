@@ -18,6 +18,7 @@ class pokemon(Module):
 		self.events = {
 			'commands' : {
 				'pokemon' : [self.pokemon, '--- get a random pokemon', 0],
+				'pokémon' : [self.pokemon, '--- get a random pokémon', 0],
 			},
 		}
 		
@@ -27,10 +28,14 @@ class pokemon(Module):
 	
 	def pokemon(self, event, command):
 		pokemon_num = random.randint(0, len(self.pokemon_list)-1)
+		pokemon_level = str(random.randint(1, 100))
 		
-		response = '*** pok' + b'\xc3\xa9'.decode() + 'mon: '
-		response += pad(str(pokemon_num)) + ' --- ' + self.pokemon_list[pokemon_num]
+		#response = '*** pok' + b'\xc3\xa9'.decode() + 'mon: '
+		response = event.source.split('!')[0]
+		response += ' f/b/binds a lvl ' + pokemon_level + ' '
+		response += self.pokemon_list[pokemon_num] + ' (' + pad(str(pokemon_num)) + ')'
 		self.bot.irc.servers[event.server].privmsg(event.from_to, response)
+		# Nick finds a lvl72 MissingNO (007)
 
 def pad(input, pad_num=3, pad_char='0'):
 	output = ''
