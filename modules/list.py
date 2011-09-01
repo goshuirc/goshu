@@ -21,6 +21,8 @@ class list(Module):
         }
     
     def list(self, event, command):
+        return
+        
         commands = []
         for module in self.bot.modules.handlers:
             for command_name in self.bot.modules.handlers[module]['commands']:
