@@ -32,15 +32,15 @@ Commands are represented like so: _8ball_
 **log_display**: prints/logs everything  
 **responses**: dynamically loads commands from _modules/responses_  
 
-**responses module**:  
+### Responses Module
 This module loads commands from the _modules/responses_ directory. That directory contains a multitude of files, each one providing a single command. The command-files are stored in json, and here are what the different keys do:  
-_info_: sentence-long string describing the command  
-_permission_: number representing the lowest permission level requirement required to access the command  
-_initial_: string to process before getting randomised string  
-_1_, _2_: list of strings to randomly pick from and process  
-_1pre_, _1post_, _2pre_, _2post_: string to add to the beginning/end of every string in given list  
-_1_: used when no argument is given  
-_2_: used when argument is given  
+**info**: sentence-long string describing the command  
+**permission**: number representing the lowest permission level requirement required to access the command  
+**initial**: string to process before getting randomised string  
+**1**, **2**: list of strings to randomly pick from and process  
+**1pre**, **1post**, **2pre**, **2post**: string to add to the beginning/end of every string in given list  
+**1**: used when no argument is given  
+**2**: used when argument is given  
 
 girclib
 -------------------
