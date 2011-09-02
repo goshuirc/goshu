@@ -1,0 +1,13 @@
+
+    "description": "[someone] --- Brofist someone!", {
+    "1": [
+        "/m brofists /s", 
+        "/m refuses", 
+        "No!", 
+        "Of course, bro' :3"
+    ], 
+    "2": [
+        "/t brofists /s", 
+        "/t refuses"
+    ]
+}

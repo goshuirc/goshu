@@ -1,0 +1,11 @@
+
+    "description": "[someone] --- Cheer someone up", {
+    "1": [
+        "/m gets cheered up", 
+        "Screw you! ;__;"
+    ], 
+    "2": [
+        "/s cheers up /t", 
+        "/s does not cheer up /t"
+    ]
+}
