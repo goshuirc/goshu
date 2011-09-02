@@ -71,7 +71,7 @@ class Modules:
 	
 	def handle(self, event):
 		called = []
-		for module in self.modules:
+		for module in sorted(self.modules):
 			if event.type in self.modules[module].events[event.direction]:
 				for h in self.modules[module].events[event.direction][event.type]:
 					if h[1] not in called:
@@ -107,7 +107,7 @@ class Modules:
 			except IndexError:
 				command_args = ''
 			called = []
-			for module in self.modules:
+			for module in sorted(self.modules):
 				if 'commands' in self.modules[module].events:
 					try:
 						self.modules[module].events['commands'][command_name][0](event, Command(command_name, command_args))

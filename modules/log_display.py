@@ -20,8 +20,8 @@ from gbot.modules import Module
 from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import filename_escape
 
-class log_display(Module):
-    name = "log_display"
+class a_log_display(Module):
+    name = "a_log_display"
     
     def __init__(self):
         self.events = {
