@@ -9,6 +9,7 @@
 
 from gbot.modules import Module, Command
 from gbot.libs.girclib import escape, unescape
+from gbot.libs.helper import filename_escape
 import random
 import os
 import json
@@ -102,14 +103,3 @@ class responses(Module):
                 self.bot.irc.servers[event.server].action(event.from_to, outline[2:].strip())
             else:
                 self.bot.irc.servers[event.server].privmsg(event.from_to, outline)
-
-
-import string
-def filename_escape(unsafe, replace_char='_', valid_chars=string.ascii_letters+string.digits+'- '):
-    safe = ''
-    for character in unsafe:
-        if character in valid_chars:
-            safe += character
-        else:
-            safe += replace_char
-    return safe

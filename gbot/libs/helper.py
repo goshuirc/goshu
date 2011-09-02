@@ -18,6 +18,7 @@ Functions:
 
 is_ok() -- prompt the user for yes/no and returns True/False
 bytes_to_str() -- convert number of bytes to a human-readable format
+filename_escape() -- escapes a filename (slashes removed, etc)
 
 """
 
@@ -411,3 +412,26 @@ Input the user provides, same as the input() builtin
 def print(*args):
 	__builtins__.print(*args)
 	sys.stdout.flush()
+
+
+
+import string
+def filename_escape(unsafe, replace_char='_', valid_chars=string.ascii_letters+string.digits+'#._- '):
+	"""Escapes a string to provide a safe local filename
+
+Arguments:
+unsafe -- Unsafe string to escape
+replace_char -- Character to replace unsafe characters with
+valid_chars -- Valid filename characters
+
+Returns:
+Safe local filename string
+
+"""
+	safe = ''
+	for character in unsafe:
+		if character in valid_chars:
+			safe += character
+		else:
+			safe += replace_char
+	return safe

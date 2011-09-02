@@ -18,6 +18,7 @@ from colorama import Fore, Back, Style
 
 from gbot.modules import Module
 from gbot.libs.girclib import escape, unescape
+from gbot.libs.helper import filename_escape
 
 class log_display(Module):
     name = "log_display"
@@ -287,13 +288,3 @@ back_colors = {
     '14' : '',
     '15' : '',
 }
-
-import string
-def filename_escape(unsafe, replace_char='_', valid_chars=string.ascii_letters+string.digits+'#._- '):
-    safe = ''
-    for character in unsafe:
-        if character in valid_chars:
-            safe += character
-        else:
-            safe += replace_char
-    return safe

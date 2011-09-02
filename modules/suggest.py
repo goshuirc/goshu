@@ -11,6 +11,7 @@ import os
 
 from gbot.modules import Module
 from gbot.libs.girclib import escape
+from gbot.libs.helper import filename_escape
 
 class suggest(Module):
 	name = 'suggest'
@@ -47,13 +48,3 @@ class suggest(Module):
 		for line in output:
 			outfile.write(line + '\n')
 		outfile.close()
-
-import string
-def filename_escape(unsafe, replace_char='_', valid_chars=string.ascii_letters+string.digits+'- '):
-	safe = ''
-	for character in unsafe:
-		if character in valid_chars:
-			safe += character
-		else:
-			safe += replace_char
-	return safe
