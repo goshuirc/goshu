@@ -185,7 +185,7 @@ class ServerConnection:
 			(ctcp_type, ctcp_args) = string.split(' ', 1)
 		else:
 			(ctcp_type, ctcp_args) = (string, '')
-		self.irc._handle_event(Event(self.irc, self.name, 'out', 'ctcp_reply', self.info['connection']['nick'], target, [ctcp_type, ctcp_args]))
+		self.irc._handle_event(Event(self.irc, self.name, 'out', 'ctcp_reply', self.info['connection']['nick'], ip, [ctcp_type, ctcp_args]))
 	
 	def join(self, channel, key=''):
 		self.connection.join(channel, key)
