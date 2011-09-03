@@ -23,9 +23,6 @@ class soundcloud(Module):
         }
     
     def soundcloud_search(self, event, command):
-        if command.arguments == '':
-            return
-        
         encoded_query = urllib.parse.urlencode({b'q' : unescape(command.arguments)})
         url = 'http://api.soundcloud.com/tracks.json?client_id=e3dfa9998292005f9e73329b1dd9dfb7&%s' % (encoded_query)
         try:

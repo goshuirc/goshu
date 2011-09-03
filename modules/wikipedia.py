@@ -23,9 +23,6 @@ class wikipedia(Module):
         }
     
     def wikipedia_search(self, event, command):
-        if command.arguments == '':
-            return
-        
         query = {
             b'action' : 'query',
             b'list' : 'search',

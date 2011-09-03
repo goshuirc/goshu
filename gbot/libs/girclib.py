@@ -173,11 +173,19 @@ class ServerConnection:
 	
 	def ctcp(self, type, target, string):
 		self.connection.ctcp(type, target, string)
-		self.irc._handle_event(Event(self.irc, self.name, 'out', 'ctcp', self.info['connection']['nick'], target, [string]))
+		if len(string.split()) > 1:
+			(ctcp_type, ctcp_args) = string.split(' ', 1)
+		else:
+			(ctcp_type, ctcp_args) = (string, '')
+		self.irc._handle_event(Event(self.irc, self.name, 'out', 'ctcp', self.info['connection']['nick'], target, [ctcp_type, ctcp_args]))
 	
 	def ctcp_reply(self, ip, string):
 		self.connection.ctcp_reply(ip, string)
-		self.irc._handle_event(Event(self.irc, self.name, 'out', 'ctcp_reply', self.info['connection']['nick'], ip, [string]))
+		if len(string.split()) > 1:
+			(ctcp_type, ctcp_args) = string.split(' ', 1)
+		else:
+			(ctcp_type, ctcp_args) = (string, '')
+		self.irc._handle_event(Event(self.irc, self.name, 'out', 'ctcp_reply', self.info['connection']['nick'], target, [ctcp_type, ctcp_args]))
 	
 	def join(self, channel, key=''):
 		self.connection.join(channel, key)
@@ -289,6 +297,8 @@ unescape_dict = {
 
 def unescape(in_string):
 	"""Change goshu codes into IRC codes."""
+	if len(in_string) < 1:
+		return ''
 	out_string = ''
 	while 1:
 		if in_string[0] == '/':

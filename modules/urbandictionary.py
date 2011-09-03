@@ -23,9 +23,6 @@ class urbandictionary(Module):
         }
     
     def ud_search(self, event, command):
-        if command.arguments == '':
-            return
-        
         encoded_query = urllib.parse.urlencode({b'term' : unescape(command.arguments)})
         url = 'http://www.urbandictionary.com/iphone/search/define?%s' % (encoded_query)
         try:
