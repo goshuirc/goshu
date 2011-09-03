@@ -30,10 +30,12 @@ class link(Module):
                 break # only do this for youtube links
             if '/user/' in url:
                 break # don't do this for user pages, no useful info in title
+            if 'youtuberepeat.com' in url:
+                break # don't do this for youtuberepeat.com, no title in there
             title = gettitle(url)
             if title == '':
                 continue
-            response = '*** title: ' + html_unescape(title)
+            response = '*** title: ' + escape(html_unescape(title))
             self.bot.irc.servers[event.server].privmsg(event.from_to, response)
             return # don't spam us tryna get every title
 

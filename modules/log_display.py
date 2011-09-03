@@ -21,7 +21,7 @@ from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import filename_escape
 
 class a_log_display(Module):
-    name = "a_log_display"
+    name = "a_log_display" # a_ at the beginning so goshu calls this module first
     
     def __init__(self):
         self.events = {

@@ -12,6 +12,7 @@ from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import filename_escape
 import random
 import os
+import sys
 import json
 
 class responses(Module):
@@ -24,7 +25,7 @@ class responses(Module):
                 'privmsg' : [(0, self.combined_call)],
             },
         }
-        self.responses_path = 'modules/responses'
+        self.responses_path = 'modules'+os.sep+'responses'
         random.seed()
     
     def commands(self):
@@ -32,7 +33,7 @@ class responses(Module):
         for (dirpath, dirs, files) in os.walk(self.responses_path):
             for file in files:
                 try:
-                    info = json.loads(open(self.responses_path+'/'+file).read())
+                    info = json.loads(open(dirpath+os.sep+file).read())
                 except ValueError:
                     continue
                 
@@ -63,11 +64,18 @@ class responses(Module):
             self.combined(event, Command(command_name, command_args))
     
     def combined(self, event, command):
-        if not os.path.exists(self.responses_path+'/'+filename_escape(command.command)):
+        module_path = None
+        for (dirpath, dirs, files) in os.walk(self.responses_path):
+            for file in files:
+                if not dirpath in sys.path:
+                    sys.path.insert(0, dirpath)
+                if file == filename_escape(command.command):
+                    module_path = dirpath
+        if not module_path:
             return
         
         try:
-            responses = json.loads(open(self.responses_path+'/'+filename_escape(command.command)).read())
+            responses = json.loads(open(module_path+os.sep+filename_escape(command.command)).read())
         except ValueError:
             return
         
