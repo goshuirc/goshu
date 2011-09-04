@@ -10,6 +10,8 @@
 from gbot.modules import Module
 from gbot.libs.girclib import escape
 import random
+import json
+import os
 
 class pokemon(Module):
 	name = 'pokemon'
@@ -18,24 +20,43 @@ class pokemon(Module):
 		self.events = {
 			'commands' : {
 				'pokemon' : [self.pokemon, '--- get a random pokemon', 0],
-				'pokémon' : [self.pokemon, '--- get a random pokémon', 0],
+				'pokerst' : [self.reset_pokemon, '--- reset corrupted pokemon save', 1],
 			},
 		}
 		
-		self.pokemon_list = ['MissingNO', 'Bulbasaur', 'Ivysaur', 'Venusaur', 'Charmander', 'Charmeleon', 'Charizard', 'Squirtle', 'Wartortle', 'Blastoise', 'Caterpie', 'Metapod', 'Butterfree', 'Weedle', 'Kakuna', 'Beedrill', 'Pidgey', 'Pidgeotto', 'Pidgeot', 'Rattata', 'Raticate', 'Spearow', 'Fearow', 'Ekans', 'Arbok', 'Pikachu', 'Raichu', 'Sandshrew', 'Sandslash', 'Nidoran (F)', 'Nidorina', 'Nidoqueen', 'Nidoran (M)', 'Nidorino', 'Nidoking', 'Clefairy', 'Clefable', 'Vulpix', 'Ninetales', 'Jigglypuff', 'Wigglytuff', 'Zubat', 'Golbat', 'Oddish', 'Gloom', 'Vileplume', 'Paras', 'Parasect', 'Venonat', 'Venomoth', 'Diglett', 'Dugtrio', 'Meowth', 'Persian', 'Psyduck', 'Golduck', 'Mankey', 'Primeape', 'Growlithe', 'Arcanine', 'Poliwag', 'Poliwhirl', 'Poliwrath', 'Abra', 'Kadabra', 'Alakazam', 'Machop', 'Machoke', 'Machamp', 'Bellsprout', 'Weepinbell', 'Victreebel', 'Tentacool', 'Tentacruel', 'Geodude', 'Graveler', 'Golem', 'Ponyta', 'Rapidash', 'Slowpoke', 'Slowbro', 'Magnemite', 'Magneton', "Farfetch'd", 'Doduo', 'Dodrio', 'Seel', 'Dewgong', 'Grimer', 'Muk', 'Shellder', 'Cloyster', 'Gastly', 'Haunter', 'Gengar', 'Onix', 'Drowzee', 'Hypno', 'Krabby', 'Kingler', 'Voltorb', 'Electrode', 'Exeggcute', 'Exeggutor', 'Cubone', 'Marowak', 'Hitmonlee', 'Hitmonchan', 'Lickitung', 'Koffing', 'Weezing', 'Rhyhorn', 'Rhydon', 'Chansey', 'Tangela', 'Kangaskhan', 'Horsea', 'Seadra', 'Goldeen', 'Seaking', 'Staryu', 'Starmie', 'Mr. Mime', 'Scyther', 'Jynx', 'Electabuzz', 'Magmar', 'Pinsir', 'Tauros', 'Magikarp', 'Gyarados', 'Lapras', 'Ditto', 'Eevee', 'Vaporeon', 'Jolteon', 'Flareon', 'Porygon', 'Omanyte', 'Omastar', 'Kabuto', 'Kabutops', 'Aerodactyl', 'Snorlax', 'Articuno', 'Zapdos', 'Moltres', 'Dratini', 'Dragonair', 'Dragonite', 'Mewtwo', 'Mew']
+		self.pokemon_path = 'modules'+os.sep+'pokemon'+os.sep
+		self.pokemon_file = 'pokemon_list.json'
+		self.corrupt_file = 'corrupt_list.json'
+		self.corrupted = None
 		
 		random.seed()
 	
 	def pokemon(self, event, command):
-		pokemon_num = random.randint(0, len(self.pokemon_list)-1)
-		pokemon_level = str(random.randint(1, 100))
+		if self.corrupted:
+			pokemon_list = json.loads(open(self.pokemon_path+self.corrupt_file).read())
+			pokemon_num = random.randint(0, len(pokemon_list)-1)
+			pokemon_level = str(random.randint(1, 100000))
+		
+		else:
+			pokemon_list = json.loads(open(self.pokemon_path+self.pokemon_file).read())
+			pokemon_num = random.randint(0, len(pokemon_list)-1)
+			pokemon_level = str(random.randint(1, 100))
 		
 		#response = '*** pok' + b'\xc3\xa9'.decode() + 'mon: '
 		response = event.source.split('!')[0]
 		response += ' f/b/binds a lvl ' + pokemon_level + ' '
-		response += self.pokemon_list[pokemon_num] + ' (' + pad(str(pokemon_num)) + ')'
+		response += pokemon_list[pokemon_num] + ' (' + pad(str(pokemon_num)) + ')'
 		self.bot.irc.servers[event.server].privmsg(event.from_to, response)
-		# Nick finds a lvl72 MissingNO (007)
+		#>>> Nick finds a lvl72 MissingNO (000)
+		if pokemon_num == 0:
+			self.corrupted = True
+	
+	def reset_pokemon(self, event, command):
+		if not self.corrupted:
+			return
+		
+		self.corrupted = None
+		self.bot.irc.servers[event.server].action(event.from_to, 'takes out the cartridge, blows on it, and puts it back in')
 
 def pad(input, pad_num=3, pad_char='0'):
 	output = ''

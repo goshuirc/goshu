@@ -7,31 +7,92 @@
 # ----------------------------------------------------------------------------
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 
-from gbot.modules import Module
+from gbot.modules import Module, Command
 from gbot.libs.girclib import escape, unescape
+from gbot.libs.helper import filename_escape
 import urllib.request, urllib.parse, urllib.error
 import json
+import sys
+import os
 
 class danbooru(Module):
     name = 'danbooru'
     
     def __init__(self):
         self.events = {
-            'commands' : {
-                'danbooru' : [self.booru, '<tags> --- search danbooru result for given tags', 0],
-                'oreno' : [self.booru, '<tags> --- search oreimo result for given tags', 0],
+            'in' : {
+                'pubmsg' : [(0, self.combined_call)],
+                'privmsg' : [(0, self.combined_call)],
             },
         }
+        self.booru_path = 'modules'+os.sep+'danbooru'
     
-    def booru(self, event, command):
-        if command.command == 'danbooru':
-            url = 'http://danbooru.donmai.us'
-            response = '*** Danbooru: '
-        elif command.command == 'oreno':
-            url = 'http://oreno.imouto.org'
-            response = '*** OreNo: '
-        response += self.retrieve_url(url, command.arguments)
+    
+    def commands(self):
+        output = Module.commands(self)
+        for (dirpath, dirs, files) in os.walk(self.booru_path):
+            for file in files:
+                try:
+                    (name, ext) = os.path.splitext(file)
+                    if ext == os.extsep + 'json':
+                        info = json.loads(open(dirpath+os.sep+file).read())
+                except ValueError:
+                    continue
+                
+                if 'description' in info:
+                    command_description = info['description']
+                else:
+                    command_description = ''
+                if 'permission' in info:
+                    command_permission = info['permission']
+                else:
+                    command_permission = 0
+                
+                output[name] = [self.combined, command_description, command_permission]
+        return output
+    
+    
+    def combined_call(self, event):
+        if event.arguments[0].split(self.bot.settings._store['prefix'])[0] == '':
+            try:
+                command_name = event.arguments[0][1:].split()[0].lower()
+            except IndexError:
+                return
+            try:
+                command_args = event.arguments[0][1:].split(' ', 1)[1]
+            except IndexError:
+                command_args = ''
+            self.combined(event, Command(command_name, command_args))
+    
+    def combined(self, event, command):
+        module_path = None
+        for (dirpath, dirs, files) in os.walk(self.booru_path):
+            for file in files:
+                if not dirpath in sys.path:
+                    sys.path.insert(0, dirpath)
+                (name, ext) = os.path.splitext(file)
+                if ext == os.extsep + 'json':
+                    if name == filename_escape(command.command):
+                        module_path = dirpath
+        if not module_path:
+            return
+        
+        try:
+            booru = json.loads(open(module_path+os.sep+filename_escape(command.command)+os.extsep+'json').read())
+        except ValueError:
+            return
+        
+        if 'display_name' in booru:
+            response = booru['display_name']
+        else:
+            response = '*** BooruNameHere: '
+        
+        if 'url' not in booru:
+            return
+        response += self.retrieve_url(booru['url'], command.arguments)
+        
         self.bot.irc.servers[event.server].privmsg(event.from_to, response)
+    
     
     def retrieve_url(self, url, tags):
         encoded_tags = urllib.parse.urlencode({

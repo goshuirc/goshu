@@ -28,12 +28,15 @@ class responses(Module):
         self.responses_path = 'modules'+os.sep+'responses'
         random.seed()
     
+    
     def commands(self):
         output = Module.commands(self)
         for (dirpath, dirs, files) in os.walk(self.responses_path):
             for file in files:
                 try:
-                    info = json.loads(open(dirpath+os.sep+file).read())
+                    (name, ext) = os.path.splitext(file)
+                    if ext == os.extsep + 'json':
+                        info = json.loads(open(dirpath+os.sep+file).read())
                 except ValueError:
                     continue
                 
@@ -46,7 +49,7 @@ class responses(Module):
                 else:
                     command_permission = 0
                 
-                output[file] = [self.combined, command_description, command_permission]
+                output[name] = [self.combined, command_description, command_permission]
         return output
 
         # /s means source, the nick of whoever did the command
@@ -56,7 +59,10 @@ class responses(Module):
     
     def combined_call(self, event):
         if event.arguments[0].split(self.bot.settings._store['prefix'])[0] == '':
-            command_name = event.arguments[0][1:].split()[0].lower()
+            try:
+                command_name = event.arguments[0][1:].split()[0].lower()
+            except IndexError:
+                return
             try:
                 command_args = event.arguments[0][1:].split(' ', 1)[1]
             except IndexError:
@@ -69,13 +75,15 @@ class responses(Module):
             for file in files:
                 if not dirpath in sys.path:
                     sys.path.insert(0, dirpath)
-                if file == filename_escape(command.command):
-                    module_path = dirpath
+                (name, ext) = os.path.splitext(file)
+                if ext == os.extsep + 'json':
+                    if name == filename_escape(command.command):
+                        module_path = dirpath
         if not module_path:
             return
         
         try:
-            responses = json.loads(open(module_path+os.sep+filename_escape(command.command)).read())
+            responses = json.loads(open(module_path+os.sep+filename_escape(command.command)+os.extsep+'json').read())
         except ValueError:
             return
         
