@@ -19,37 +19,41 @@ class pokemon(Module):
 	def __init__(self):
 		self.events = {
 			'commands' : {
-				'pokemon' : [self.pokemon, '--- get a random pokemon', 0],
+				'pokemon' : [self.get_pokemon, '--- get a random pokemon', 0],
+				'poketeam' : [self.get_pokemon, '--- get a random pokemon team', 0],
 				'pokerst' : [self.reset_pokemon, '--- reset corrupted pokemon save', 1],
 			},
 		}
 		
-		self.pokemon_path = 'modules'+os.sep+'pokemon'+os.sep
-		self.pokemon_file = 'pokemon_list.json'
-		self.corrupt_file = 'corrupt_list.json'
+		self.path = 'modules'+os.sep+'pokemon'+os.sep
+		self.files = ['pokemon_list.json', 'corrupt_list.json']
 		self.corrupted = None
 		
 		random.seed()
-	
-	def pokemon(self, event, command):
-		if self.corrupted:
-			pokemon_list = json.loads(open(self.pokemon_path+self.corrupt_file).read())
-			pokemon_num = random.randint(0, len(pokemon_list)-1)
-			pokemon_level = str(random.randint(1, 100000))
-		
+
+	def get_pokemon(self, event, command):
+		team = []
+		if command.command == 'pokemon' or self.corrupted:
+			team.append(Monster(self.corrupted, self.path, self.files, True))
 		else:
-			pokemon_list = json.loads(open(self.pokemon_path+self.pokemon_file).read())
-			pokemon_num = random.randint(0, len(pokemon_list)-1)
-			pokemon_level = str(random.randint(1, 100))
+			while len(team) < 6:
+				mon = Monster(self.corrupted, self.path, self.files, True)
+				if mon.number != 0:
+					team.append(mon)
+
+		response = event.source.split('!')[0] + ' finds '
+		if len(team) <= 1:
+			response += 'a '
+
+		for team_member in team:
+			response += 'lvl ' + str(team_member.level) + ' ' + team_member.name + ', '# + ' (' + pad(str(team_member.number)) + '), '
+		response = response[:-2]
+
+		for team_member in team:
+			if team_member.number == 0:
+				self.corrupted = True
 		
-		#response = '*** pok' + b'\xc3\xa9'.decode() + 'mon: '
-		response = event.source.split('!')[0]
-		response += ' f/b/binds a lvl ' + pokemon_level + ' '
-		response += pokemon_list[pokemon_num] + ' (' + pad(str(pokemon_num)) + ')'
 		self.bot.irc.servers[event.server].privmsg(event.from_to, response)
-		#>>> Nick finds a lvl72 MissingNO (000)
-		if pokemon_num == 0:
-			self.corrupted = True
 	
 	def reset_pokemon(self, event, command):
 		if not self.corrupted:
@@ -57,6 +61,28 @@ class pokemon(Module):
 		
 		self.corrupted = None
 		self.bot.irc.servers[event.server].action(event.from_to, 'takes out the cartridge, blows on it, and puts it back in')
+
+class Monster:
+	def __init__(self, corrupted=False, path='', files=['',''], generate=False):
+		self.number = 0
+		self.name = ''
+		self.level = 0
+
+		if generate:
+			self.generate(corrupted, path, files)
+
+	def generate(self, corrupted=False, path='', files=['','']):
+		if corrupted:
+			poke_list = json.loads(open(path+files[1]).read())
+			self.number = random.randint(0, len(poke_list)-1)
+			self.name = poke_list[self.number]
+			self.level = str(random.randint(1, 100000))
+
+		else:
+			poke_list = json.loads(open(path+files[0]).read())
+			self.number = random.randint(0, len(poke_list)-1)
+			self.name = poke_list[self.number]
+			self.level = str(random.randint(1, 100))
 
 def pad(input, pad_num=3, pad_char='0'):
 	output = ''

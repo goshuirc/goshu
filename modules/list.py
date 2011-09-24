@@ -44,9 +44,12 @@ class list(Module):
         
         else:
             # list commands
-            output = '*** Commands: '
+            output = ['*** Commands: ']
             for bot_command in bot_commands:
-                output += bot_command[0] + ', '
-            output = output[:-2] # remove last ', '
-            
-            self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], output)
+                output[0] += bot_command[0] + ', '
+            output[0] = output[0][:-2] # remove last ', '
+
+            output.append('Note: to display information on a specific command, use /ilist <command>/i. eg: /ilist 8ball');
+
+            for line in output:
+            	self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], line)

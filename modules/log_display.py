@@ -103,6 +103,18 @@ class a_log_display(Module):
             output += '/c14>/c '
             output += event.arguments[0]
         
+        elif event.type in ['action', ]:
+            output += '/c3-/c'
+            if event.direction == 'in':
+                output += event.target.split('!')[0]
+                targets.append(event.target.split('!')[0])
+            else:
+                output += event.target
+                targets.append(event.target)
+            output += '/c3-/c  /b* '
+            output += event.source.split('!')[0] + '/b '
+            output += event.arguments[0]
+        
         elif event.type in ['umode', ]:
             output += 'Mode change '
             output += '/c14[/c'
@@ -123,6 +135,56 @@ class a_log_display(Module):
             output += '/c14]/c'
             output += ' by /b'
             output += event.source.split('!')[0]
+        
+        elif event.type in ['kick', ]:
+            targets.append(event.target)
+            output += '/c6-/c!/c6-/c10 '
+            output += event.arguments[0]
+            output += '/c was kicked from '
+            output += event.target
+            output += ' by '
+            output += event.source.split('!')[0]
+            output += ' /c14[/c'
+            output += event.arguments[1]
+            output += '/c14]/c'
+        
+        elif event.type in ['join', ]:
+            targets.append(event.target)
+            output += '/c6-/c!/c6-/c10 '
+            output += event.source.split('!')[0]
+            output += ' /c14[/c10'
+            output += event.source.split('!')[1]
+            output += '/c14]/c '
+            output += 'has joined /b'
+            output += event.target
+        
+        elif event.type in ['nick', ]:
+            output += '/c6-/c!/c6-/c10 '
+            output += event.source.split('!')[0]
+            output += '/c is now known as /c10'
+            output += str(event.target)
+        
+        elif event.type in ['currenttopic', ]:
+            targets.append(event.arguments[0])
+            output += '/c6-/c!/c6-/c10 Topic for /c10'
+            output += event.arguments[0]
+            output += '/c: '
+            output += event.arguments[1]
+        
+        elif event.type in ['quit', ]:
+            output += '/c6-/c!/c6-/c10 '
+            output += event.source.split('!')[0]
+            output += ' /c14[/c'
+            output += event.source.split('!')[1]
+            output += '/c14]/c has quit /c14[/c'
+            output += event.arguments[0]
+            output += '/c14]/c'
+        
+        elif event.type in ['ctcp', ] and event.arguments[0] == 'ACTION':
+            return
+        
+        elif event.type in ['ping', 'pong' ]:
+            return
             
         else:
             targets.append('tofix')
@@ -254,16 +316,16 @@ fore_colors = {
 }
 bold_fore_colors = {
     '0' : Fore.WHITE+Style.BRIGHT,
-    '1' : Fore.BLACK+Style.BRIGHT,
-    '2' : Fore.BLUE+Style.BRIGHT,
-    '3' : Fore.GREEN+Style.BRIGHT,
+    '1' : Fore.BLACK+Style.DIM,
+    '2' : Fore.BLUE,
+    '3' : Fore.GREEN,
     '4' : Fore.RED+Style.BRIGHT,
-    '5' : Fore.RED+Style.BRIGHT,
-    '6' : Fore.MAGENTA+Style.BRIGHT,
-    '7' : Fore.YELLOW+Style.BRIGHT,
+    '5' : Fore.RED,
+    '6' : Fore.MAGENTA,
+    '7' : Fore.YELLOW,
     '8' : Fore.YELLOW+Style.BRIGHT,
     '9' : Fore.GREEN+Style.BRIGHT,
-    '10' : Fore.CYAN+Style.BRIGHT,
+    '10' : Fore.CYAN,
     '11' : Fore.CYAN+Style.BRIGHT,
     '12' : Fore.BLUE+Style.BRIGHT,
     '13' : Fore.MAGENTA+Style.BRIGHT,

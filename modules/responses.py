@@ -109,7 +109,7 @@ class responses(Module):
             response =  responses[num + 'pre'] + response
         if num + 'post' in responses:
             response += responses[num + 'post']
-        output.append(responses[num][response_num])
+        output.append(response)
         
         for outline in output:
             outline = outline.replace('/S', source.upper()).replace('/T', target.upper())

@@ -428,6 +428,8 @@ Returns:
 Safe local filename string
 
 """
+	if not unsafe:
+		return ''
 	safe = ''
 	for character in unsafe:
 		if character in valid_chars:

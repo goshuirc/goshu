@@ -42,11 +42,11 @@ class gelbooru(Module):
         except:
             return 'Connection Error'
         
-        results_http = search_results.read().decode('utf-8')
-        
-        results_json = json.loads(results_http)
-        
         try:
+            results_http = search_results.read().decode('utf-8')
+            
+            results_json = json.loads(results_http)
+            
             return escape(url + '/index.php?page=post&s=view&id=' + str(results_json[0]['id']))
         except:
             return 'No Results'
