@@ -11,7 +11,6 @@ import sys
 
 class Module:
 	"""Module to add commands/functionality to the bot."""
-	...
 	
 	def commands(self):
 		command_list = {}
@@ -61,7 +60,7 @@ class Modules:
 	def append(self, module):
 		if module not in self.modules:
 			self.modules[module.name] = module
-			for direction in ['in', 'out', 'commands', 'all']:
+			for direction in ['in', 'out', 'commands', '*']:
 				if direction not in module.events:
 					module.events[direction] = {}
 			module.bot = self.bot
@@ -72,47 +71,45 @@ class Modules:
 	def handle(self, event):
 		called = []
 		for module in sorted(self.modules):
-			if event.type in self.modules[module].events[event.direction]:
-				for h in self.modules[module].events[event.direction][event.type]:
-					if h[1] not in called:
-						called.append(h[1])
-						h[1](event)
-			if 'all' in self.modules[module].events[event.direction]:
-				for h in self.modules[module].events[event.direction]['all']:
-					if h[1] not in called:
-						called.append(h[1])
-						h[1](event)
-			if event.type in self.modules[module].events['all']:
-				for h in self.modules[module].events['all'][event.type]:
-					if h[1] not in called:
-						called.append(h[1])
-						h[1](event)
-			if 'all' in self.modules[module].events['all']:
-				for h in self.modules[module].events['all']['all']:
-					if h[1] not in called:
-						called.append(h[1])
-						h[1](event)
+			for search_direction in ['*', event.direction]:
+				for search_type in ['*', event.type]:
+					if search_type in self.modules[module].events[search_direction]:
+						for h in self.modules[module].events[search_direction][search_type]:
+							if h[1] not in called:
+								called.append(h[1])
+								h[1](event)
 		if event.type == 'privmsg' or event.type == 'pubmsg':
 			self.handle_command(event)
 	
 	def handle_command(self, event):
-		if event.arguments[0].split(self.bot.settings._store['prefix'])[0] == '':
-			if len(event.arguments[0].split(self.bot.settings._store['prefix'])[1].strip()) < 1:
+		if self.bot.settings.store['prefix'] in event.arguments[0] and event.arguments[0].split(self.bot.settings.store['prefix'])[0] == '':
+			if len(event.arguments[0].split(self.bot.settings.store['prefix'])[1].strip()) < 1:
 				return # empty
-			elif len(event.arguments[0].split(self.bot.settings._store['prefix'])[1].split()[0]) < 1:
+			elif len(event.arguments[0].split(self.bot.settings.store['prefix'])[1].split()[0]) < 1:
 				return # no command
 			command_name = event.arguments[0][1:].split()[0].lower()
 			try:
 				command_args = event.arguments[0][1:].split(' ', 1)[1]
 			except IndexError:
 				command_args = ''
+			
+			useraccount = self.bot.accounts.account(event.source, event.server)
+			if useraccount:
+				userlevel = self.bot.accounts.access_level(useraccount)
+			else:
+				userlevel = 0
+			
 			called = []
 			for module in sorted(self.modules):
 				if 'commands' in self.modules[module].events:
-					try:
-						self.modules[module].events['commands'][command_name][0](event, Command(command_name, command_args))
-					except KeyError:
-						...
+					for search_command in ['*', command_name]:
+						if search_command in self.modules[module].events['commands']:
+							if userlevel >= self.modules[module].events['commands'][search_command][2]:
+								if self.modules[module].events['commands'][search_command][0] not in called:
+									called.append(self.modules[module].events['commands'][search_command][0])
+									self.modules[module].events['commands'][search_command][0](event, Command(command_name, command_args))
+							else:
+								print('no privs mang')
 
 class Command:
 	"""Command from a client."""

@@ -17,6 +17,7 @@ class Bot:
 	def __init__(self):
 		self.DEBUG = DEBUG
 		
+		self.accounts = info.Accounts(self)
 		self.settings = info.Settings(self)
 		self.info = info.Info(self)
 		self.irc = irc.IRC(self)

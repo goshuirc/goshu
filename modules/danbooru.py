@@ -7,7 +7,7 @@
 # ----------------------------------------------------------------------------
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 
-from gbot.modules import Module, Command
+from gbot.modules import Module
 from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import filename_escape
 import urllib.request, urllib.parse, urllib.error
@@ -20,9 +20,8 @@ class danbooru(Module):
     
     def __init__(self):
         self.events = {
-            'in' : {
-                'pubmsg' : [(0, self.combined_call)],
-                'privmsg' : [(0, self.combined_call)],
+            'commands' : {
+                '*' : [self.combined, '--- handle danbooru', 0],
             },
         }
         self.booru_path = 'modules'+os.sep+'danbooru'
@@ -51,18 +50,6 @@ class danbooru(Module):
                 output[name] = [self.combined, command_description, command_permission]
         return output
     
-    
-    def combined_call(self, event):
-        if event.arguments[0].split(self.bot.settings._store['prefix'])[0] == '':
-            try:
-                command_name = event.arguments[0][1:].split()[0].lower()
-            except IndexError:
-                return
-            try:
-                command_args = event.arguments[0][1:].split(' ', 1)[1]
-            except IndexError:
-                command_args = ''
-            self.combined(event, Command(command_name, command_args))
     
     def combined(self, event, command):
         module_path = None

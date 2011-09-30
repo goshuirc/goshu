@@ -19,13 +19,13 @@ class Manager():
 	def __init__(self, bot, path=None):
 		self.bot = bot
 		self.path = path
-		self._store = {}
+		self.store = {}
 	
-	def ret(paths, store=None):
+	def ret(self, paths, store=None):
 		if store:
 			value = store
 		else:
-			value = self._store
+			value = self.store
 		paths = paths.split('.')
 		for path in paths:
 			value = value[path]
@@ -51,19 +51,19 @@ class Manager():
 		if path:
 			file = open(path, 'r')
 			try:
-				self._store = json.loads(file.read())
+				self.store = json.loads(file.read())
 			except ValueError:
-				self._store = {}
+				self.store = {}
 			file.close()
 		elif self.path:
 			file = open(self.path, 'r')
 			try:
-				self._store = json.loads(file.read())
+				self.store = json.loads(file.read())
 			except ValueError:
-				self._store = {}
+				self.store = {}
 			file.close()
 		else:
-			self._store = {}
+			self.store = {}
 			if self.bot.DEBUG:
 				print(self.name+'.load : no path to load from')
 	
@@ -71,11 +71,11 @@ class Manager():
 		"""Save `self.store` in file at `path`, or `self.path`."""
 		if path:
 			file = open(path, 'w')
-			file.write(json.dumps(self._store, sort_keys=True, indent=4))
+			file.write(json.dumps(self.store, sort_keys=True, indent=4))
 			file.close()
 		elif self.path:
 			file = open(self.path, 'w')
-			file.write(json.dumps(self._store, sort_keys=True, indent=4))
+			file.write(json.dumps(self.store, sort_keys=True, indent=4))
 			file.close()
 		else:
 			if self.bot.DEBUG:
@@ -87,6 +87,8 @@ class Manager():
 	
 	def _encrypt(self, password):
 		"""Returns hashed password."""
+		if type(password) == str:
+			password = password.encode()
 		return hashlib.sha512(password).hexdigest()
 
 
@@ -97,7 +99,7 @@ class Info(Manager):
 	
 	def update(self):
 		"""Make sure servers are correct, etc."""
-		old_store = self._store
+		old_store = self.store
 		new_store = {}
 		
 		if len(old_store) < 1:
@@ -119,7 +121,7 @@ class Info(Manager):
 				if self._update_server(old_store, server):
 					new_store[server] = old_store[server]
 		
-		self._store = new_store
+		self.store = new_store
 	
 	def _update_server(self, store, server):
 		if server:
@@ -205,14 +207,14 @@ class Settings(Manager):
 	
 	def update(self):
 		"""Update the current data file."""
-		old_store = self._store
+		old_store = self.store
 		new_store = {}
 		
 		new_store['nick'] = self._update_attribute('nick', old_store)
 		new_store['passhash'] = self._update_attribute('passhash', old_store, password=True, display_name='password')
 		new_store['prefix'] = self._update_attribute('prefix', old_store, display_name='bot command prefix')
 		
-		self._store = new_store
+		self.store = new_store
 	
 	def _update_attribute(self, name, store, password=False, display_name=None):
 		"""Return updated single piece of data."""
@@ -246,3 +248,86 @@ class Settings(Manager):
 				while data == '':
 					data = helper.new_input(' %s: ' % display_name, newline=False, clearline=True).strip()
 				return data.split()[0]
+
+
+class Accounts(Manager):
+	"""Manages Goshubot Account Info."""
+	
+	name = 'Accounts'
+	
+	def add_account(self, name, password):
+		self.store[name] = {}
+		self.store[name]['password'] = self._encrypt(password)
+		
+		self.store[name]['modules'] = {}
+		
+		self.save()
+	
+	def remove_account(self, name):
+		self.load()
+		if name in self.store:
+			del self.store[name]
+			self.save()
+			return True
+		else:
+			self.save()
+			return False
+	
+	
+	def account_exists(self, name):
+		self.load()
+		if name in self.store:
+			return True
+		else:
+			return False
+	
+	
+	def is_password(self, name, password):
+		self.load()
+		if self.account_exists(name):
+			if self.store[name]['password'] == self._encrypt(password):
+				return True
+		return False
+	
+	def set_password(self, name, password):
+		self.load()
+		if self.account_exists(name):
+			self.store[name]['password'] = self._encrypt(password)
+			self.save()
+	
+	
+	def login(self, name, password, server, userstring):
+		self.load()
+		if self.is_password(name, password):
+			self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo'] = {}
+			self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo']['name'] = name
+			self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo']['userhost'] = userstring.split('!')[1]
+			return True
+		else:
+			return False
+	
+	def account(self, userstring, server):
+		self.load()
+		if 'accountinfo' in self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]:
+			if 'userhost' in self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo']:
+				if self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo']['userhost'] == userstring.split('!')[1]:
+					return self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo']['name']
+		return None
+	
+	def set_access_level(self, name, level=0):
+		self.load()
+		if self.account_exists(name):
+			self.store[name]['level'] = level
+			if level == 0:
+				del self.store[name]['level']
+			self.save()
+			return True
+		return False
+	
+	def access_level(self, name):
+		self.load()
+		level = 0
+		if self.account_exists(name):
+			if 'level' in self.store[name]:
+				level = self.store[name]['level']
+		return level

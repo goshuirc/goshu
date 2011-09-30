@@ -15,6 +15,7 @@
 *__pycache__
 
 ## goshu3
+accountinfo.json
 info.json
 settings.json
 logs/*

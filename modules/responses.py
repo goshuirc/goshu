@@ -7,8 +7,7 @@
 # ----------------------------------------------------------------------------
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 
-from gbot.modules import Module, Command
-from gbot.libs.girclib import escape, unescape
+from gbot.modules import Module
 from gbot.libs.helper import filename_escape
 import random
 import os
@@ -20,9 +19,8 @@ class responses(Module):
     
     def __init__(self):
         self.events = {
-            'in' : {
-                'pubmsg' : [(0, self.combined_call)],
-                'privmsg' : [(0, self.combined_call)],
+            'commands' : {
+                '*' : [self.combined, '--- handle responses', 0],
             },
         }
         self.responses_path = 'modules'+os.sep+'responses'
@@ -57,18 +55,6 @@ class responses(Module):
         # note: /S and /T represent allcaps versions of /s and /t
         # /m at the start means: send this line as a /me rather than a /msg
     
-    def combined_call(self, event):
-        if event.arguments[0].split(self.bot.settings._store['prefix'])[0] == '':
-            try:
-                command_name = event.arguments[0][1:].split()[0].lower()
-            except IndexError:
-                return
-            try:
-                command_args = event.arguments[0][1:].split(' ', 1)[1]
-            except IndexError:
-                command_args = ''
-            self.combined(event, Command(command_name, command_args))
-    
     def combined(self, event, command):
         module_path = None
         for (dirpath, dirs, files) in os.walk(self.responses_path):
@@ -93,29 +79,44 @@ class responses(Module):
             num = '1'
         else:
             target = command.arguments.strip()
-            if '2' in responses:
-                num = '2'
-            else:
-                num = '1'
+            num = '2'
+        
+        # message = initial, 1/2pre, line(s), 1/2post, outro
+        
+        output = []
         
         if 'initial' in responses:
-            output = [responses['initial']]
-        else:
-            output = []
+            if type(responses['initial']) == list:
+                for line in responses['initial']:
+                    output.append(line)
+            else:
+                output.append(responses['initial'])
+        
+        pre = ''
+        if num + 'pre' in responses:
+            pre = responses[num + 'pre']
+        
+        post = ''
+        if num + 'post' in responses:
+            post = responses[num + 'post']
+        
+        if num == '2':
+            if num not in responses:
+                num = '1'
         
         response_num = random.randint(1, len(responses[num])) - 1
         response = responses[num][response_num]
-        if num + 'pre' in responses:
-            response =  responses[num + 'pre'] + response
-        if num + 'post' in responses:
-            response += responses[num + 'post']
-        output.append(response)
         
-        for outline in output:
-            outline = outline.replace('/S', source.upper()).replace('/T', target.upper())
-            outline = outline.replace('/s', source).replace('/t', target)
+        if type(response) == str:
+            response = [response]
+        for line in response:
+            output.append(pre + line + post)
+        
+        for line in output:
+            line = line.replace('/S', source.upper()).replace('/T', target.upper())
+            line = line.replace('/s', source).replace('/t', target)
             
-            if outline[0:2] == '/m':
-                self.bot.irc.servers[event.server].action(event.from_to, outline[2:].strip())
+            if line[0:2] == '/m':
+                self.bot.irc.servers[event.server].action(event.from_to, line[2:].strip())
             else:
-                self.bot.irc.servers[event.server].privmsg(event.from_to, outline)
+                self.bot.irc.servers[event.server].privmsg(event.from_to, line)

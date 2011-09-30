@@ -8,7 +8,6 @@
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 
 from gbot.modules import Module
-import json
 
 class list(Module):
     name = "list"
@@ -26,9 +25,15 @@ class list(Module):
         for module in self.bot.modules.modules:
             module_commands = self.bot.modules.modules[module].commands()
             for command_name in module_commands:
+                if command_name == '*':
+                    continue
                 command_description = module_commands[command_name][1]
                 command_permission = module_commands[command_name][2]
-                if command_permission <= 0:
+                if len(module_commands[command_name]) >= 4:
+                    command_view_permission = module_commands[command_name][3]
+                else:
+                    command_view_permission = command_permission
+                if self.bot.accounts.access_level(event) >= command_view_permission:
                     bot_commands.append([command_name, command_description, command_permission])
         bot_commands = sorted(bot_commands)
         
@@ -36,11 +41,17 @@ class list(Module):
             # single command info
             for bot_command in bot_commands:
                 if bot_command[0] == command.arguments.split()[0]:
-                    output = '*** Command:  '
-                    output += bot_command[0] + ' '
-                    output += bot_command[1]
-                    
-                    self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], output)
+                    command_permission = bot_command[2]
+                    if len(bot_command) >= 4:
+                        command_view_permission = bot_command[3]
+                    else:
+                        command_view_permission = command_permission
+                    if self.bot.accounts.access_level(event) >= command_view_permission:
+                        output = '*** Command:  '
+                        output += bot_command[0] + ' '
+                        output += bot_command[1]
+                        
+                        self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], output)
         
         else:
             # list commands
@@ -52,4 +63,4 @@ class list(Module):
             output.append('Note: to display information on a specific command, use /ilist <command>/i. eg: /ilist 8ball');
 
             for line in output:
-            	self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], line)
+                self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], line)

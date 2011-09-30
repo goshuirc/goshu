@@ -1,8 +1,9 @@
 {
     "description": "<question> --- ask the magic 8ball", 
     "1post": ", /s", 
+    "2post": ", /s", 
     "1": [
-    	"As I see it, It is certain", 
+    	"As I see it, it is certain", 
         "It is decidedly so", 
         "Most likely", 
         "Outlook good", 

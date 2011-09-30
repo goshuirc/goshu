@@ -21,7 +21,7 @@ class pokemon(Module):
 			'commands' : {
 				'pokemon' : [self.get_pokemon, '--- get a random pokemon', 0],
 				'poketeam' : [self.get_pokemon, '--- get a random pokemon team', 0],
-				'pokerst' : [self.reset_pokemon, '--- reset corrupted pokemon save', 1],
+				'pokerst' : [self.reset_pokemon, '--- reset corrupted pokemon save', 0],
 			},
 		}
 		
