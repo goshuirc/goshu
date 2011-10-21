@@ -98,25 +98,7 @@ class apiquery(Module):
                     response += escape(str(eval('results' + term[1])))
                 except IndexError:
                     response += '[apiquery term invalid, IndexError]'
+                except KeyError:
+                    response += '[apiquery term invalid, KeyError]'
         
         return response
-    
-    
-    def search(self, event, command):
-        url = 'http://search.twitter.com/search.json?'
-        url += urllib.parse.urlencode({b'q' : unescape(command.arguments)})
-        
-        try:
-            search_results = urllib.request.urlopen(url)
-            try:
-                json_result = json.loads(search_results.read().decode('utf-8'))
-                result = escape(html_unescape(json_result['results'][0]['from_user']))
-                result += ' --- '
-                result += escape(html_unescape(json_result['results'][0]['text']))
-            except:
-                result = 'No Results'
-        except urllib.error.URLError:
-            result = 'Connection Error'
-        
-        response = '*** Twitter: ' + result
-        self.bot.irc.servers[event.server].privmsg(event.from_to, response)
