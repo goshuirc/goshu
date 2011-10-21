@@ -150,9 +150,9 @@ class a_log_display(Module):
         
         elif event.type in ['join', ]:
             targets.append(event.target)
-            output += '/c6-/c!/c6-/c10 '
+            output += '/c6-/c!/c6-/b/c10 '
             output += event.source.split('!')[0]
-            output += ' /c14[/c10'
+            output += '/b /c14[/c10'
             output += event.source.split('!')[1]
             output += '/c14]/c '
             output += 'has joined /b'
@@ -276,8 +276,8 @@ def display_unescape(input):
                         output += back_colors[str(int(back))]
                 
                 else:
-                    output += Fore.RESET
-                    output += Back.RESET
+                    output += Fore.RESET+Style.NORMAL
+                    output += Back.RESET+Style.NORMAL
             
             elif len(input) > 1 and input[1] in ['b', 'i', 'u', 'r']:
                 input = input[2:]
@@ -297,35 +297,35 @@ def display_unescape(input):
                 
 
 fore_colors = {
-    '0' : Fore.WHITE+Style.BRIGHT,
-    '1' : Fore.BLACK,
-    '2' : Fore.BLUE,
-    '3' : Fore.GREEN,
+    '0' : Fore.WHITE+Style.NORMAL,
+    '1' : Fore.BLACK+Style.NORMAL,
+    '2' : Fore.BLUE+Style.NORMAL,
+    '3' : Fore.GREEN+Style.NORMAL,
     '4' : Fore.RED+Style.BRIGHT,
-    '5' : Fore.RED,
-    '6' : Fore.MAGENTA,
-    '7' : Fore.YELLOW,
+    '5' : Fore.RED+Style.NORMAL,
+    '6' : Fore.MAGENTA+Style.NORMAL,
+    '7' : Fore.YELLOW+Style.NORMAL,
     '8' : Fore.YELLOW+Style.BRIGHT,
     '9' : Fore.GREEN+Style.BRIGHT,
-    '10' : Fore.CYAN,
+    '10' : Fore.CYAN+Style.NORMAL,
     '11' : Fore.CYAN+Style.BRIGHT,
     '12' : Fore.BLUE+Style.BRIGHT,
     '13' : Fore.MAGENTA+Style.BRIGHT,
     '14' : Fore.BLACK+Style.BRIGHT,
-    '15' : Fore.WHITE,
+    '15' : Fore.WHITE+Style.NORMAL,
 }
 bold_fore_colors = {
     '0' : Fore.WHITE+Style.BRIGHT,
     '1' : Fore.BLACK+Style.DIM,
-    '2' : Fore.BLUE,
-    '3' : Fore.GREEN,
+    '2' : Fore.BLUE+Style.NORMAL,
+    '3' : Fore.GREEN+Style.NORMAL,
     '4' : Fore.RED+Style.BRIGHT,
-    '5' : Fore.RED,
-    '6' : Fore.MAGENTA,
-    '7' : Fore.YELLOW,
+    '5' : Fore.RED+Style.NORMAL,
+    '6' : Fore.MAGENTA+Style.NORMAL,
+    '7' : Fore.YELLOW+Style.NORMAL,
     '8' : Fore.YELLOW+Style.BRIGHT,
     '9' : Fore.GREEN+Style.BRIGHT,
-    '10' : Fore.CYAN,
+    '10' : Fore.CYAN+Style.NORMAL,
     '11' : Fore.CYAN+Style.BRIGHT,
     '12' : Fore.BLUE+Style.BRIGHT,
     '13' : Fore.MAGENTA+Style.BRIGHT,

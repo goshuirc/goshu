@@ -9,6 +9,7 @@
 
 from gbot.modules import Module
 from gbot.libs.girclib import escape, unescape
+from gbot.libs.helper import html_unescape
 import urllib.request, urllib.parse, urllib.error
 
 class link(Module):
@@ -73,15 +74,3 @@ def gettitle(url):
         return title
     except:
         return ''
-
-_unescape_map = {
-    '&amp;' : '&',
-    '&lt;' : '<',
-    '&gt;' : '>',
-    '&quot;' : '"',
-    '&#39;' : "'",
-}
-def html_unescape(input):
-    for char in _unescape_map.keys():
-        input = input.replace(char, _unescape_map[char])
-    return input

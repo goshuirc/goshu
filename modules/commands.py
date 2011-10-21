@@ -15,8 +15,8 @@ class commands(Module):
 	def __init__(self):
 		self.events = {
 			'commands' : {
-				'msg' : [self.msg, '<user> <message> --- send a /msg', 3],
-				'me' : [self.me, '<user> <message> --- send a /me', 3],
+				'msg' : [self.msg, '<user> <message> --- send a /msg', 5],
+				'me' : [self.me, '<user> <message> --- send a /me', 5],
 			},
 		}
 	

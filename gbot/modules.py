@@ -63,6 +63,7 @@ class Modules:
 			for direction in ['in', 'out', 'commands', '*']:
 				if direction not in module.events:
 					module.events[direction] = {}
+			module.folder_path = 'modules' + os.sep + module.name
 			module.bot = self.bot
 			return True
 		else:
@@ -78,7 +79,7 @@ class Modules:
 							if h[1] not in called:
 								called.append(h[1])
 								h[1](event)
-		if event.type == 'privmsg' or event.type == 'pubmsg':
+		if event.type == 'privmsg' or event.type == 'pubmsg' and event.direction == 'in':
 			self.handle_command(event)
 	
 	def handle_command(self, event):

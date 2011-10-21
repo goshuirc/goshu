@@ -43,8 +43,9 @@ class dice(Module):
 			for line in oline:
 				if('d' in line):
 					if line.split('d')[0].isdigit():
-						if len(str(line.split('d')[1])) < 50:
-							idice.append(line.split('d'))
+						if len(str(line.split('d')[1])) > 6 or len(str(line.split('d')[0])) > 10:
+							raise Exception
+						idice.append(line.split('d'))
 					else:
 						idice.append(['1',line.split('d')[1]])
 				else:
@@ -63,6 +64,7 @@ class dice(Module):
 					i += 1
 			
 			# run and construct random numbers
+			i = 0
 			for split in idice:
 				dice = []
 			
@@ -76,6 +78,9 @@ class dice(Module):
 							result = random.randint(int(split[1]), -1)
 							dice.append(result)
 							out_dice_line += str(result)+', '
+						i += 1
+						if i > 10000:
+							raise exception
 				else:
 					dice += split
 			
@@ -96,7 +101,7 @@ class dice(Module):
 		
 		
 		except:
-			output_lines = ['DICE SYNTAX: '+self.bot.settings._store['prefix']+'d <dice>',
+			output_lines = ['DICE SYNTAX: '+self.bot.settings.store['prefix']+'d <dice>',
 							'    <dice> is a string like d12+4d8-13',
 							'    or any other permutation of rpg dice and numbers',]
 			

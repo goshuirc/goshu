@@ -315,7 +315,6 @@ class Accounts(Manager):
 		return None
 	
 	def set_access_level(self, name, level=0):
-		self.load()
 		if self.account_exists(name):
 			self.store[name]['level'] = level
 			if level == 0:

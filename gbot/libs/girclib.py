@@ -274,6 +274,8 @@ class Event:
 				self.from_to = str(source).split('!')[0]
 			else:
 				self.from_to = str(target).split('!')[0]
+		else:
+			self.from_to = str(target).split('!')[0]
 
 
 def escape(string):

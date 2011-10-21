@@ -9,8 +9,11 @@
 
 from gbot.modules import Module
 from gbot.libs.girclib import escape, unescape
-import urllib.request, urllib.parse, urllib.error
+from gbot.libs.helper import filename_escape, html_unescape
+import os
+import sys
 import json
+import urllib.request, urllib.parse, urllib.error
 
 class google(Module):
     name = 'google'
@@ -18,43 +21,104 @@ class google(Module):
     def __init__(self):
         self.events = {
             'commands' : {
+                '*' : [self.dynamic_search, '--- dynamic searches', 0],
                 'google' : [self.google_search, '<query> --- google something, get results', 0],
-                'youtube' : [self.youtube_search, '<query> --- searches, then returns youtube video', 0],
             },
         }
+        self.dynamic_path = 'modules'+os.sep+'google'
     
-    def google_search(self, event, command):
-        calc_result = self.google_calc_search(command.arguments)
-        if calc_result:
-            response = '*** /c12G/c4o/c8o/c12g/c3l/c4e/c: ' + calc_result
-            self.bot.irc.servers[event.server].privmsg(event.from_to, response)
+    def commands(self):
+        output = Module.commands(self)
+        for (dirpath, dirs, files) in os.walk(self.dynamic_path):
+            for file in files:
+                try:
+                    (name, ext) = os.path.splitext(file)
+                    if ext == os.extsep + 'json':
+                        info = json.loads(open(dirpath+os.sep+file).read())
+                except ValueError:
+                    continue
+                
+                if 'description' in info:
+                    command_description = info['description']
+                else:
+                    command_description = ''
+                if 'permission' in info:
+                    command_permission = info['permission']
+                else:
+                    command_permission = 0
+                
+                output[name] = [self.dynamic_search, command_description, command_permission]
+        return output
+    
+    
+    def dynamic_search(self, event, command):
+        module_path = None
+        for (dirpath, dirs, files) in os.walk(self.dynamic_path):
+            for file in files:
+                if not dirpath in sys.path:
+                    sys.path.insert(0, dirpath)
+                (name, ext) = os.path.splitext(file)
+                if ext == os.extsep + 'json':
+                    if name == filename_escape(command.command):
+                        module_path = dirpath
+        if not module_path:
             return
         
-        encoded_query = urllib.parse.urlencode({b'q' : unescape(command.arguments)})
-        url = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&%s' % (encoded_query)
+        try:
+            responses = json.loads(open(module_path+os.sep+filename_escape(command.command)+os.extsep+'json').read())
+        except ValueError:
+            return
+        
+        query = ''
+        if 'url' in responses:
+            query += 'site:' + responses['url'] + ' '
+        query += command.arguments
+        
+        if 'name' in responses:
+            name = responses['name']
+        else:
+            name = 'Search'
+        response = '*** ' + name + ': '
+        response += self.google_result_search(query)
+        
+        self.bot.irc.servers[event.server].privmsg(event.from_to, response)
+    
+    def google_search(self, event, command):
+        response = '*** /c12G/c4o/c8o/c12g/c3l/c4e/c: '
+        
+        calc_result = self.google_calc_search(command.arguments)
+        if calc_result:
+            response += calc_result
+        else:
+            response += self.google_result_search(command.arguments)
+        
+        self.bot.irc.servers[event.server].privmsg(event.from_to, response)
+    
+    
+    def google_result_search(self, query):
+        url = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&'
+        url += urllib.parse.urlencode({b'q' : unescape(query)})
+        
         try:
             search_results = urllib.request.urlopen(url)
-            json_result = json.loads(search_results.read().decode('utf-8'))
             try:
+                json_result = json.loads(search_results.read().decode('utf-8'))
                 url_result = escape(json_result['responseData']['results'][0]['unescapedUrl'])
             except:
                 url_result = 'No Results'
         except urllib.error.URLError:
             url_result = 'Connection Error'
-        
-        response = '*** /c12G/c4o/c8o/c12g/c3l/c4e/c: ' + url_result
-        
-        self.bot.irc.servers[event.server].privmsg(event.from_to, response)
+        return url_result
     
     def google_calc_search(self, query):
         url = 'http://www.google.com/ig/calculator?'
         url += urllib.parse.urlencode({b'q' : unescape(query)})
         
-        calc_result = urllib.request.urlopen(url)
-        calc_read = calc_result.read().decode('utf-8')
-        calc_split = calc_read.split('"')
-        
         try:
+            calc_result = urllib.request.urlopen(url)
+            calc_read = calc_result.read().decode('utf-8')
+            calc_split = calc_read.split('"')
+            
             #q_from = json_result['lhs']
             #q_to = json_result['rhs']
             q_from = calc_split[1]
@@ -66,23 +130,3 @@ class google(Module):
             final_result = False
         
         return final_result
-    
-    def youtube_search(self, event, command):
-        encoded_query = urllib.parse.urlencode({b'q' : unescape(command.arguments)})
-        url = 'http://gdata.youtube.com/feeds/api/videos?alt=jsonc&v=2&max-results=1&%s' % (encoded_query)
-        
-        try:
-            search_results = urllib.request.urlopen(url)
-            json_result = json.loads(search_results.read().decode('utf-8'))
-            try:
-                url_result = escape(json_result['data']['items'][0]['title'])
-                url_result += escape(' - http://youtu.be/')
-                url_result += escape(json_result['data']['items'][0]['id'])
-            except:
-                url_result = 'No Results'
-        except urllib.error.URLError:
-            url_result = 'Connection Error'
-        
-        response = '*** You/c5Tube/c: '+url_result
-        
-        self.bot.irc.servers[event.server].privmsg(event.from_to, response)

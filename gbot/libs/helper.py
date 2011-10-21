@@ -19,6 +19,7 @@ Functions:
 is_ok() -- prompt the user for yes/no and returns True/False
 bytes_to_str() -- convert number of bytes to a human-readable format
 filename_escape() -- escapes a filename (slashes removed, etc)
+html_unescape() -- unescapes a string's &str; characters to normal
 
 """
 
@@ -437,3 +438,17 @@ Safe local filename string
 		else:
 			safe += replace_char
 	return safe
+
+
+_unescape_map = {
+    '&amp;' : '&',
+    '&lt;' : '<',
+    '&gt;' : '>',
+    '&quot;' : '"',
+    '&#39;' : "'",
+}
+def html_unescape(input):
+	"""Unescapes a string from using html-escaped &str; characters to the actual ones."""
+	for char in _unescape_map.keys():
+		input = input.replace(char, _unescape_map[char])
+	return input

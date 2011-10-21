@@ -9,7 +9,7 @@
 
 # fix for Windows' shitty default cp1252 encoding unicode output errors
 import sys
-if sys.stdout.encoding != 'utf-8':
+if sys.stdout.encoding.lower() != 'utf-8':
     import warnings
     warnings.warn('unicode may be mangled due to non utf-8 stdout encoding: '+sys.stdout.encoding, UnicodeWarning)
     import io

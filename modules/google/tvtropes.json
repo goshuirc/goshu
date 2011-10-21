@@ -1,0 +1,5 @@
+{
+    "name": "tvtropes", 
+    "description": "<query> --- search tvtropes", 
+    "url": "tvtropes.org/pmwiki/pmwiki.php -action=source"
+}
