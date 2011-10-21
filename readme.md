@@ -37,6 +37,9 @@ Commands are represented like so: _8ball_
 **invite**: makes the bot auto-join any channel it's /invited to  
 **log_display**: prints/logs everything  
 
+Dynamic Command Modules
+-----------------------
+Specific Dynamic Command Module keys and usage instructions
 
 ### ApiQuery Module
 This module loads commands from the _modules/apiquery_ directory; That directory contains a multitude of files, each one providing a single command. The command-files are stored in json, and here are what the different keys do:  
