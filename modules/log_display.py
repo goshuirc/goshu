@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# ----------------------------------------------------------------------------  
-# "THE BEER-WARE LICENSE" (Revision 42):  
-# <danneh@danneh.net> wrote this file. As long as you retain this notice you  
-# can do whatever you want with this stuff. If we meet some day, and you think  
-# this stuff is worth it, you can buy me a beer in return Daniel Oakley  
+# ----------------------------------------------------------------------------
+# "THE BEER-WARE LICENSE" (Revision 42):
+# <danneh@danneh.net> wrote this file. As long as you retain this notice you
+# can do whatever you want with this stuff. If we meet some day, and you think
+# this stuff is worth it, you can buy me a beer in return Daniel Oakley
 # ----------------------------------------------------------------------------
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 
@@ -22,7 +22,7 @@ from gbot.libs.helper import filename_escape
 
 class a_log_display(Module):
     name = "a_log_display" # a_ at the beginning so goshu calls this module first
-    
+
     def __init__(self):
         self.events = {
             '*' : {
@@ -32,25 +32,25 @@ class a_log_display(Module):
         self.nick_colors = {}
         self.logfiles_open = {}
         random.seed()
-    
+
     def handler(self, event):
         if event.type == 'all_raw_messages':
             return
-        
+
         #> 15:26:43
         output = '/c14'
         output += strftime("%H:%M:%S", localtime())
-        
+
         #> -rizon-
         output += ' /c2-/c'
         output += event.server
         output += '/c2-/c '
-        
+
         targets = ['all']
-        
+
         if event.type == '':
             ...
-        
+
         elif event.type in ['welcome', 'yourhost', 'created', 'myinfo',
                             'featurelist', 'luserclient', 'luserop',
                             'luserchannels', 'luserme', 'n_local',
@@ -58,7 +58,7 @@ class a_log_display(Module):
                             'motdstart', 'motd', 'endofmotd', '042', ]:
             for message in event.arguments:
                 output += message + ' '
-            
+
         elif event.type in ['privnotice', '439', ]:
             targets.append(event.source.split('!')[0])
             output += '/c14-'
@@ -71,7 +71,7 @@ class a_log_display(Module):
                 output = output[:-1]
             output += '-/c '
             output += event.arguments[0]
-        
+
         elif event.type in ['pubmsg', ]:
             targets.append(event.target)
             output += '/c3-/c'
@@ -88,7 +88,7 @@ class a_log_display(Module):
             output += self.nick_color(event.source.split('!')[0])
             output += '/c14>/c '
             output += event.arguments[0]
-        
+
         elif event.type in ['privmsg', ]:
             output += '/c3-/c'
             if event.direction == 'in':
@@ -102,7 +102,7 @@ class a_log_display(Module):
             output += self.nick_color(event.source.split('!')[0])
             output += '/c14>/c '
             output += event.arguments[0]
-        
+
         elif event.type in ['action', ]:
             output += '/c3-/c'
             if event.direction == 'in':
@@ -114,7 +114,7 @@ class a_log_display(Module):
             output += '/c3-/c  /b* '
             output += event.source.split('!')[0] + '/b '
             output += event.arguments[0]
-        
+
         elif event.type in ['umode', ]:
             output += 'Mode change '
             output += '/c14[/c'
@@ -122,7 +122,7 @@ class a_log_display(Module):
             output += '/c14]/c'
             output += ' for user '
             output += event.target
-        
+
         elif event.type in ['mode', ]:
             targets.append(event.target)
             output += '/c6-/c!/c6-/c '
@@ -135,7 +135,7 @@ class a_log_display(Module):
             output += '/c14]/c'
             output += ' by /b'
             output += event.source.split('!')[0]
-        
+
         elif event.type in ['kick', ]:
             targets.append(event.target)
             output += '/c6-/c!/c6-/c10 '
@@ -147,7 +147,7 @@ class a_log_display(Module):
             output += ' /c14[/c'
             output += event.arguments[1]
             output += '/c14]/c'
-        
+
         elif event.type in ['join', ]:
             targets.append(event.target)
             output += '/c6-/c!/c6-/b/c10 '
@@ -157,20 +157,20 @@ class a_log_display(Module):
             output += '/c14]/c '
             output += 'has joined /b'
             output += event.target
-        
+
         elif event.type in ['nick', ]:
             output += '/c6-/c!/c6-/c10 '
             output += event.source.split('!')[0]
             output += '/c is now known as /c10'
             output += str(event.target)
-        
+
         elif event.type in ['currenttopic', ]:
             targets.append(event.arguments[0])
             output += '/c6-/c!/c6-/c10 Topic for /c10'
             output += event.arguments[0]
             output += '/c: '
             output += event.arguments[1]
-        
+
         elif event.type in ['quit', ]:
             output += '/c6-/c!/c6-/c10 '
             output += event.source.split('!')[0]
@@ -179,21 +179,21 @@ class a_log_display(Module):
             output += '/c14]/c has quit /c14[/c'
             output += event.arguments[0]
             output += '/c14]/c'
-        
+
         elif event.type in ['ctcp', ] and event.arguments[0] == 'ACTION':
             return
-        
+
         elif event.type in ['ping', 'pong' ]:
             return
-            
+
         else:
             targets.append('tofix')
             output += str(event.direction) + ' ' + str(event.type) + ' ' + str(event.source) + ' ' + str(event.target) + ' ' + escape(str(event.arguments))
             #print('    unknown:', output)
-        
+
         print(display_unescape(output + '/c'))
         self.log(output, event.server, targets)
-    
+
     def log(self, output, server='global', targets=['global']):
         server_escape = filename_escape(server)
         targets_escape = []
@@ -205,18 +205,18 @@ class a_log_display(Module):
             if not os.path.exists('logs/'+server):
                 os.makedirs('logs/'+server)
             path = 'logs/'+server_escape+'/'+target+'.log'
-            
+
             if target not in self.logfiles_open or not os.path.exists(path):
                 output = '/c14 Logfile Opened - ' + strftime("%A %B %d, %H:%M:%S %Y", localtime()) + '\n' + output
                 self.logfiles_open[target] = strftime("%A %B %d", localtime())
             elif self.logfiles_open[target] != strftime("%A %B %d", localtime()):
                 output = '/c14 New Day - ' + strftime("%A %B %d, %H:%M:%S %Y", localtime()) + '\n' + output
                 self.logfiles_open[target] = strftime("%A %B %d", localtime())
-            
+
             outfile = open(path, 'a', encoding='utf-8')
             outfile.write(unescape(output) + '\n')
             outfile.close()
-    
+
     def nick_color(self, nickhost):
         nick = nickhost.split('!')[0]
         if nick not in self.nick_colors:
@@ -235,12 +235,12 @@ def display_unescape(input):
                 back = ''
                 input = input[2:]
                 in_fore = True
-                
+
                 while True:
                     if len(input) > 0 and input[0].isdigit():
                         digit = input[0]
                         input = input[1:]
-                        
+
                         if in_fore:
                             if len(fore) < 2:
                                 fore += digit
@@ -253,17 +253,17 @@ def display_unescape(input):
                             else:
                                 input = digit + input
                                 break
-                    
+
                     elif len(input) > 0 and input[0] == ',':
                         if in_fore:
                             input = input[1:]
                             in_fore = False
                         else:
                             break
-                    
+
                     else:
                         break
-                
+
                 if fore != '':
                     if int(fore) > 15:
                         while int(fore) > 15:
@@ -274,27 +274,27 @@ def display_unescape(input):
                             while int(back) > 15:
                                 back = str(int(back) - 14)
                         output += back_colors[str(int(back))]
-                
+
                 else:
                     output += Fore.RESET+Style.NORMAL
                     output += Back.RESET+Style.NORMAL
-            
+
             elif len(input) > 1 and input[1] in ['b', 'i', 'u', 'r']:
                 input = input[2:]
-            
+
             elif len(input) >= 2:
                 input = input[2:]
-            
+
         elif len(input) > 0:
             output += input[0]
             if len(input) > 0:
                 input = input[1:]
-        
+
         else:
             break
-    
+
     return output
-                
+
 
 fore_colors = {
     '0' : Fore.WHITE+Style.NORMAL,

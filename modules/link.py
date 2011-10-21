@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# ----------------------------------------------------------------------------  
-# "THE BEER-WARE LICENSE" (Revision 42):  
-# <danneh@danneh.net> wrote this file. As long as you retain this notice you  
-# can do whatever you want with this stuff. If we meet some day, and you think  
-# this stuff is worth it, you can buy me a beer in return Daniel Oakley  
+# ----------------------------------------------------------------------------
+# "THE BEER-WARE LICENSE" (Revision 42):
+# <danneh@danneh.net> wrote this file. As long as you retain this notice you
+# can do whatever you want with this stuff. If we meet some day, and you think
+# this stuff is worth it, you can buy me a beer in return Daniel Oakley
 # ----------------------------------------------------------------------------
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 
@@ -14,7 +14,7 @@ import urllib.request, urllib.parse, urllib.error
 
 class link(Module):
     name = 'link'
-    
+
     def __init__(self):
         self.events = {
             'in' : {
@@ -22,10 +22,10 @@ class link(Module):
                 'privmsg' : [(0, self.link)],
             },
         }
-    
+
     def link(self, event):
         url_list = urls(unescape(event.arguments[0]))
-        
+
         for url in url_list:
             if 'youtu' not in url:
                 break # only do this for youtube links

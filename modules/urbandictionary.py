@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# ----------------------------------------------------------------------------  
-# "THE BEER-WARE LICENSE" (Revision 42):  
-# <danneh@danneh.net> wrote this file. As long as you retain this notice you  
-# can do whatever you want with this stuff. If we meet some day, and you think  
-# this stuff is worth it, you can buy me a beer in return Daniel Oakley  
+# ----------------------------------------------------------------------------
+# "THE BEER-WARE LICENSE" (Revision 42):
+# <danneh@danneh.net> wrote this file. As long as you retain this notice you
+# can do whatever you want with this stuff. If we meet some day, and you think
+# this stuff is worth it, you can buy me a beer in return Daniel Oakley
 # ----------------------------------------------------------------------------
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 
@@ -14,14 +14,14 @@ import json
 
 class urbandictionary(Module):
     name = 'urbandictionary'
-    
+
     def __init__(self):
         self.events = {
             'commands' : {
                 'ud' : [self.ud_search, '<query> --- see UrbanDictionary definition', 0],
             },
         }
-    
+
     def ud_search(self, event, command):
         encoded_query = urllib.parse.urlencode({b'term' : unescape(command.arguments)})
         url = 'http://www.urbandictionary.com/iphone/search/define?%s' % (encoded_query)
@@ -36,7 +36,7 @@ class urbandictionary(Module):
                 url_result = 'No Results'
         except urllib.error.URLError:
             url_result = 'Connection Error'
-        
+
         response = '*** UrbanDictionary: ' + url_result
-        
+
         self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], response)
