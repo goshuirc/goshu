@@ -18,7 +18,7 @@ Commands are represented like so: _8ball_
 
 ### User-oriented  (modify/remove these to your heart's content)
 **dice**: adds _d_, parsing rpg dice like this: _d_ d6-3  
-**google**: adds _google_ and _youtube_, returns first search result _(also dynamic command module)_  
+**google**: adds _google_ and _youtube_, returns first search result _(also a dynamic command module)_  
 **link**: posts the title of posted urls  
 **list**: adds _list_, lists current commands and help for commands  
 **pokemon**: adds _pokemon_ and _pokedex_, returns random pokemon  
@@ -37,8 +37,30 @@ Commands are represented like so: _8ball_
 **invite**: makes the bot auto-join any channel it's /invited to  
 **log_display**: prints/logs everything  
 
+
+### ApiQuery Module
+This module loads commands from the _modules/apiquery_ directory; That directory contains a multitude of files, each one providing a single command. The command-files are stored in json, and here are what the different keys do:  
+**description**: sentence-long string describing the command  
+**permission**: number representing the lowest permission level requirement required to access the command  
+**url**: part of the url directly before the encoded user data  
+**urlpost**: part of the url directly after the encoded user data  
+**response**: series of lists, representing how the response is constructed from the given json  
+
+### Danbooru Module
+This module loads commands from the _modules/danbooru_ directory, keys:  
+**description**: sentence-long string describing the command  
+**permission**: number representing the lowest permission level requirement required to access the command  
+**url**: base url of the danbooru installation  
+
+### Google Module
+This module loads commands from the _modules/google_ directory, keys:  
+**name**: name given to represent site  
+**description**: sentence-long string describing the command  
+**permission**: number representing the lowest permission level requirement required to access the command  
+**url**: the url of the site to match, literally inserted after a "site:" google keyword  
+
 ### Responses Module
-This module loads commands from the _modules/responses_ directory. That directory contains a multitude of files, each one providing a single command. The command-files are stored in json, and here are what the different keys do:  
+This module loads commands from the _modules/responses_ directory, keys:  
 **description**: sentence-long string describing the command  
 **permission**: number representing the lowest permission level requirement required to access the command  
 **initial**: string to process before getting randomised string  
