@@ -9,29 +9,33 @@ Installing/Configuring
 
 Modules
 -------
-goshu3 is very modular, and allows you to simply drop goshu3 modules into the modules/ folder, where they're automatically loaded at runtime.
+goshu3 is very modular, and allows you to simply drop goshu3 modules into the modules/ folder, where they're automatically loaded at runtime.  
 To disable any modules, simply delete them, or move them to a different folder (something like modules/disabled/ perhaps?)  
 goshu3 comes with a number of modules to help you get started:
 
 Modules are represented like so: **dice**  
-Commands are represented like so: _8ball_ 
+Commands are represented like so: _8ball_  
 
 ### User-oriented  (modify/remove these to your heart's content)
-**danbooru**: adds _danbooru_ and _oreno_, for searching those sites  
 **dice**: adds _d_, parsing rpg dice like this: _d_ d6-3  
-**google**: adds _google_ and _youtube_, returns first search result  
+**google**: adds _google_ and _youtube_, returns first search result _(also dynamic command module)_  
 **link**: posts the title of posted urls  
 **list**: adds _list_, lists current commands and help for commands  
 **pokemon**: adds _pokemon_ and _pokedex_, returns random pokemon  
 **suggest**: adds _suggest_, allows users to make suggestions  
 **urbandictionary**: adds _ud_, returns definition from urbandictionary  
 
+### Dynamic Command Modules (remove commands within these module's folders)
+**apiquery**: simple json query and replying  
+**danbooru**: danbooru-based site search  
+**google**: google search alias commands _(also provides user-oriented commands)_  
+**responses**: various commands, simple random responses  
+
 ### Backend  (only modify/remove these if you know what you're doing)
 **ctcp_reply**: handles the basic CTCP requests - stuff like PING, VER, TIME  
 **info**: adds _info_, outputs testing info  
 **invite**: makes the bot auto-join any channel it's /invited to  
 **log_display**: prints/logs everything  
-**responses**: dynamically loads commands from _modules/responses_  
 
 ### Responses Module
 This module loads commands from the _modules/responses_ directory. That directory contains a multitude of files, each one providing a single command. The command-files are stored in json, and here are what the different keys do:  
@@ -58,11 +62,11 @@ License
 Released under the Beer-Ware License
 
 ```python
-# ----------------------------------------------------------------------------  
-# "THE BEER-WARE LICENSE" (Revision 42):  
-# <danneh@danneh.net> wrote this file. As long as you retain this notice you  
-# can do whatever you want with this stuff. If we meet some day, and you think  
-# this stuff is worth it, you can buy me a beer in return Daniel Oakley  
+# ----------------------------------------------------------------------------
+# "THE BEER-WARE LICENSE" (Revision 42):
+# <danneh@danneh.net> wrote this file. As long as you retain this notice you
+# can do whatever you want with this stuff. If we meet some day, and you think
+# this stuff is worth it, you can buy me a beer in return Daniel Oakley
 # ----------------------------------------------------------------------------
 ```
 
