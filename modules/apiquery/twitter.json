@@ -1,7 +1,7 @@
 {
     "name": "Twitter", 
     "description": "<query> --- tweets galore!", 
-    "url": "http://search.twitter.com/search.json?q=", 
+    "url": "https://search.twitter.com/search.json?q=", 
     "response": [
     	["json", "['results'][0]['from_user']"], 
     	["text", " --- "], 

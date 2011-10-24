@@ -65,12 +65,20 @@ def urls_protocol(input_str, protocol='http'):
 def gettitle(url):
     try:
         page = urllib.request.urlopen(url)
-        title_list = page.read().decode('utf-8').split('<title>')[1].split('</title>')[0].strip().split('\n')
-        title = ''
-        for newline_title in title_list:
-            title += newline_title.strip() + ' '
-        if len(title) > 0:
-            title = title[:-1] # remove last space
-        return title
+        old_title = page.read().decode('utf-8').split('<title>')[1].split('</title>')[0].strip()
+        new_title = ''
+        last_char_is_whitespace = False
+        for title_char in old_title:
+            if title_char.isspace():
+                if last_char_is_whitespace:
+                    continue
+                else:
+                    new_title += ' '
+                    last_char_is_whitespace = True
+            else:
+                if last_char_is_whitespace:
+                    last_char_is_whitespace = False
+                new_title += title_char
+        return new_title
     except:
         return ''

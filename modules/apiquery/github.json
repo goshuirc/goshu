@@ -1,7 +1,7 @@
 {
     "name": "github", 
     "description": "<query> --- github repo search", 
-    "url": "http://github.com/api/v2/json/repos/search/", 
+    "url": "https://github.com/api/v2/json/repos/search/", 
     "response": [
     	["json", "['repositories'][0]['name']"], 
     	["text", " --- "], 

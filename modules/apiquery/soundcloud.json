@@ -1,7 +1,7 @@
 {
     "name": "SoundCloud", 
     "description": "<query> --- music search!", 
-    "url": "http://api.soundcloud.com/tracks.json?client_id=e3dfa9998292005f9e73329b1dd9dfb7&q=", 
+    "url": "https://api.soundcloud.com/tracks.json?client_id=e3dfa9998292005f9e73329b1dd9dfb7&q=", 
     "response": [
     	["json", "[0]['title']"], 
     	["text", " by "], 

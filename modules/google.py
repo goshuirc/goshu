@@ -96,7 +96,7 @@ class google(Module):
 
 
     def google_result_search(self, query):
-        url = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&'
+        url = 'https://ajax.googleapis.com/ajax/services/search/web?v=1.0&'
         url += urllib.parse.urlencode({b'q' : unescape(query)})
 
         try:
@@ -111,7 +111,7 @@ class google(Module):
         return url_result
 
     def google_calc_search(self, query):
-        url = 'http://www.google.com/ig/calculator?'
+        url = 'https://www.google.com/ig/calculator?'
         url += urllib.parse.urlencode({b'q' : unescape(query)})
 
         try:
