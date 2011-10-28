@@ -76,7 +76,14 @@ class apiquery(Module):
         try:
             query_results = urllib.request.urlopen(url)
             json_results = json.loads(query_results.read().decode('utf-8'))
-            result = self.json_data_exctact(json_results, querydata['response'])
+            if 'html_unescape' in querydata:
+                do_unescape = querydata['html_unescape']
+            else:
+                do_unescape = False
+            try:
+                result = self.json_data_exctact(json_results, querydata['response'], do_unescape)
+            except ApiQueryError:
+                result = 'No Results'
         except urllib.error.URLError:
             result = 'Connection Error'
         except ValueError:
@@ -85,7 +92,7 @@ class apiquery(Module):
         response = '*** ' + querydata['name'] + ': ' + result
         self.bot.irc.servers[event.server].privmsg(event.from_to, response)
 
-    def json_data_exctact(self, results, response_format):
+    def json_data_exctact(self, results, response_format, do_unescape=False):
         response = ''
 
         for term in response_format:
@@ -95,10 +102,16 @@ class apiquery(Module):
                 response += escape(term[1])
             else:
                 try:
-                    response += escape(str(eval('results' + term[1])))
+                    if do_unescape:
+                        response += escape(html_unescape(str(eval('results' + term[1]))))
+                    else:
+                        response += escape(str(eval('results' + term[1])))
                 except IndexError:
-                    response += '[apiquery term invalid, IndexError]'
+                    raise ApiQueryError
                 except KeyError:
-                    response += '[apiquery term invalid, KeyError]'
+                    raise ApiQueryError
 
         return response
+
+class ApiQueryError(Exception):
+    ...

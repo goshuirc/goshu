@@ -48,6 +48,7 @@ This module loads commands from the _modules/apiquery_ directory; That directory
 **url**: part of the url directly before the encoded user data  
 **urlpost**: part of the url directly after the encoded user data  
 **response**: series of lists, representing how the response is constructed from the given json  
+**html_unescape**: whether to unescape stuff like &quot; and other html-escaped characters in json responses  
 
 ### Danbooru Module
 This module loads commands from the _modules/danbooru_ directory, keys:  

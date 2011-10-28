@@ -6,5 +6,6 @@
     	["json", "['results'][0]['from_user']"], 
     	["text", " --- "], 
     	["json", "['results'][0]['text']"]
-    ]
+    ], 
+    "html_unescape": true
 }
