@@ -1,5 +1,5 @@
 {
     "name": "TokyoTosho", 
     "description": "<query> --- search tokyotosho", 
-    "url": "tokyotosho.info"
+    "url": "tokyotosho.info inurl:id"
 }

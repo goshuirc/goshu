@@ -13,6 +13,7 @@ import random
 import os
 import sys
 import json
+import codecs
 
 class responses(Module):
     name = 'responses'
@@ -69,7 +70,7 @@ class responses(Module):
             return
 
         try:
-            responses = json.loads(open(module_path+os.sep+filename_escape(command.command)+os.extsep+'json').read())
+            responses = json.loads(codecs.open(module_path+os.sep+filename_escape(command.command)+os.extsep+'json', 'r', 'utf8').read())
         except ValueError:
             return
 
