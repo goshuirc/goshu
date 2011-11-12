@@ -12,18 +12,18 @@ from . import info, irc, modules
 DEBUG = False
 
 class Bot:
-  """Brings all of goshubot together in a nice happy class."""
+    """Brings all of goshubot together in a nice happy class."""
 
-  def __init__(self):
-    self.DEBUG = DEBUG
+    def __init__(self):
+        self.DEBUG = DEBUG
 
-    self.accounts = info.Accounts(self)
-    self.settings = info.Settings(self)
-    self.info = info.Info(self)
-    self.irc = irc.IRC(self)
-    self.modules = modules.Modules(self)
+        self.accounts = info.Accounts(self)
+        self.settings = info.Settings(self)
+        self.info = info.Info(self)
+        self.irc = irc.IRC(self)
+        self.modules = modules.Modules(self)
 
-  def start(self):
-    self.irc.add_handler('all', 'all', self.modules.handle)
-    self.irc.connect_info(self.info, self.settings)
-    self.irc.process_forever()
+    def start(self):
+        self.irc.add_handler('all', 'all', self.modules.handle)
+        self.irc.connect_info(self.info, self.settings)
+        self.irc.process_forever()
