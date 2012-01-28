@@ -309,6 +309,8 @@ class Accounts(Manager):
     def login(self, name, password, server, userstring):
         self.load()
         if self.is_password(name, password):
+            if userstring.split('!')[0] not in self.bot.irc.servers[server].info['users']:
+                self.bot.irc.servers[server].create_user(userstring)
             self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo'] = {}
             self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo']['name'] = name
             self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo']['userhost'] = userstring.split('!')[1]
@@ -318,10 +320,11 @@ class Accounts(Manager):
 
     def account(self, userstring, server):
         self.load()
-        if 'accountinfo' in self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]:
-            if 'userhost' in self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo']:
-                if self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo']['userhost'] == userstring.split('!')[1]:
-                    return self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo']['name']
+        if userstring.split('!')[0] in self.bot.irc.servers[server].info['users']:
+            if 'accountinfo' in self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]:
+                if 'userhost' in self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo']:
+                    if self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo']['userhost'] == userstring.split('!')[1]:
+                        return self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo']['name']
         return None
 
     def set_access_level(self, name, level=0):

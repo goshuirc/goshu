@@ -16,11 +16,10 @@ if sys.stdout.encoding.lower() != 'utf-8':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding=sys.stdout.encoding, errors='replace', line_buffering=True)
 
 import gbot.bot
-gbot.bot.DEBUG = True
 
 print('Goshubot - IRC Bot')
 
-bot = gbot.bot.Bot()
+bot = gbot.bot.Bot(debug=True)
 
 
 accountinfo_path = 'accountinfo.json'

@@ -240,6 +240,12 @@ class ServerConnection:
             except:
                 ...
 
+        elif event.type == 'quit':
+            for channel in self.info['channels']:
+                if event.source.split('!')[0] in self.info['channels'][channel]['users']:
+                    del self.info['channels'][channel]['users'][event.source.split('!')[0]]
+            del self.info['users'][event.source.split('!')[0]]
+
         elif event.type == 'join':
             self.create_user(event.source)
             self.info['channels'][event.target]['users'][event.source.split('!')[0]] = ''

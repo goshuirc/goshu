@@ -114,8 +114,30 @@ class responses(Module):
             output.append(pre + line + post)
 
         for line in output:
+            line = line.replace('//', '/{slash}')
             line = line.replace('/S', source.upper()).replace('/T', target.upper())
             line = line.replace('/s', source).replace('/t', target)
+            
+            line_split = line.split('/{randomchannelnick}')
+            if len(line_split) > 1:
+                i = 0
+                actual_line = ''
+                for line_segment in line_split:
+                    actual_line += line_segment
+                    i += 1
+                    if i < len(line_split):
+                        try:
+                            user_list = list(self.bot.irc.servers[event.server].info['channels'][event.from_to]['users'].keys())
+                            user_num = random.randint(1, len(user_list)) - 1
+                            if len(user_list) > 1:
+                                while user_list[user_num] == event.source.split('!')[0]:
+                                    user_num = random.randint(1, len(user_list)) - 1
+                            actual_line += user_list[user_num]
+                        except:
+                            actual_line += event.source.split('!')[0]
+                line = actual_line
+            
+            line = line.replace('/{slash}', '//')
 
             if line[0:2] == '/m':
                 self.bot.irc.servers[event.server].action(event.from_to, line[2:].strip())

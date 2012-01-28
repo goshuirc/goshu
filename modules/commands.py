@@ -10,30 +10,30 @@
 from gbot.modules import Module
 
 class commands(Module):
-  name = 'commands'
+    name = 'commands'
 
-  def __init__(self):
-    self.events = {
-      'commands' : {
-        'msg' : [self.msg, '<user> <message> --- send a /msg', 5],
-        'me' : [self.me, '<user> <message> --- send a /me', 5],
-      },
-    }
+    def __init__(self):
+        self.events = {
+            'commands' : {
+                'msg' : [self.msg, '<user> <message> --- send a /msg', 5],
+                'me' : [self.me, '<user> <message> --- send a /me', 5],
+            },
+        }
 
-  def msg(self, event, command):
-    split_arguments = command.arguments.split(' ', 1)
-    if len(split_arguments) < 2:
-      split_arguments.append(' ')
+    def msg(self, event, command):
+        split_arguments = command.arguments.split(' ', 1)
+        if len(split_arguments) < 2:
+            split_arguments.append(' ')
 
-    (msg_target, msg_msg) = split_arguments
+        (msg_target, msg_msg) = split_arguments
 
-    self.bot.irc.servers[event.server].privmsg(msg_target, msg_msg)
+        self.bot.irc.servers[event.server].privmsg(msg_target, msg_msg)
 
-  def me(self, event, command):
-    split_arguments = command.arguments.split(' ', 1)
-    if len(split_arguments) < 2:
-      split_arguments.append(' ')
+    def me(self, event, command):
+        split_arguments = command.arguments.split(' ', 1)
+        if len(split_arguments) < 2:
+            split_arguments.append(' ')
 
-    (msg_target, msg_msg) = split_arguments
+        (msg_target, msg_msg) = split_arguments
 
-    self.bot.irc.servers[event.server].action(msg_target, msg_msg)
+        self.bot.irc.servers[event.server].action(msg_target, msg_msg)

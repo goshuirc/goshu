@@ -76,17 +76,25 @@ class danbooru(Module):
 
         if 'url' not in booru:
             return
-        response += self.retrieve_url(booru['url'], command.arguments)
+        
+        if 'version' not in booru:
+            booru['version'] = 1
+        
+        response += self.retrieve_url(booru['url'], command.arguments, booru['version'])
 
         self.bot.irc.servers[event.server].privmsg(event.from_to, response)
 
 
-    def retrieve_url(self, url, tags):
+    def retrieve_url(self, url, tags, version):
         encoded_tags = urllib.parse.urlencode({
             b'limit' : 1,
             b'tags' : unescape(tags),
         })
-        api_url = url + '/post/index.json?' + encoded_tags
+        if version == 1:
+            api_position = '/post/index.json?'
+        elif version == 2:
+            api_position = '/posts.json?'
+        api_url = url + api_position + encoded_tags
 
         try:
             search_results = urllib.request.urlopen(api_url)
@@ -95,9 +103,15 @@ class danbooru(Module):
 
         results_http = search_results.read().decode('utf-8')
 
-        results_json = json.loads(results_http)
+        try:
+            results_json = json.loads(results_http)
+        except ValueError:
+            return "Not a JSON response"
 
         try:
-            return escape(url + '/post/show/' + str(results_json[0]['id']))
+            return_str = escape(url + '/post/show/' + str(results_json[0]['id']))
+            return_str += '  rating:/b' + results_json[0]['rating'] + '/b'
+            return_str += '  /c14' + results_json[0]['tags']
+            return return_str
         except:
             return 'No Results'

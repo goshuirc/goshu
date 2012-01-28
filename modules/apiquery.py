@@ -10,10 +10,10 @@
 from gbot.modules import Module
 from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import filename_escape, html_unescape
-import json
-import os
-import sys
 import urllib.request, urllib.parse, urllib.error
+import json
+import sys
+import os
 
 class apiquery(Module):
     name = 'apiquery'
@@ -21,7 +21,7 @@ class apiquery(Module):
     def __init__(self):
         self.events = {
             'commands' : {
-                '*' : [self.query, '<query> --- apiquery', 0],
+                '*' : [self.combined, '<query> --- json api query', 0],
             },
         }
 
@@ -45,10 +45,10 @@ class apiquery(Module):
                 else:
                     command_permission = 0
 
-                output[name] = [self.query, command_description, command_permission]
+                output[name] = [self.combined, command_description, command_permission]
         return output
 
-    def query(self, event, command):
+    def combined(self, event, command):
         module_path = None
         for (dirpath, dirs, files) in os.walk(self.folder_path):
             for file in files:

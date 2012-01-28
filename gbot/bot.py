@@ -8,15 +8,15 @@
 # Goshubot IRC Bot	-	http://danneh.net/goshu
 
 from . import info, irc, modules
-
-DEBUG = False
+import logging
 
 class Bot:
     """Brings all of goshubot together in a nice happy class."""
 
-    def __init__(self):
-        self.DEBUG = DEBUG
-
+    def __init__(self, debug=False):
+        self.debug = debug
+        self.logger = logging.Logger
+        
         self.accounts = info.Accounts(self)
         self.settings = info.Settings(self)
         self.info = info.Info(self)
@@ -26,4 +26,7 @@ class Bot:
     def start(self):
         self.irc.add_handler('all', 'all', self.modules.handle)
         self.irc.connect_info(self.info, self.settings)
-        self.irc.process_forever()
+        try:
+            self.irc.process_forever()
+        except KeyboardInterrupt:
+            self.irc.disconnect_all('Goodbye')

@@ -55,14 +55,15 @@ class list(Module):
 
         else:
             # list commands
-            output = ['*** Commands: ', '    ']
-            limit = int(len(bot_commands) / 2)
-            for bot_command in bot_commands[:limit]:
-                output[0] += bot_command[0] + ', '
-            output[0] = output[0][:-2] # remove last ', '
-            for bot_command in bot_commands[limit:]:
-                output[1] += bot_command[0] + ', '
-            output[1] = output[1][:-2] # remove last ', '
+            output = ['*** Commands: ']
+            i = 0
+            limit = 350
+            for bot_command in bot_commands:
+                if (len(output[i]) + len(bot_command[0])) > limit:
+                    output.append('    ')
+                    i += 1
+                output[i] += bot_command[0] + ', '
+            output[i] = output[i][:-2] # remove last ', '
 
             output.append('Note: to display information on a specific command, use /ilist <command>/i. eg: /ilist 8ball');
 
