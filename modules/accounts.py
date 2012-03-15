@@ -36,8 +36,8 @@ class accounts(Module):
 
         self.bot.accounts.add_account(user_args[0].lower(), user_args[1])
 
-        if len(user_args) > 2:
-            self.bot.accounts.store[user_args]['email'] = user_args[2]
+        #if len(user_args) > 2:
+        #    self.bot.accounts.store[user_args[0].lower()]['email'] = user_args[2]
 
         self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], 'Account Registered!')
 

@@ -2,6 +2,8 @@
     "description": "--- see your future", 
     "1pre": "You will ", 
     "1post": ", /s", 
+    "2pre": "You will ", 
+    "2post": ", /s", 
     "1": [
     	"enjoy next season's anime", 
         "win the lottery", 

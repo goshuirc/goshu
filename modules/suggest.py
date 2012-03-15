@@ -43,7 +43,7 @@ class suggest(Module):
         if not os.path.exists('suggestions'):
             os.makedirs('suggestions')
 
-        path = 'suggestions/' + section
+        path = 'suggestions'+os.sep+section
         outfile = open(path, 'a', encoding='utf-8')
         for line in output:
             outfile.write(line + '\n')

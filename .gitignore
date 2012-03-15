@@ -8,6 +8,7 @@
 .project
 .pydevproject
 .settings/*
+*.sublime-*
 
 ## python
 *.pyc
@@ -15,8 +16,6 @@
 *__pycache__
 
 ## goshu3
-accountinfo.json
-info.json
-settings.json
+config/*
 logs/*
 suggestions/*

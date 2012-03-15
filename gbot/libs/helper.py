@@ -445,9 +445,17 @@ _unescape_map = {
     '&gt;' : '>',
     '&quot;' : '"',
     '&#39;' : "'",
+    '&#039;' : "'",
 }
 def html_unescape(input):
     """Unescapes a string from using html-escaped &str; characters to the actual ones."""
+    output = input
     for char in _unescape_map.keys():
-        input = input.replace(char, _unescape_map[char])
-    return input
+        output = output.replace(char, _unescape_map[char])
+    return output
+
+
+def utf8_bom(input):
+    """Strips BOM from a utf8 string, because open() leaves it in for some reason."""
+    output = input.replace('\ufeff', '')
+    return output

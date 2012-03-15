@@ -18,10 +18,11 @@ Commands are represented like so: _8ball_
 
 ### User-oriented  (modify/remove these to your heart's content)
 **dice**: adds _d_, parsing rpg dice like this: _d_ d6-3  
+**dictionary**: adds _def_, definitions provided by wordnic (requires api key)  
 **google**: adds _google_ and _youtube_, returns first search result _(also a dynamic command module)_  
-**link**: posts the title of posted urls  
-**list**: adds _list_, lists current commands and help for commands  
+**link**: posts the title of posted urls (restricted to youtube videos initially)  
 **pokemon**: adds _pokemon_ and _pokedex_, returns random pokemon  
+**random_module**: adds _random_  
 **suggest**: adds _suggest_, allows users to make suggestions  
 **urbandictionary**: adds _ud_, returns definition from urbandictionary  
 
@@ -32,9 +33,12 @@ Commands are represented like so: _8ball_
 **responses**: various commands, simple random responses  
 
 ### Backend  (only modify/remove these if you know what you're doing)
+**accounts**: handles goshu's accounts  
+**commands**: basic irc commands, things like _msg_, _me_, _join_  
 **ctcp_reply**: handles the basic CTCP requests - stuff like PING, VER, TIME  
 **info**: adds _info_, outputs testing info  
 **invite**: makes the bot auto-join any channel it's /invited to  
+**list**: adds _list_, lists current commands and help for commands  
 **log_display**: prints/logs everything  
 
 Dynamic Command Modules

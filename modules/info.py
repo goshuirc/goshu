@@ -8,6 +8,7 @@
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 
 from gbot.modules import Module
+import os
 import json
 
 class info(Module):
@@ -16,9 +17,14 @@ class info(Module):
     def __init__(self):
         self.events = {
             'commands' : {
-                'info' : [self.info, 'get bot info', 10],
+                'info' : [self.info, 'output bot debug info', 10],
             },
         }
 
     def info(self, event, command):
-        print(json.dumps(self.bot.irc.servers[event.server].info, sort_keys=True, indent=4))
+        pretty_json = json.dumps(self.bot.irc.servers[event.server].info, sort_keys=True, indent=4)
+
+        #print(pretty_json)
+
+        info_file = open('config'+os.sep+'modules'+os.sep+'info.json', 'w', encoding='utf-8')
+        info_file.write(pretty_json)

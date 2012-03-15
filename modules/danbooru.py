@@ -14,6 +14,7 @@ import urllib.request, urllib.parse, urllib.error
 import json
 import sys
 import os
+import hashlib
 
 class danbooru(Module):
     name = 'danbooru'
@@ -66,6 +67,7 @@ class danbooru(Module):
 
         try:
             booru = json.loads(open(module_path+os.sep+filename_escape(command.command)+os.extsep+'json').read())
+            booruaccounts = json.loads(open('config'+os.sep+'modules'+os.sep+filename_escape(command.command)+os.extsep+'json').read())
         except ValueError:
             return
 
@@ -80,21 +82,35 @@ class danbooru(Module):
         if 'version' not in booru:
             booru['version'] = 1
         
-        response += self.retrieve_url(booru['url'], command.arguments, booru['version'])
+        if command.command in booru:
+            booru['username'] = booruaccounts[command.command]['username']
+            booru['password'] = booruaccounts[command.command]['password']
+        
+        response += self.retrieve_url(booru['url'], command.arguments, booru['version'],
+                                      booru['username'], booru['password'])
 
         self.bot.irc.servers[event.server].privmsg(event.from_to, response)
 
 
-    def retrieve_url(self, url, tags, version):
-        encoded_tags = urllib.parse.urlencode({
+    def retrieve_url(self, url, tags, version, username, password=None):
+        post = {
             b'limit' : 1,
             b'tags' : unescape(tags),
-        })
+            b'login' : username,
+        }
+
+        if password:
+            post['password_hash'] = str(hashlib.sha1(b'choujin-steiner--' + password.encode('utf-8') + b'--').hexdigest())
+        
+        encoded_tags = urllib.parse.urlencode(post)
+
+
         if version == 1:
             api_position = '/post/index.json?'
         elif version == 2:
             api_position = '/posts.json?'
         api_url = url + api_position + encoded_tags
+
 
         try:
             search_results = urllib.request.urlopen(api_url)

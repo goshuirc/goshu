@@ -47,7 +47,7 @@ class list(Module):
                     else:
                         command_view_permission = command_permission
                     if self.bot.accounts.access_level(event) >= command_view_permission:
-                        output = '*** Command:  '
+                        output = '*** Command:  ' + self.bot.settings.store['prefix']
                         output += bot_command[0] + ' '
                         output += bot_command[1]
 
@@ -65,7 +65,7 @@ class list(Module):
                 output[i] += bot_command[0] + ', '
             output[i] = output[i][:-2] # remove last ', '
 
-            output.append('Note: to display information on a specific command, use /ilist <command>/i. eg: /ilist 8ball');
+            output.append('Note: to display information on a specific command, use /i'+self.bot.settings.store['prefix']+'list <command>/i. eg: /i'+self.bot.settings.store['prefix']+'list 8ball');
 
             for line in output:
                 self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], line)

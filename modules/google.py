@@ -103,7 +103,9 @@ class google(Module):
             search_results = urllib.request.urlopen(url)
             try:
                 json_result = json.loads(search_results.read().decode('utf-8'))
-                url_result = escape(json_result['responseData']['results'][0]['unescapedUrl'])
+                url_result = escape(html_unescape(json_result['responseData']['results'][0]['titleNoFormatting']))
+                url_result += ' -- '
+                url_result += escape(json_result['responseData']['results'][0]['unescapedUrl'])
             except:
                 url_result = 'No Results'
         except urllib.error.URLError:

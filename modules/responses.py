@@ -8,12 +8,11 @@
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 
 from gbot.modules import Module
-from gbot.libs.helper import filename_escape
+from gbot.libs.helper import filename_escape, utf8_bom
 import random
 import os
 import sys
 import json
-import codecs
 
 class responses(Module):
     name = 'responses'
@@ -35,7 +34,9 @@ class responses(Module):
                 try:
                     (name, ext) = os.path.splitext(file)
                     if ext == os.extsep + 'json':
-                        info = json.loads(open(dirpath+os.sep+file).read())
+                        f = open(dirpath+os.sep+file, encoding='utf8')
+                        f_read = utf8_bom(f.read())
+                        info = json.loads(f_read)
                 except ValueError:
                     continue
 
@@ -70,7 +71,9 @@ class responses(Module):
             return
 
         try:
-            responses = json.loads(codecs.open(module_path+os.sep+filename_escape(command.command)+os.extsep+'json', 'r', 'utf8').read())
+            f = open(module_path+os.sep+filename_escape(command.command)+os.extsep+'json', 'r', encoding='utf8')
+            f_read = utf8_bom(f.read())
+            responses = json.loads(f_read)
         except ValueError:
             return
 
@@ -117,6 +120,7 @@ class responses(Module):
             line = line.replace('//', '/{slash}')
             line = line.replace('/S', source.upper()).replace('/T', target.upper())
             line = line.replace('/s', source).replace('/t', target)
+            line = line.replace('/{prefix}', self.bot.settings.store['prefix'])
             
             line_split = line.split('/{randomchannelnick}')
             if len(line_split) > 1:

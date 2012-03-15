@@ -22,13 +22,13 @@ print('Goshubot - IRC Bot')
 bot = gbot.bot.Bot(debug=True)
 
 
-accountinfo_path = 'accountinfo.json'
+accountinfo_path = 'config/info.json'
 bot.accounts.use_file(accountinfo_path)
 
-settings_path = 'settings.json'
+settings_path = 'config/bot.json'
 bot.settings.use_file(settings_path, update=True)
 
-info_path = 'info.json'
+info_path = 'config/irc.json'
 bot.info.use_file(info_path, update=True)
 
 modules_path = 'modules'
