@@ -67,9 +67,11 @@ class danbooru(Module):
 
         try:
             booru = json.loads(open(module_path+os.sep+filename_escape(command.command)+os.extsep+'json').read())
-            booruaccounts = json.loads(open('config'+os.sep+'modules'+os.sep+filename_escape(command.command)+os.extsep+'json').read())
+            booruaccounts = json.loads(open('config'+os.sep+'modules'+os.sep+filename_escape(self.name)+os.extsep+'json').read())
         except ValueError:
             return
+        except IOError:
+            booruaccounts = {}
 
         if 'display_name' in booru:
             response = booru['display_name']
@@ -82,9 +84,12 @@ class danbooru(Module):
         if 'version' not in booru:
             booru['version'] = 1
         
-        if command.command in booru:
+        if command.command in booruaccounts:
             booru['username'] = booruaccounts[command.command]['username']
             booru['password'] = booruaccounts[command.command]['password']
+        else:
+            booru['username'] = None
+            booru['password'] = None
         
         response += self.retrieve_url(booru['url'], command.arguments, booru['version'],
                                       booru['username'], booru['password'])
@@ -92,12 +97,14 @@ class danbooru(Module):
         self.bot.irc.servers[event.server].privmsg(event.from_to, response)
 
 
-    def retrieve_url(self, url, tags, version, username, password=None):
+    def retrieve_url(self, url, tags, version, username=None, password=None):
         post = {
             b'limit' : 1,
             b'tags' : unescape(tags),
-            b'login' : username,
         }
+
+        if username:
+            post['login'] = username
 
         if password:
             post['password_hash'] = str(hashlib.sha1(b'choujin-steiner--' + password.encode('utf-8') + b'--').hexdigest())
@@ -111,6 +118,7 @@ class danbooru(Module):
             api_position = '/posts.json?'
         api_url = url + api_position + encoded_tags
 
+        print(api_url)
 
         try:
             search_results = urllib.request.urlopen(api_url)
@@ -127,7 +135,10 @@ class danbooru(Module):
         try:
             return_str = escape(url + '/post/show/' + str(results_json[0]['id']))
             return_str += '  rating:/b' + results_json[0]['rating'] + '/b'
-            return_str += '  /c14' + results_json[0]['tags']
+            if version == 1:
+                return_str += '  /c14' + results_json[0]['tags']
+            elif version == 2:
+                return_str += '  /c14' + results_json[0]['tag_string']
             return return_str
         except:
             return 'No Results'

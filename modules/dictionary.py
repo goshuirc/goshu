@@ -9,6 +9,7 @@
 
 from gbot.modules import Module
 from gbot.libs.girclib import escape, unescape
+from gbot.libs.helper import filename_escape
 import urllib.request, urllib.parse, urllib.error
 import json
 import os
@@ -28,7 +29,7 @@ class dictionary(Module):
         if command.arguments.strip() == '':
             return
 
-        dictionary_info = json.loads(open('config'+os.sep+'modules'+os.sep+'dictionary'+os.extsep+'json').read())
+        dictionary_info = json.loads(open('config'+os.sep+'modules'+os.sep+filename_escape(self.name)+os.extsep+'json').read())
 
         url = 'http://api.wordnik.com/v4/word.json/'
         url += urllib.parse.urlencode({b'' : unescape(command.arguments.strip())})[1:]
