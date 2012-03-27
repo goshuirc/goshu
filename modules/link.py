@@ -27,7 +27,7 @@ class link(Module):
         url_list = urls(unescape(event.arguments[0]))
 
         for url in url_list:
-            if 'youtu' not in url:
+            if ('youtu' not in url) and ('nicovideo.jp/watch/sm' not in url):
                 break # only do this for youtube links
             if '/user/' in url:
                 break # don't do this for user pages, no useful info in title
@@ -38,7 +38,7 @@ class link(Module):
                 continue
             response = '*** title: ' + escape(html_unescape(title))
             self.bot.irc.servers[event.server].privmsg(event.from_to, response)
-            return # don't spam us tryna get every title
+            return # don't spam us tryna return every title
 
 def urls(input_str):
     url_list = []

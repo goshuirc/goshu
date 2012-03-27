@@ -29,7 +29,11 @@ class dictionary(Module):
         if command.arguments.strip() == '':
             return
 
-        dictionary_info = json.loads(open('config'+os.sep+'modules'+os.sep+filename_escape(self.name)+os.extsep+'json').read())
+        try:
+            dictionary_info = json.loads(open('config'+os.sep+'modules'+os.sep+filename_escape(self.name)+os.extsep+'json').read())
+        except:
+            print('no api key file')
+            return
 
         url = 'http://api.wordnik.com/v4/word.json/'
         url += urllib.parse.urlencode({b'' : unescape(command.arguments.strip())})[1:]

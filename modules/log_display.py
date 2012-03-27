@@ -79,10 +79,16 @@ class a_log_display(Module):
             output += '/c3- '
             output += '/c14</c'
             try:
-                if self.bot.irc.servers[event.server].info['channels'][event.target]['users'][event.source.split('!')[0]] == '': # prefix: +%@&~
+                selected_mode = ''
+
+                for mode in ['~', '&', '@', '%', '+']:
+                    if mode in self.bot.irc.servers[event.server].info['channels'][event.target]['users'][event.source.split('!')[0]]:
+                        output += mode
+                        selected_mode = mode
+                        break
+
+                if not selected_mode:
                     output += ' '
-                else:
-                    output += self.bot.irc.servers[event.server].info['channels'][event.target]['users'][event.source.split('!')[0]]
             except:
                 output += ' '
             output += self.nick_color(event.source.split('!')[0])
@@ -106,8 +112,8 @@ class a_log_display(Module):
         elif event.type in ['action', ]:
             output += '/c3-/c'
             if event.direction == 'in':
-                output += event.target.split('!')[0]
-                targets.append(event.target.split('!')[0])
+                output += event.source.split('!')[0]
+                targets.append(event.source.split('!')[0])
             else:
                 output += event.target
                 targets.append(event.target)

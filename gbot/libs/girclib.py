@@ -85,26 +85,13 @@ class IRC:
         """Call handle functions, and all that fun stuff."""
         self.servers[event.server].update_info(event)
         called = []
-        if event.type in self.handlers[event.direction]:
-            for h in self.handlers[event.direction][event.type]:
-                if h[1] not in called:
-                    called.append(h[1])
-                    h[1](event)
-        if 'all' in self.handlers[event.direction]:
-            for h in self.handlers[event.direction]['all']:
-                if h[1] not in called:
-                    called.append(h[1])
-                    h[1](event)
-        if event.type in self.handlers['all']:
-            for h in self.handlers['all'][event.type]:
-                if h[1] not in called:
-                    called.append(h[1])
-                    h[1](event)
-        if 'all' in self.handlers['all']:
-            for h in self.handlers['all']['all']:
-                if h[1] not in called:
-                    called.append(h[1])
-                    h[1](event)
+        for event_direction in [event.direction, 'all']:
+            for event_type in [event.type, 'all']:
+                if event_type in self.handlers[event_direction]:
+                    for h in self.handlers[event_direction][event_type]:
+                        if h[1] not in called:
+                            called.append(h[1])
+                            h[1](event)
 
     def _handle_ping(self, event):
         self.servers[event.server].pong(event.arguments[0])
@@ -208,6 +195,7 @@ class ServerConnection:
         if event.type == 'join':
             self.create_user(event.source)
             self.create_channel(event.target)
+            self.info['channels'][event.target]['users'][event.source.split('!')[0]] = ''
 
         elif event.type == 'namreply':
             self.info['channels'][event.arguments[1]]['users'] = {}
@@ -223,8 +211,12 @@ class ServerConnection:
 
         elif event.type == 'currenttopic':
             self.create_channel(event.arguments[0])
-            self.info['channels'][event.arguments[0]]['topic'] = {}
             self.info['channels'][event.arguments[0]]['topic']['topic'] = event.arguments[1]
+
+        elif event.type == 'topicinfo':
+            self.create_channel(event.arguments[0])
+            self.info['channels'][event.arguments[0]]['topic']['user'] = event.arguments[1]
+            self.info['channels'][event.arguments[0]]['topic']['time'] = event.arguments[2]
 
         elif event.type == 'nick':
             for channel in self.info['channels'].copy():
@@ -240,15 +232,29 @@ class ServerConnection:
             except:
                 ...
 
+        elif event.type == 'kick':
+            try:
+                del self.info['channels'][event.target]['users'][event.arguments[0]]
+            except:
+                ...
+
         elif event.type == 'quit':
             for channel in self.info['channels']:
                 if event.source.split('!')[0] in self.info['channels'][channel]['users']:
                     del self.info['channels'][channel]['users'][event.source.split('!')[0]]
             del self.info['users'][event.source.split('!')[0]]
 
-        elif event.type == 'join':
-            self.create_user(event.source)
-            self.info['channels'][event.target]['users'][event.source.split('!')[0]] = ''
+        elif event.type == 'mode':
+            for mode in irclib3._parse_modes(" ".join(event.arguments), "bklvohaq"):
+                if mode[1] not in mode_dict:
+                    continue
+
+                if mode[0] == '-':
+                    if mode_dict[mode[1]] in self.info['channels'][event.target]['users'][mode[2]]:
+                        self.info['channels'][event.target]['users'][mode[2]] = self.info['channels'][event.target]['users'][mode[2]].replace(mode_dict[mode[1]], '')
+                elif mode[0] == '+':
+                    if mode_dict[mode[1]] not in self.info['channels'][event.target]['users'][mode[2]]:
+                        self.info['channels'][event.target]['users'][mode[2]] += mode_dict[mode[1]]
 
     def create_user(self, user):
         user_nick = user.split('!')[0]
@@ -259,7 +265,10 @@ class ServerConnection:
 
     def create_channel(self, channel):
         if channel not in self.info['channels']:
-            self.info['channels'][channel] = {}
+            self.info['channels'][channel] = {
+                'topic' : {},
+                'users' : {}
+            }
 
 
 class Event:
@@ -295,12 +304,12 @@ def escape(string):
     return string
 
 unescape_dict = {
-        '/' : '/', # unescape real slashes
-        'b' : '\x02', # bold
-        'c' : '\x03', # color
-        'i' : '\x1d', # italic
-        'u' : '\x1f', # underline
-        'r' : '\x0f', # reset
+    '/' : '/', # unescape real slashes
+    'b' : '\x02', # bold
+    'c' : '\x03', # color
+    'i' : '\x1d', # italic
+    'u' : '\x1f', # underline
+    'r' : '\x0f', # reset
 }
 
 def unescape(in_string):
@@ -323,3 +332,11 @@ def unescape(in_string):
         if len(in_string) < 1:
             break
     return out_string
+
+mode_dict = {
+    'v' : '+', # voice
+    'h' : '%', # hop
+    'o' : '@', # op
+    'a' : '&', # protected
+    'q' : '~'  # owner
+}
