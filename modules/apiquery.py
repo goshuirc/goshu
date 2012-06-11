@@ -74,7 +74,7 @@ class apiquery(Module):
             url += querydata['urlpost']
 
         try:
-            query_results = urllib.request.urlopen(url)
+            query_results = urllib.request.urlopen(url, timeout=5) #seconds
             json_results = json.loads(query_results.read().decode('utf-8'))
             if 'html_unescape' in querydata:
                 do_unescape = querydata['html_unescape']

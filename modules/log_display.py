@@ -112,8 +112,8 @@ class a_log_display(Module):
         elif event.type in ['action', ]:
             output += '/c3-/c'
             if event.direction == 'in':
-                output += event.source.split('!')[0]
-                targets.append(event.source.split('!')[0])
+                output += event.from_to
+                targets.append(event.from_to)
             else:
                 output += event.target
                 targets.append(event.target)
@@ -143,11 +143,11 @@ class a_log_display(Module):
             output += event.source.split('!')[0]
 
         elif event.type in ['kick', ]:
-            targets.append(event.target)
+            targets.append(escape(event.target))
             output += '/c6-/c!/c6-/c10 '
             output += event.arguments[0]
             output += '/c was kicked from '
-            output += event.target
+            output += escape(event.target)
             output += ' by '
             output += event.source.split('!')[0]
             output += ' /c14[/c'
@@ -162,7 +162,7 @@ class a_log_display(Module):
             output += event.source.split('!')[1]
             output += '/c14]/c '
             output += 'has joined /b'
-            output += event.target
+            output += escape(event.target)
 
         elif event.type in ['nick', ]:
             output += '/c6-/c!/c6-/c10 '

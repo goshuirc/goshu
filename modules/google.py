@@ -13,7 +13,9 @@ from gbot.libs.helper import filename_escape, html_unescape
 import os
 import sys
 import json
+import gbot.libs.demjson as demjson
 import urllib.request, urllib.parse, urllib.error
+import xml.sax.saxutils as saxutils
 
 class google(Module):
     name = 'google'
@@ -116,19 +118,20 @@ class google(Module):
         url = 'https://www.google.com/ig/calculator?'
         url += urllib.parse.urlencode({b'q' : unescape(query)})
 
-        try:
+        #try:
+        if True:
             calc_result = urllib.request.urlopen(url)
-            calc_read = calc_result.read().decode('utf-8')
-            calc_split = calc_read.split('"')
+            charset = calc_result.headers._headers[1][1].split('charset=')[1]
+            calc_read = calc_result.read().decode(charset)
 
-            #q_from = json_result['lhs']
-            #q_to = json_result['rhs']
-            q_from = calc_split[1]
-            q_to = calc_split[3]
+            json_result = demjson.decode(calc_read)
+            q_from = json_result['lhs']
+            q_to = saxutils.unescape(json_result['rhs'].replace('<sup>', '^').replace('</sup>', '').replace('&#215;', '×'))
+
             if q_from == '' or q_to == '':
                 return False
             final_result = '/i' + escape(q_from) + '/i is /i' + escape(q_to) + '/i'
-        except:
-            final_result = False
+        #except:
+        #    final_result = False
 
         return final_result

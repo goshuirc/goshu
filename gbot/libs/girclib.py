@@ -69,15 +69,17 @@ class IRC:
     def _handle_irclib(self, connection, event):
         if event.eventtype() in ['privmsg', 'pubmsg', 'privnotice', 'pubnotice', 'action', 'currenttopic',
                                  'motd', 'endofmotd', 'yourhost', 'endofnames', 'ctcp', 'topic', 'quit',
-                                 'part', 'kick', ]:
+                                 'part', 'kick', 'kick', 'join',]:
             event_arguments = []
             for arg in event.arguments():
                 event_arguments.append(escape(arg))
         else:
-            #event_arguments = event.arguments()
-            event_arguments = []
-            for arg in event.arguments():
-                event_arguments.append(escape(arg))
+            event_arguments = event.arguments()
+            #event_arguments = []
+            #for arg in event.arguments():
+            #    event_arguments.append(escape(arg))
+        #if 'raw' not in event.eventtype():
+        #    print("    ", event.eventtype(), ' ', str(event_arguments))
         new_event = Event(self, self.name(connection), 'in', event.eventtype(), event.source(), event.target(), event_arguments)
         self._handle_event(new_event)
 
@@ -182,12 +184,18 @@ class ServerConnection:
         self.connection.pong(target)
         self.irc._handle_event(Event(self.irc, self.name, 'out', 'pong', self.info['connection']['nick'], target))
 
-    def privmsg(self, target, message):
-        self.connection.privmsg(target, unescape(message))
+    def privmsg(self, target, message, chanserv_escape=True):
         if irclib3.is_channel(target):
             command = 'pubmsg'
+            if chanserv_escape and message[0] == '.':
+                message_escaped = message[0]
+                message_escaped += '/b/b'
+                message_escaped += message[1:]
+                message = message_escaped
         else:
             command = 'privmsg'
+
+        self.connection.privmsg(target, unescape(message))
         self.irc._handle_event(Event(self.irc, self.name, 'out', command, self.info['connection']['nick'], target, [message]))
 
 

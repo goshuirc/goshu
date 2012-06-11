@@ -12,7 +12,7 @@ times however, you wish a small task was taken care of for you. This module
 if chock full of little extensions and helper functions I've written while
 writing programs.
 Things like converting bytes to a human-readable string, an easy progress
-meter function, small interesting stuff like that.
+meter function---small interesting stuff like that.
 
 Functions:
 
@@ -20,6 +20,7 @@ is_ok() -- prompt the user for yes/no and returns True/False
 bytes_to_str() -- convert number of bytes to a human-readable format
 filename_escape() -- escapes a filename (slashes removed, etc)
 html_unescape() -- unescapes a string's &str; characters to normal
+utf8_bom() -- removes the utf8 bom, because open() decides to leave it in
 
 """
 
@@ -439,20 +440,22 @@ Safe local filename string
     return safe
 
 
+
+import xml.sax.saxutils as saxutils
+
 _unescape_map = {
-    '&amp;' : '&',
-    '&lt;' : '<',
-    '&gt;' : '>',
-    '&quot;' : '"',
     '&#39;' : "'",
     '&#039;' : "'",
+    '&quot;' : "'",
 }
+
 def html_unescape(input):
-    """Unescapes a string from using html-escaped &str; characters to the actual ones."""
-    output = input
+    """Turns any html-escaped characters back to their normal equivalents."""
+    output = saxutils.unescape(input)
     for char in _unescape_map.keys():
         output = output.replace(char, _unescape_map[char])
     return output
+
 
 
 def utf8_bom(input):

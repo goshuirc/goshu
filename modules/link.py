@@ -28,7 +28,7 @@ class link(Module):
 
         for url in url_list:
             if ('youtu' not in url) and ('nicovideo.jp/watch/sm' not in url):
-                break # only do this for youtube links
+                break # only do this for youtube/niconico links
             if '/user/' in url:
                 break # don't do this for user pages, no useful info in title
             if 'youtuberepeat.com' in url:
