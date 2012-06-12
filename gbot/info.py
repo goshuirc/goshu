@@ -11,6 +11,7 @@ from .libs import helper
 import hashlib
 import json
 import codecs
+import os
 
 class Manager():
     """Manages info/settings; to be subclassed."""
@@ -71,16 +72,21 @@ class Manager():
     def save(self, path=None):
         """Save `self.store` in file at `path`, or `self.path`."""
         if path:
-            file = open(path, 'w')
-            file.write(json.dumps(self.store, sort_keys=True, indent=4))
-            file.close()
+            save_path = path
         elif self.path:
-            file = open(self.path, 'w')
-            file.write(json.dumps(self.store, sort_keys=True, indent=4))
-            file.close()
+            save_path = self.path
         else:
             if self.bot.DEBUG:
                 print(self.name+'.save : no path to save to')
+            return
+
+        save_dir = save_path.rsplit(os.sep, 1)[0]
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+
+        file = open(save_path, 'w')
+        file.write(json.dumps(self.store, sort_keys=True, indent=4))
+        file.close()
 
     def update(self):
         """Update the current data file, to be overwritten by subclass."""
