@@ -47,7 +47,6 @@ except ImportError:
 	# and install
 	old_path = os.getcwd()
 	os.chdir(unzip_path)
-	print(os.getcwd())
 	os.system(sys.executable + ' ' + 'setup.py build')
 	os.system(sys.executable + ' ' + 'setup.py install')
 	os.chdir(old_path)
