@@ -118,8 +118,7 @@ class google(Module):
         url = 'https://www.google.com/ig/calculator?'
         url += urllib.parse.urlencode({b'q' : unescape(query)})
 
-        #try:
-        if True:
+        try:
             calc_result = urllib.request.urlopen(url)
             charset = calc_result.headers._headers[1][1].split('charset=')[1]
             calc_read = calc_result.read().decode(charset)
@@ -131,7 +130,7 @@ class google(Module):
             if q_from == '' or q_to == '':
                 return False
             final_result = '/i' + escape(q_from) + '/i is /i' + escape(q_to) + '/i'
-        #except:
-        #    final_result = False
+        except:
+            final_result = False
 
         return final_result
