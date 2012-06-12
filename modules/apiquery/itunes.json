@@ -3,10 +3,10 @@
     "description": "<query> --- return itunes media", 
     "url": "http://itunes.apple.com/search?limit=2&term=", 
     "response": [
-    	["json", "['results'][0]['artistName']"], 
-    	["text", " --- "], 
-    	["json", "['results'][0]['trackName']"], 
-    	["text", " --- "], 
-    	["json", "['results'][0]['trackViewUrl']"]
+        ["json", "['results'][0]['artistName']"], 
+        ["text", " --- "], 
+        ["json", "['results'][0]['trackName']"], 
+        ["text", " --- "], 
+        ["json", "['results'][0]['trackViewUrl']"]
     ]
 }

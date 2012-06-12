@@ -3,10 +3,10 @@
     "description": "<query> --- music search!", 
     "url": "https://api.soundcloud.com/tracks.json?client_id=e3dfa9998292005f9e73329b1dd9dfb7&q=", 
     "response": [
-    	["json", "[0]['title']"], 
-    	["text", " by "], 
-    	["json", "[0]['user']['username']"], 
-    	["text", " --- "], 
-    	["json", "[0]['permalink_url']"]
+        ["json", "[0]['title']"], 
+        ["text", " by "], 
+        ["json", "[0]['user']['username']"], 
+        ["text", " --- "], 
+        ["json", "[0]['permalink_url']"]
     ]
 }

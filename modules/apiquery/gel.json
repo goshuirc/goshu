@@ -3,12 +3,12 @@
     "description": "<query> --- stupid videos and all that fun stuff", 
     "url": "http://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&limit=1&tags=", 
     "response": [
-    	["escaped_text", "http://gelbooru.com/index.php?page=post&s=view&id="], 
-    	["json", "[0]['id']"], 
-    	["text", "  rating:/b"],
+        ["escaped_text", "http://gelbooru.com/index.php?page=post&s=view&id="], 
+        ["json", "[0]['id']"], 
+        ["text", "  rating:/b"],
         ["json", "[0]['rating']"],
-    	["text", "/b  /c14["],
-    	["json", "[0]['tags']"],
-    	["text", "]"]
+        ["text", "/b  /c14["],
+        ["json", "[0]['tags']"],
+        ["text", "]"]
     ]
 }

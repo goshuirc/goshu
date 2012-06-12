@@ -3,8 +3,8 @@
     "description": "<query> --- stupid videos and all that fun stuff", 
     "url": "https://gdata.youtube.com/feeds/api/videos?alt=jsonc&v=2&max-results=1&q=", 
     "response": [
-    	["json", "['data']['items'][0]['title']"], 
-    	["escaped_text", " - http://youtu.be/"], 
-    	["json", "['data']['items'][0]['id']"]
+        ["json", "['data']['items'][0]['title']"], 
+        ["escaped_text", " - http://youtu.be/"], 
+        ["json", "['data']['items'][0]['id']"]
     ]
 }
