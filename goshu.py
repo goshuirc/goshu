@@ -17,6 +17,10 @@ if sys.stdout.encoding.lower() != 'utf-8':
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding=sys.stdout.encoding, errors='replace', line_buffering=True)
 
+#delete old colorama install dir
+if os.path.exists('autoinstall'):
+	import shutil
+	shutil.rmtree('autoinstall')
 #automatically download/install colorama if needed
 try:
 	import colorama
