@@ -1,4 +1,4 @@
-Goshubot - _goshu3_d
+Goshubot - _goshu3_
 ===================
 
 Python3 IRC Bot, using the [irc](http://sourceforge.net/projects/python-irclib/) and [colorama](http://pypi.python.org/pypi/colorama) libraries
