@@ -9,7 +9,7 @@
 
 import bisect
 
-import irc.client
+import irc.client, irc.modes
 
 class IRC:
     """Wrapper for irclib's IRC class."""
@@ -253,7 +253,7 @@ class ServerConnection:
             del self.info['users'][event.source.split('!')[0]]
 
         elif event.type == 'mode':
-            for mode in irc.client._parse_modes(" ".join(event.arguments), "bklvohaq"):
+            for mode in irc.modes._parse_modes(" ".join(event.arguments), "bklvohaq"):
                 if mode[1] not in mode_dict:
                     continue
 

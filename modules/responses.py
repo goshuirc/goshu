@@ -37,6 +37,8 @@ class responses(Module):
                         f = open(dirpath+os.sep+file, encoding='utf8')
                         f_read = utf8_bom(f.read())
                         info = json.loads(f_read)
+                    else:
+                        continue
                 except ValueError:
                     continue
 

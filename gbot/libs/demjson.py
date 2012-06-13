@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 r""" A JSON data encoder and decoder.
@@ -737,8 +737,8 @@ def isstringtype( obj ):
     # Must also check for some other pseudo-string types
     import types, collections
     return isinstance(obj, str) \
-           or isinstance(obj, collections.UserString) \
-           or isinstance(obj, collections.MutableString)
+           or isinstance(obj, collections.UserString) #\
+           #or isinstance(obj, collections.MutableString) # py3 does not have MutableStrings anymore
 
 
 # ----------------------------------------------------------------------
@@ -1191,7 +1191,7 @@ class JSON(object):
             if decpt is None and exponent >= 0:
                 # An integer
                 if ept:
-                    n = int(''.join()[:ept])
+                    n = int(''.join(number)[:ept]) # py3 join needs arg, fixed it
                 else:
                     n = int(''.join(number))
                 n *= sign
@@ -1384,10 +1384,11 @@ class JSON(object):
         """Encodes a Python string into a JSON string literal.
 
         """
+        #print('\n\nSTRING ==', [s], '\n') #py3 debug
         # Must handle instances of UserString specially in order to be
         # able to use ord() on it's simulated "characters".
         import collections
-        if isinstance(s, (collections.UserString, collections.MutableString)):
+        if isinstance(s, collections.UserString): #(collections.UserString, collections.MutableString)): # py3 no mutable
             def tochar(c):
                 return c.data
         else:
@@ -1442,13 +1443,14 @@ class JSON(object):
             elif cord <= 0xFFFF:
                 # Other BMP Unicode character
                 if isinstance(encunicode, bool):
-                    doesc = encunicode
+                    doesc = encunicode # py3 derp, failing test case
                 else:
                     doesc = encunicode( c )
                 if doesc:
                     chunks.append(r'\u%04x' % cord)
                 else:
-                    chunks.append( c )
+                    chunks.append( c ) # py3 derp 2, look into failing test case
+                    #print('   char is ', [c]) # py3 debug
                 i += 1
             else: # ord(c) >= 0x10000
                 # Non-BMP Unicode

@@ -27,16 +27,19 @@ class google(Module):
                 'google' : [self.google_search, '<query> --- google something, get results', 0],
             },
         }
-        self.dynamic_path = 'modules'+os.sep+'google'
+        self.dynamic_path = 'modules'+os.sep+self.name
 
     def commands(self):
         output = Module.commands(self)
         for (dirpath, dirs, files) in os.walk(self.dynamic_path):
+            print((dirpath, dirs, files))
             for file in files:
                 try:
                     (name, ext) = os.path.splitext(file)
                     if ext == os.extsep + 'json':
                         info = json.loads(open(dirpath+os.sep+file).read())
+                    else:
+                        continue
                 except ValueError:
                     continue
 

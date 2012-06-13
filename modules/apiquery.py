@@ -33,6 +33,8 @@ class apiquery(Module):
                     (name, ext) = os.path.splitext(file)
                     if ext == os.extsep + 'json':
                         info = json.loads(open(dirpath+os.sep+file).read())
+                    else:
+                        continue
                 except ValueError:
                     continue
 
