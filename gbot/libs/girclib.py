@@ -9,13 +9,13 @@
 
 import bisect
 
-from . import irclib3
+import irc.client
 
 class IRC:
     """Wrapper for irclib's IRC class."""
 
     def __init__(self):
-        self.irc = irclib3.IRC()
+        self.irc = irc.client.IRC()
 
         self.servers = {} # server connections
         self.connections = [] # dcc connections
@@ -26,7 +26,7 @@ class IRC:
         }
 
         self.irc.add_global_handler('all_events', self._handle_irclib)
-        self.irc.remove_global_handler('irc', irclib3._ping_ponger)
+        self.irc.remove_global_handler('irc', irc.client._ping_ponger)
         self.add_handler('in', 'ping', self._handle_ping, -42)
 
 
@@ -36,7 +36,7 @@ class IRC:
         return connection
 
     def dcc(self, dcctype="chat"):
-        c = irclib3.DCCConnection(dcctype)
+        c = irc.client.DCCConnection(dcctype)
         self.connections.append(c)
         return c
 
@@ -185,7 +185,7 @@ class ServerConnection:
         self.irc._handle_event(Event(self.irc, self.name, 'out', 'pong', self.info['connection']['nick'], target))
 
     def privmsg(self, target, message, chanserv_escape=True):
-        if irclib3.is_channel(target):
+        if irc.client.is_channel(target):
             command = 'pubmsg'
             if chanserv_escape and message[0] == '.':
                 message_escaped = message[0]
@@ -253,7 +253,7 @@ class ServerConnection:
             del self.info['users'][event.source.split('!')[0]]
 
         elif event.type == 'mode':
-            for mode in irclib3._parse_modes(" ".join(event.arguments), "bklvohaq"):
+            for mode in irc.client._parse_modes(" ".join(event.arguments), "bklvohaq"):
                 if mode[1] not in mode_dict:
                     continue
 
@@ -348,3 +348,6 @@ mode_dict = {
     'a' : '&', # protected
     'q' : '~'  # owner
 }
+
+class NickMask(irc.client.NickMask):
+    ...

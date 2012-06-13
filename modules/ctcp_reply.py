@@ -9,7 +9,7 @@
 
 from time import strftime, localtime, gmtime
 from gbot.modules import Module
-from gbot.libs.irclib3 import nm_to_n
+from gbot.libs.girclib import NickMask
 
 class ctcp_reply(Module):
     name = "ctcp_reply"
@@ -24,27 +24,27 @@ class ctcp_reply(Module):
     def ctcp_reply(self, event):
 
         if event.arguments[0] == 'VERSION':
-            self.bot.irc.servers[event.server].ctcp_reply(nm_to_n(event.source), 'VERSION Goshubot:3:None')
+            self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'VERSION Goshubot:3:None')
 
         elif event.arguments[0] == 'SOURCE':
-            self.bot.irc.servers[event.server].ctcp_reply(nm_to_n(event.source), 'SOURCE github.com/Danneh/Goshubot')
+            self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'SOURCE github.com/Danneh/Goshubot')
 
         elif event.arguments[0] == 'USERINFO':
             userinfostring = None
             #userinfostring = "Please don't kline me, I'll play nice!"
             if userinfostring:
-                self.bot.irc.servers[event.server].ctcp_reply(nm_to_n(event.source), "USERINFO :%s" % userinfostring)
+                self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, "USERINFO :%s" % userinfostring)
 
         elif event.arguments[0] == 'CLIENTINFO':
-            self.bot.irc.servers[event.server].ctcp_reply(nm_to_n(event.source), 'CLIENTINFO :Understood CTCP Pairs: CLIENTINFO, ERRMSG, PING, SOURCE, TIME, USERINFO, VERSION')
+            self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'CLIENTINFO :Understood CTCP Pairs: CLIENTINFO, ERRMSG, PING, SOURCE, TIME, USERINFO, VERSION')
 
         elif event.arguments[0] == 'ERRMSG':
             #self.bot.irc.servers[event.server].ctcp_reply(nm_to_n(event.source, 'ERRMSG '+event.arguments()[1]+':ERRMSG echo, no error has occured') #could be bad, errmsg-storm, anyone?
             pass
 
         elif event.arguments[0] == 'TIME':
-            self.bot.irc.servers[event.server].ctcp_reply(nm_to_n(event.source), 'TIME '+strftime("%a %b %d, %H:%M:%S %Y", localtime()))
+            self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'TIME '+strftime("%a %b %d, %H:%M:%S %Y", localtime()))
 
         elif event.arguments[0] == 'PING':
             if len(event.arguments) > 1:
-                self.bot.irc.servers[event.server].ctcp_reply(nm_to_n(event.source), "PING " + event.arguments[1])
+                self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, "PING " + event.arguments[1])
