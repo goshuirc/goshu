@@ -4,6 +4,9 @@
 ## windows cache
 *Thumbs.db
 
+## mac cache
+.DS_Store
+
 ## ide files
 .project
 .pydevproject
@@ -20,3 +23,6 @@ config/*
 logs/*
 suggestions/*
 autoinstall/*
+
+## 2to3, mainly
+*.bak
