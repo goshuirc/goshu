@@ -15,6 +15,7 @@ import sys
 import json
 import gbot.libs.demjson as demjson
 import urllib.request, urllib.parse, urllib.error
+import socket
 import xml.sax.saxutils as saxutils
 
 class google(Module):
@@ -115,6 +116,8 @@ class google(Module):
                 url_result = 'No Results'
         except urllib.error.URLError:
             url_result = 'Connection Error'
+        except socket.timeout:
+            result = 'Connection timed out'
         return url_result
 
     def google_calc_search(self, query):

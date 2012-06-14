@@ -11,6 +11,7 @@ from gbot.modules import Module
 from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import filename_escape
 import urllib.request, urllib.parse, urllib.error
+import socket
 import json
 import os
 from pprint import pprint
@@ -59,6 +60,9 @@ class dictionary(Module):
 
         except urllib.error.URLError:
             response += 'You broke it, nice job'
+
+        except socket.timeout:
+            response = 'Connection timed out'
 
         except urllib.error.HTTPError as error_code:
             if '404' in error_code:

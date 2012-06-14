@@ -11,6 +11,7 @@ from gbot.modules import Module
 from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import filename_escape, html_unescape
 import urllib.request, urllib.parse, urllib.error
+import socket # for timeout
 import json
 import sys
 import os
@@ -90,6 +91,8 @@ class apiquery(Module):
             result = 'Connection Error'
         except ValueError:
             result = 'No Results'
+        except socket.timeout:
+            result = 'Connection timed out'
 
         response = '*** ' + querydata['name'] + ': ' + result
         self.bot.irc.servers[event.server].privmsg(event.from_to, response)

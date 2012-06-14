@@ -11,6 +11,7 @@ from gbot.modules import Module
 from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import filename_escape
 import urllib.request, urllib.parse, urllib.error
+import socket
 import json
 import sys
 import os
@@ -124,6 +125,8 @@ class danbooru(Module):
 
         try:
             search_results = urllib.request.urlopen(api_url)
+        except socket.timeout:
+            result = 'Connection timed out'
         except:
             return 'Connection Error'
 
