@@ -114,10 +114,13 @@ class google(Module):
                 url_result += escape(json_result['responseData']['results'][0]['unescapedUrl'])
             except:
                 url_result = 'No Results'
+
         except urllib.error.URLError:
             url_result = 'Connection Error'
+
         except socket.timeout:
             result = 'Connection timed out'
+            
         return url_result
 
     def google_calc_search(self, query):

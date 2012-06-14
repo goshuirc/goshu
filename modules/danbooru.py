@@ -125,15 +125,18 @@ class danbooru(Module):
 
         try:
             search_results = urllib.request.urlopen(api_url)
+
         except socket.timeout:
             result = 'Connection timed out'
-        except:
+
+        except urllib.error.URLError:
             return 'Connection Error'
 
         results_http = search_results.read().decode('utf-8')
 
         try:
             results_json = json.loads(results_http)
+            
         except ValueError:
             return "Not a JSON response"
 
