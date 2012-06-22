@@ -525,7 +525,8 @@ class ServerConnection(Connection):
             self.socket.bind((self.localaddress, self.localport))
             self.socket.connect((self.server, self.port))
             if ssl:
-                self.ssl = ssl_mod.wrap_socket(self.socket)
+                #self.ssl = ssl_mod.wrap_socket(self.socket)
+                self.socket = ssl_mod.wrap_socket(self.socket)
         except socket.error as err:
             self.socket.close()
             self.socket = None
@@ -586,10 +587,7 @@ class ServerConnection(Connection):
         """[Internal]"""
 
         try:
-            if self.ssl:
-                new_data = self.ssl.read(2 ** 14)
-            else:
-                new_data = self.socket.recv(2 ** 14)
+            new_data = self.socket.recv(2 ** 14)
             try: # handles unicode/latin hybrid encoding, fairly common
                 new_data = new_data.decode('utf8')
             except UnicodeDecodeError:
