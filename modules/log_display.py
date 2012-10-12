@@ -219,7 +219,7 @@ class a_log_display(Module):
                 output = '/c14 New Day - ' + strftime("%A %B %d, %H:%M:%S %Y", localtime()) + '\n' + output
                 self.logfiles_open[target] = strftime("%A %B %d", localtime())
 
-            outfile = open(path, 'a', encoding='utf-8')
+            outfile = open(path.lower(), 'a', encoding='utf-8')
             outfile.write(unescape(output) + '\n')
             outfile.close()
 

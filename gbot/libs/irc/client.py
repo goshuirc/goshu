@@ -591,7 +591,12 @@ class ServerConnection(Connection):
             try: # handles unicode/latin hybrid encoding, fairly common
                 new_data = new_data.decode('utf8')
             except UnicodeDecodeError:
-                new_data = new_data.decode('cp1252')
+                try:
+                    new_data = new_data.decode('cp1252')
+                except UnicodeDecodeError:
+                    # damnit, will want to change this to go and figure out the
+                    #  actual encoding sometime
+                    new_data = new_data.decode('sjis', 'ignore')
 
         except socket.error:
             # The server hung up.

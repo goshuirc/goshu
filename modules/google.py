@@ -129,7 +129,10 @@ class google(Module):
 
         try:
             calc_result = urllib.request.urlopen(url)
-            charset = calc_result.headers._headers[1][1].split('charset=')[1]
+            try:
+                charset = calc_result.headers._headers[2][1].split('charset=')[1]
+            except IndexError:
+                charset = 'ISO-8859-1'
             calc_read = calc_result.read().decode(charset)
 
             json_result = demjson.decode(calc_read)

@@ -110,8 +110,10 @@ class responses(Module):
             if num not in responses:
                 num = '1'
 
-        response_num = random.randint(1, len(responses[num])) - 1
-        response = responses[num][response_num]
+        response_list = responses[num]
+        response_num = random.randint(1, len(response_list)) - 1
+        random.shuffle(response_list)
+        response = response_list[response_num]
 
         if type(response) == str:
             response = [response]

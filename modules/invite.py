@@ -21,3 +21,5 @@ class invite(Module):
 
     def invite(self, event):
         self.bot.irc.servers[event.server].join(event.arguments[0])
+        self.bot.irc.servers[event.server].privmsg(event.arguments[0], 'Thanks for inviting me, ' + event.source.split('!')[0])
+

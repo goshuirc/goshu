@@ -121,8 +121,6 @@ class danbooru(Module):
             api_position = '/posts.json?'
         api_url = url + api_position + encoded_tags
 
-        print(api_url)
-
         try:
             search_results = urllib.request.urlopen(api_url)
 

@@ -211,7 +211,9 @@ class ServerConnection:
             self.info['channels'][event.target]['users'][event.source.split('!')[0]] = ''
 
         elif event.type == 'namreply':
-            self.info['channels'][event.arguments[1]]['users'] = {}
+            # only create new dict if it doesn't exist, bakabaka
+            if 'users' not in self.info['channels'][event.arguments[1]]:
+                self.info['channels'][event.arguments[1]]['users'] = {}
             for user in event.arguments[2].split():
                 if user[0] in '+%@&~':
                     user_priv = user[0]
