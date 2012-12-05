@@ -9,9 +9,7 @@
 
 from time import strftime, localtime, gmtime
 import random
-
 import os
-
 from colorama import init
 init() #colorama
 from colorama import Fore, Back, Style

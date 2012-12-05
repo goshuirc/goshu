@@ -6,10 +6,12 @@
 # this stuff is worth it, you can buy me a beer in return Daniel Oakley
 # ----------------------------------------------------------------------------
 # Goshubot IRC Bot    -    http://danneh.net/goshu
+
 import os
 import sys
 import inspect
 import importlib
+
 
 class Module:
     """Module to add commands/functionality to the bot."""
@@ -23,6 +25,7 @@ class Module:
             command_list[command] = self.events['commands'][command]
 
         return command_list
+
 
 class Modules:
     """Manages goshubot's modules."""
