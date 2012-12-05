@@ -8,17 +8,14 @@
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 
 import bisect
-
 import ssl
-import irc
-import irc.client as irc_client
-import irc.modes as irc_modes
+import irc, irc.client
 
 class IRC:
     """Wrapper for irclib's IRC class."""
 
     def __init__(self):
-        self.irc = irc_client.IRC()
+        self.irc = irc.client.IRC()
 
         self.servers = {} # server connections
         self.connections = [] # dcc connections
@@ -29,7 +26,7 @@ class IRC:
         }
 
         self.irc.add_global_handler('all_events', self._handle_irclib)
-        self.irc.remove_global_handler('irc', irc_client._ping_ponger)
+        self.irc.remove_global_handler('irc', irc.client._ping_ponger)
         self.add_handler('in', 'ping', self._handle_ping, -42)
 
 
@@ -39,7 +36,7 @@ class IRC:
         return connection
 
     def dcc(self, dcctype="chat"):
-        c = irc_client.DCCConnection(dcctype)
+        c = irc.client.DCCConnection(dcctype)
         self.connections.append(c)
         return c
 
@@ -143,15 +140,12 @@ class ServerConnection:
             self.info['connection']['sslsock'] = sslsock
         if ipv6 != False:
             self.info['connection']['ipv6'] = ipv6
-        #self.connection.connect(address, port, nick, password, username, ircname, localaddress, localport, sslsock, ipv6)
-        server_address = (address, port)
+        
         if sslsock:
-            Factory = irc.connection.Factory(wrapper=ssl.wrap_socket)
+            Factory = irc.connection.Factory(wrapper=ssl.wrap_socket, ipv6=ipv6)
         else:            
-            Factory = irc.connection.Factory()
-
-        if ipv6:
-            Factory.from_legacy_params(ipv6=True)
+            Factory = irc.connection.Factory(ipv6=ipv6)
+        
         self.connection.connect(address, port, nick, password, username, ircname, Factory)
 
     def disconnect(self, message):
@@ -197,7 +191,7 @@ class ServerConnection:
         self.irc._handle_event(Event(self.irc, self.name, 'out', 'pong', self.info['connection']['nick'], target))
 
     def privmsg(self, target, message, chanserv_escape=True):
-        if irc_client.is_channel(target):
+        if irc.client.is_channel(target):
             command = 'pubmsg'
             if chanserv_escape and message[0] == '.':
                 message_escaped = message[0]
@@ -267,7 +261,7 @@ class ServerConnection:
             del self.info['users'][event.source.split('!')[0]]
 
         elif event.type == 'mode':
-            for mode in irc_modes._parse_modes(" ".join(event.arguments), "bklvohaq"):
+            for mode in irc.modes._parse_modes(" ".join(event.arguments), "bklvohaq"):
                 if mode[1] not in mode_dict:
                     continue
 
@@ -363,5 +357,5 @@ mode_dict = {
     'q' : '~'  # owner
 }
 
-class NickMask(irc_client.NickMask):
+class NickMask(irc.client.NickMask):
     ...
