@@ -16,8 +16,17 @@ class list(Module):
         self.events = {
             'commands' : {
                 'list' : [self.list, "[command] --- list all commands; if command is present, display info on that command instead~", 0],
+                'help' : [self.list, "[command] --- list all commands; if command is present, display info on that command instead~", 0],
             },
+            'in' : {
+                'privmsg' : [(0, self.privmsg)]
+            }
         }
+
+    def privmsg(self, event):
+        if event.arguments[0].lower() in ['help', 'hello', 'hi']:
+            line = 'Hello! I am a bot, to view the avaliable commands, please type ' + self.bot.settings.store['prefix'] + 'list'
+            self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], line)
 
     def list(self, event, command):
         bot_commands = []

@@ -10,6 +10,7 @@
 import os
 import sys
 import inspect
+import imp
 import importlib
 
 
@@ -65,6 +66,7 @@ class Modules:
     
     def load(self, name):
         whole_module = importlib.import_module(name)
+        imp.reload(whole_module)  # so reloading works
 
         # find the actual goshu Module we wanna load from the whole module
         module = None
