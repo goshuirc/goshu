@@ -16,12 +16,24 @@ class accounts(Module):
         self.events = {
             'commands' : {
                 'register' : [self.register, '<username> <password> [email] --- register a goshu account', 0],
-                'login' : [self.login, '<username> <password> --- login to a goshu account', 0],
+                'login' : [self.login, '[[username] [password]] --- login to a goshu account, if no user/pass use nickserv integration', 0],
                 'loggedin' : [self.loggedin, '--- see if you are logged in', 0],
                 'owner' : [self.owner, '<password> --- make yourself a bot owner', 0, 10],
                 'setaccess' : [self.setaccess, "<username> <level> --- set user's access level", 1],
+                'nickserv' : [self.nickserv, "<link/list/del> --- link, list, or delete nickserv-goshu accounts", 0]
+            },
+            'in' : {
+                'notice' : [(-30, self.nickserv_listener)],
             },
         }
+
+
+    def nickserv(self, event, command):
+        ...
+
+    def nickserv_listener(self, event):
+        #self.bot.irc.servers[event.server].privmsg('nickserv', 'info '+event.arguments[0].split()[0])
+        print('/msg nickserv info '+event.arguments[0].split()[0])
 
 
     def register(self, event, command):
@@ -45,10 +57,11 @@ class accounts(Module):
     def login(self, event, command):
         user_args = command.arguments.split()
 
-        if len(user_args) < 2:
-            return
+        if user_args is None:
+            # Aww yeah nickserv attempt!
+            ...
 
-        if self.bot.accounts.login(user_args[0].lower(), user_args[1], event.server, event.source):
+        elif (len(user_args) > 1) and self.bot.accounts.login(user_args[0].lower(), user_args[1], event.server, event.source):
             self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], 'Login Accepted!')
 
 

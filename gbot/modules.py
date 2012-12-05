@@ -8,6 +8,8 @@
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 import os
 import sys
+import inspect
+import importlib
 
 class Module:
     """Module to add commands/functionality to the bot."""
@@ -22,52 +24,72 @@ class Module:
 
         return command_list
 
-class ModuleLoader:
-    """Prepares a list of modules."""
-
-    def __init__(self, path):
-        self.path = path
-
-    def __iter__(self):
-        for(dirpath, dirs, files) in os.walk(self.path):
-            if not dirpath in sys.path:
-                sys.path.insert(0, dirpath)
-            for file in files:
-                (name, ext) = os.path.splitext(file)
-                if ext == os.extsep + 'py':
-                    __import__(name, None, None, [''])
-
-        for module in Module.__subclasses__():
-            yield module()
-
 class Modules:
     """Manages goshubot's modules."""
 
     def __init__(self, bot):
         self.bot = bot
         self.modules = {}
+        self.paths = []
 
-    def load(self, path):
-        loader = ModuleLoader(path)
+    def add_path(self, path):
+        if not path in sys.path:
+            self.paths.append(path)
+            sys.path.insert(0, path)
+
+    def modules_from_path(self, path):
+        modules = []
+        for(dirpath, dirs, files) in os.walk(path):
+            for file in files:
+                (name, ext) = os.path.splitext(file)
+                if ext == os.extsep + 'py':
+                    modules.append(name)
+        return modules
+
+    def load_init(self, path):
+        self.add_path(path)
+        modules = self.modules_from_path(path)
         output = 'modules '
-        for module in loader:
-            if self.append(module):
-                output += module.name + ', '
+        for module in modules:
+            loaded_module = self.load(module)
+            if loaded_module is not None:
+                output += loaded_module.name + ', '
+            else:
+                output += module + '[FAILED], '
         output = output[:-2]
         output += ' loaded'
         print(output)
+    
+    def load(self, name):
+        whole_module = importlib.import_module(name)
 
-    def append(self, module):
-        if module not in self.modules:
-            self.modules[module.name] = module
-            for direction in ['in', 'out', 'commands', '*']:
-                if direction not in module.events:
-                    module.events[direction] = {}
-            module.folder_path = 'modules' + os.sep + module.name
-            module.bot = self.bot
-            return True
-        else:
+        # find the actual goshu Module we wanna load from the whole module
+        module = None
+        for item in inspect.getmembers(whole_module):
+            if item[1] in Module.__subclasses__():
+                module = item[1]()
+                break
+        if module is None:
+            return None
+
+        if module.name in self.modules:
+            return None
+
+        self.modules[module.name] = module
+        for direction in ['in', 'out', 'commands', '*']:
+            if direction not in module.events:
+                module.events[direction] = {}
+        module.folder_path = 'modules' + os.sep + module.name
+        module.bot = self.bot
+        return module
+
+    def unload(self, name):
+        if name not in self.modules:
+            print('module', name, 'not in', self.modules)
             return False
+
+        del self.modules[name]
+        return True
 
     def handle(self, event):
         called = []

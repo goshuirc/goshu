@@ -33,7 +33,7 @@ class list(Module):
                     command_view_permission = module_commands[command_name][3]
                 else:
                     command_view_permission = command_permission
-                if self.bot.accounts.access_level(event) >= command_view_permission:
+                if self.bot.accounts.access_level(self.bot.accounts.account(event.source, event.server)) >= command_view_permission:
                     bot_commands.append([command_name, command_description, command_permission])
         bot_commands = sorted(bot_commands)
 
@@ -41,15 +41,15 @@ class list(Module):
             # single command info
             for bot_command in bot_commands:
                 if bot_command[0] == command.arguments.split()[0]:
-                    command_permission = bot_command[2]
-                    if len(bot_command) >= 4:
-                        command_view_permission = bot_command[3]
-                    else:
-                        command_view_permission = command_permission
-                    if self.bot.accounts.access_level(event) >= command_view_permission:
+                    
+                    # fix help display for single help strings
+                    if isinstance(bot_command[1], str):
+                        bot_command[1] = [bot_command[1]]
+
+                    for help_string in bot_command[1]:
                         output = '*** Command:  ' + self.bot.settings.store['prefix']
                         output += bot_command[0] + ' '
-                        output += bot_command[1]
+                        output += help_string
 
                         self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], output)
 

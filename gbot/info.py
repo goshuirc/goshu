@@ -164,7 +164,7 @@ class Info(Manager):
         else:
             assumed_port = 6667
         self._update_attribute(old_server, new_server, 'connection.port', 'port', old_value=assumed_port)
-        self._update_attribute(old_server, new_server, 'nickserv_pass', 'nickserv password', can_ignore=True)
+        self._update_attribute(old_server, new_server, 'connection.nickserv_password', 'nickserv password', can_ignore=True)
 
         store[new_server_name] = new_server
 

@@ -73,7 +73,7 @@ info_path = 'config/irc.json'
 bot.info.use_file(info_path, update=True)
 
 modules_path = 'modules'
-bot.modules.load(modules_path)
+bot.modules.load_init(modules_path)
 
 
 bot.start()
