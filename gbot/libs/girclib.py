@@ -9,7 +9,7 @@
 
 import bisect
 import ssl
-import irc, irc.client
+import irc, irc.client, irc.modes
 
 class IRC:
     """Wrapper for irclib's IRC class."""
