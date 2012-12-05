@@ -1,15 +1,13 @@
 Goshubot - _goshu3_
 ===================
 
-Python3 IRC Bot, using the [irc](http://sourceforge.net/projects/python-irclib/) and [colorama](http://pypi.python.org/pypi/colorama) libraries
+Python3 IRC Bot, using the [irc](http://bitbucket.org/jaraco/irc) and [colorama](http://pypi.python.org/pypi/colorama) libraries
 
 Installing/Configuring
 ----------------------
-Simply download Python 3.x (3.2 is known to work), and run goshu.py with it.
+Simply download Python 3.x, and run goshu.py with it.
 
 If you don't have the colorama library, goshubot will automatically download and install it for you. Simple, eh?
-
-The other libraries are included—the irc library for example is a custom fork I've made, so I decided to bundle it.
 
 Modules
 -------

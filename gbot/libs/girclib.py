@@ -9,12 +9,10 @@
 
 import bisect
 
-try:
-    import irc.client as irc_client
-    import irc.modes as irc_modes
-except ImportError: # use local irc lib
-    from .irc import client as irc_client
-    from .irc import modes as irc_modes
+import ssl
+import irc
+import irc.client as irc_client
+import irc.modes as irc_modes
 
 class IRC:
     """Wrapper for irclib's IRC class."""
@@ -72,20 +70,20 @@ class IRC:
                 self.handlers[direction][event].remove(h)
 
     def _handle_irclib(self, connection, event):
-        if event.eventtype() in ['privmsg', 'pubmsg', 'privnotice', 'pubnotice', 'action', 'currenttopic',
+        if event.type in ['privmsg', 'pubmsg', 'privnotice', 'pubnotice', 'action', 'currenttopic',
                                  'motd', 'endofmotd', 'yourhost', 'endofnames', 'ctcp', 'topic', 'quit',
                                  'part', 'kick', 'kick', 'join',]:
             event_arguments = []
-            for arg in event.arguments():
+            for arg in event.arguments:
                 event_arguments.append(escape(arg))
         else:
-            event_arguments = event.arguments()
+            event_arguments = event.arguments
             #event_arguments = []
             #for arg in event.arguments():
             #    event_arguments.append(escape(arg))
         #if 'raw' not in event.eventtype():
         #    print("    ", event.eventtype(), ' ', str(event_arguments))
-        new_event = Event(self, self.name(connection), 'in', event.eventtype(), event.source(), event.target(), event_arguments)
+        new_event = Event(self, self.name(connection), 'in', event.type, event.source, event.target, event_arguments)
         self._handle_event(new_event)
 
     def _handle_event(self, event):
@@ -145,7 +143,16 @@ class ServerConnection:
             self.info['connection']['sslsock'] = sslsock
         if ipv6 != False:
             self.info['connection']['ipv6'] = ipv6
-        self.connection.connect(address, port, nick, password, username, ircname, localaddress, localport, sslsock, ipv6)
+        #self.connection.connect(address, port, nick, password, username, ircname, localaddress, localport, sslsock, ipv6)
+        server_address = (address, port)
+        if sslsock:
+            Factory = irc.connection.Factory(ssl.wrap_socket)
+        else:            
+            Factory = irc.connection.Factory()
+
+        if ipv6:
+            Factory.from_legacy_params(ipv6=True)
+        self.connection.connect(address, port, nick, password, username, ircname, Factory)
 
     def disconnect(self, message):
         self.info = {
