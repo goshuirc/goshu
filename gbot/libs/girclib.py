@@ -146,7 +146,7 @@ class ServerConnection:
         #self.connection.connect(address, port, nick, password, username, ircname, localaddress, localport, sslsock, ipv6)
         server_address = (address, port)
         if sslsock:
-            Factory = irc.connection.Factory(ssl.wrap_socket)
+            Factory = irc.connection.Factory(wrapper=ssl.wrap_socket)
         else:            
             Factory = irc.connection.Factory()
 
