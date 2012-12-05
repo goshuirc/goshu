@@ -7,7 +7,7 @@ Installing/Configuring
 ----------------------
 Simply download Python 3.x, and run goshu.py with it.
 
-If you don't have the colorama library, goshubot will automatically download and install it for you. Simple, eh?
+Deps: irc, colorama
 
 Modules
 -------
