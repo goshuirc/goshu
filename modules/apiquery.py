@@ -116,7 +116,7 @@ class apiquery(Module):
                 except KeyError:
                     raise ApiQueryError
 
-        return response
+        return response.replace('\n', ' ')
 
 class ApiQueryError(Exception):
     ...
