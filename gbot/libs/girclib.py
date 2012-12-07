@@ -261,6 +261,7 @@ class ServerConnection:
             del self.info['users'][event.source.split('!')[0]]
 
         elif event.type == 'mode':
+            # todo: channel modes, and user-only modes. Automagically populate mode tables from server join info
             for mode in irc.modes._parse_modes(" ".join(event.arguments), "bklvohaq"):
                 if mode[1] not in mode_dict:
                     continue
@@ -349,6 +350,7 @@ def unescape(in_string):
             break
     return out_string
 
+# todo: Automatically populate this from server join info
 mode_dict = {
     'v' : '+', # voice
     'h' : '%', # hop

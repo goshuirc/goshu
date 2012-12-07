@@ -29,7 +29,7 @@ class eggdrop(Module):
             },
         }
         
-        self.db_path = 'config'+os.sep+'modules'+os.sep+filename_escape(self.name)+os.extsep+'.sqlite'
+        self.db_path = 'config'+os.sep+'modules'+os.sep+filename_escape(self.name)+os.extsep+'sqlite'
         
         db_dir = self.db_path.rsplit(os.sep, 1)[0]
         if not os.path.exists(db_dir):
