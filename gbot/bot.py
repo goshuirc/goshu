@@ -10,13 +10,14 @@
 from . import info, irc, modules
 import logging
 
+
 class Bot:
     """Brings all of goshubot together in a nice happy class."""
 
     def __init__(self, debug=False):
         self.debug = debug
         self.logger = logging.Logger
-        
+
         self.accounts = info.Accounts(self)
         self.settings = info.Settings(self)
         self.info = info.Info(self)

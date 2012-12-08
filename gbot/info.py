@@ -13,6 +13,7 @@ import json
 import codecs
 import os
 
+
 class Manager():
     """Manages info/settings; to be subclassed."""
 
@@ -46,7 +47,7 @@ class Manager():
         if update:
             self.update()
 
-        self.save() # make sure we can save to the file
+        self.save()  # make sure we can save to the file
 
     def load(self, path=None):
         """Load data file from `path`, or `self.path`."""
@@ -216,6 +217,7 @@ class Info(Manager):
         if new_value != None:
             new_path[attribute_name] = new_value
 
+
 class Settings(Manager):
     """Manages goshubot settings."""
 
@@ -289,14 +291,12 @@ class Accounts(Manager):
             self.save()
             return False
 
-
     def account_exists(self, name):
         self.load()
         if name in self.store:
             return True
         else:
             return False
-
 
     def is_password(self, name, password):
         self.load()
@@ -310,7 +310,6 @@ class Accounts(Manager):
         if self.account_exists(name):
             self.store[name]['password'] = self._encrypt(password)
             self.save()
-
 
     def login(self, name, password, server, userstring):
         self.load()

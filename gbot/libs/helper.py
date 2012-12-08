@@ -28,6 +28,7 @@ import os
 import sys
 from getpass import getpass
 
+
 def split_num(line, chars=' ', maxsplits=1):
     """.split(chars, maxsplit) wrapper, to mitigate 'more values to unpack'
 
@@ -47,6 +48,7 @@ def split_num(line, chars=' ', maxsplits=1):
 
     return line
 
+
 def is_ok(prompt, blank='', clearline=False):
     """Prompt the user for yes/no and returns True/False
 
@@ -64,9 +66,9 @@ def is_ok(prompt, blank='', clearline=False):
         ok = new_input(prompt, newline=False, clearline=clearline).lower().strip()
 
         try:
-            if ok[0] == 'y' or ok[0] == 't' or ok[0] == '1': # yes, true, 1
+            if ok[0] == 'y' or ok[0] == 't' or ok[0] == '1':  # yes, true, 1
                 return True
-            elif ok[0] == 'n' or ok[0] == 'f' or ok[0] == '0': # no, false, 0
+            elif ok[0] == 'n' or ok[0] == 'f' or ok[0] == '0':  # no, false, 0
                 return False
 
         except IndexError:
@@ -93,7 +95,7 @@ def bytes_to_str(bytes, base=2, precision=0):
     elif base == 10:
         multiplexer = 1000
     else:
-        return None #raise error
+        return None  #raise error
 
     precision_string = '%.' + str(precision) + 'f'
 
@@ -143,7 +145,7 @@ def print_progress_meter(percent, boxes=None, l_indent=1, r_indent=1, newline=Fa
     if boxes == None:
         terminalinfo = terminal_info()
         boxes = terminalinfo['x']
-        if boxes == None: # could not find width
+        if boxes == None:  # could not find width
             boxes = 10
         boxes = boxes - len(output) - 2 - r_indent
     output += progress_meter(percent, boxes)
@@ -152,6 +154,7 @@ def print_progress_meter(percent, boxes=None, l_indent=1, r_indent=1, newline=Fa
         print(output)
     else:
         print(output, end='')
+
 
 def progress_meter(percent, boxes=10):
     """Returns a progress meter for the given percent.
@@ -190,6 +193,7 @@ def _fallback_terminal_info():
         'y' : y,
     }
 
+
 def _win_terminal_info():
     from ctypes import windll, create_string_buffer
     h = windll.kernel32.GetStdHandle(-12)
@@ -213,6 +217,7 @@ def _win_terminal_info():
         'x' : x,
         'y' : y,
     }
+
 
 def _unix_terminal_info():
     x = int(os.popen('tput cols', 'r').readline())
@@ -257,6 +262,7 @@ def _fallback_new_input(prompt, password=False, newline=None, clearline=False):
         return getpass(prompt)
     else:
         return input(prompt)
+
 
 def _win_new_input(prompt, password=False, newline=True, clearline=False):
     if sys.stdin is not sys.__stdin__:
@@ -323,25 +329,25 @@ def _win_new_input(prompt, password=False, newline=True, clearline=False):
                 arrowkey = True
                 continue
             elif arrowkey:
-                if c == 'K': #leftarrow
+                if c == 'K':  # left arrow
                     if pwcursor > 0:
                         pwcursor -= 1
                         msvcrt.putwch('\b')
                     arrowkey = False
                     continue
-                elif c == 'M': #rightarrow
+                elif c == 'M':  # right arrow
                     if pwcursor < len(pw):
                         pwcursor += 1
                         msvcrt.putwch(pw[pwcursor-1])
                     arrowkey = False
                     continue
-                elif c == 'G': #home
+                elif c == 'G':  # home
                     while pwcursor > 0:
                         pwcursor -= 1
                         msvcrt.putwch('\b')
                     arrowkey = False
                     continue
-                elif c == 'O': #end
+                elif c == 'O':  # end
                     while pwcursor < len(pw):
                         pwcursor += 1
                         msvcrt.putwch(pw[pwcursor-1])
@@ -393,7 +399,7 @@ else:
     #new_input = _unix_new_input
     new_input = _fallback_new_input
 
-if not terminal_info()['x']: #probably means we're running under an ide or similar
+if not terminal_info()['x']:  # probably means we're running under an ide or similar
     new_input = _fallback_new_input
 
 new_input.__doc__ = """Extends the input() builtin
@@ -410,13 +416,15 @@ Input the user provides, same as the input() builtin
 
 """
 
+
 def print(*args):
     __builtins__.print(*args)
     sys.stdout.flush()
 
 
-
 import string
+
+
 def filename_escape(unsafe, replace_char='_', valid_chars=string.ascii_letters+string.digits+'#._- '):
     """Escapes a string to provide a safe local filename
 
@@ -440,7 +448,6 @@ Safe local filename string
     return safe
 
 
-
 import xml.sax.saxutils as saxutils
 
 _unescape_map = {
@@ -449,13 +456,13 @@ _unescape_map = {
     '&quot;' : "'",
 }
 
+
 def html_unescape(input):
     """Turns any html-escaped characters back to their normal equivalents."""
     output = saxutils.unescape(input)
     for char in _unescape_map.keys():
         output = output.replace(char, _unescape_map[char])
     return output
-
 
 
 def utf8_bom(input):

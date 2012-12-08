@@ -7,8 +7,6 @@
 # ----------------------------------------------------------------------------
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 
-import os
-
 # fix for Windows' shitty default cp1252 encoding unicode output errors
 import sys
 if sys.stdout.encoding.lower() != 'utf-8':
@@ -17,12 +15,12 @@ if sys.stdout.encoding.lower() != 'utf-8':
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding=sys.stdout.encoding, errors='replace', line_buffering=True)
 
+
 import gbot.bot
 
 print('Goshubot - IRC Bot')
 
 bot = gbot.bot.Bot(debug=True)
-
 
 accountinfo_path = 'config/info.json'
 bot.accounts.use_file(accountinfo_path)
@@ -35,7 +33,6 @@ bot.info.use_file(info_path, update=True)
 
 modules_path = 'modules'
 bot.modules.load_init(modules_path)
-
 
 bot.start()
 print('\nfin~')

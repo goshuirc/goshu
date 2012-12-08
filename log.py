@@ -28,11 +28,11 @@ while currentoldline != '':
         try:
             if currentoldline[0] == '/':
                 currentoldline = currentoldline[1:]
-                
+
                 if currentoldline[0] == '/':
                     currentnewline += '/'
                     currentoldline = currentoldline[1:]
-                    
+
                 elif currentoldline[0] == 'c':
                     currentoldline = currentoldline[1:]
                     if currentoldline[0].isdigit():
@@ -45,23 +45,22 @@ while currentoldline != '':
                                     currentoldline = currentoldline[1:]
                                     if currentoldline[0].isdigit():
                                         currentoldline = currentoldline[1:]
-                    
+
                 #elif currentoldline[0] in ['b', 'i', 'u', 'r']:
                 #    currentoldline = currentoldline[1:]
-                    
+
                 else:
                     currentoldline = currentoldline[1:]
-                    
+
             else:
                 currentnewline += currentoldline[0]
                 currentoldline = currentoldline[1:]
         except IndexError:
             ...
-    
+
     newlog.write(currentnewline)
     currentoldline = escape(oldlog.readline())
     currentnewline = ''
 
 oldlog.close()
 newlog.close()
-

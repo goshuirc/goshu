@@ -11,14 +11,15 @@ import bisect
 import ssl
 import irc, irc.client, irc.modes
 
+
 class IRC:
     """Wrapper for irclib's IRC class."""
 
     def __init__(self):
         self.irc = irc.client.IRC()
 
-        self.servers = {} # server connections
-        self.connections = [] # dcc connections
+        self.servers = {}  # server connections
+        self.connections = []  # dcc connections
         self.handlers = {
             'in' : {},
             'out' : {},
@@ -29,7 +30,7 @@ class IRC:
         self.irc.remove_global_handler('irc', irc.client._ping_ponger)
         self.add_handler('in', 'ping', self._handle_ping, -42)
 
-
+    # Servers
     def server(self, name):
         connection = ServerConnection(name, self)
         self.servers[name] = connection
@@ -46,14 +47,14 @@ class IRC:
             if self.servers[server].connection == connection:
                 return server
 
-
+    # Processing
     def process_once(self, timeout=0):
         self.irc.process_once(timeout)
 
     def process_forever(self, timeout=0.2):
         self.irc.process_forever(timeout)
 
-
+    # Handling
     def add_handler(self, direction, event, handler, priority=0):
         if not event in self.handlers[direction]:
             self.handlers[direction][event] = []
@@ -69,7 +70,7 @@ class IRC:
     def _handle_irclib(self, connection, event):
         if event.type in ['privmsg', 'pubmsg', 'privnotice', 'pubnotice', 'action', 'currenttopic',
                                  'motd', 'endofmotd', 'yourhost', 'endofnames', 'ctcp', 'topic', 'quit',
-                                 'part', 'kick', 'kick', 'join',]:
+                                 'part', 'kick', 'kick', 'join', ]:
             event_arguments = []
             for arg in event.arguments:
                 event_arguments.append(escape(arg))
@@ -98,7 +99,7 @@ class IRC:
     def _handle_ping(self, event):
         self.servers[event.server].pong(event.arguments[0])
 
-
+    # Disconnect
     def disconnect_all(self, message):
         for name in self.servers.copy():
             self.servers[name].connection.disconnect(message)
@@ -118,7 +119,7 @@ class ServerConnection:
             'users' : {},
         }
 
-
+    # Connection
     def connect(self, address, port, nick, password=None, username=None, ircname=None, localaddress="", localport=0, sslsock=False, ipv6=False):
         self.connection = self.irc.irc.server()
         self.info['connection'] = {
@@ -140,12 +141,12 @@ class ServerConnection:
             self.info['connection']['sslsock'] = sslsock
         if ipv6 != False:
             self.info['connection']['ipv6'] = ipv6
-        
+
         if sslsock:
             Factory = irc.connection.Factory(wrapper=ssl.wrap_socket, ipv6=ipv6)
-        else:            
+        else:
             Factory = irc.connection.Factory(ipv6=ipv6)
-        
+
         self.connection.connect(address, port, nick, password, username, ircname, Factory)
 
     def disconnect(self, message):
@@ -157,7 +158,7 @@ class ServerConnection:
         self.connection.disconnect(message)
         del self.connection
 
-
+    # IRC Commands
     def action(self, target, action):
         self.connection.action(target, unescape(action))
         self.irc._handle_event(Event(self.irc, self.name, 'out', 'action', self.info['connection']['nick'], target, [action]))
@@ -204,7 +205,7 @@ class ServerConnection:
         self.connection.privmsg(target, unescape(message))
         self.irc._handle_event(Event(self.irc, self.name, 'out', command, self.info['connection']['nick'], target, [message]))
 
-
+    # Internal book-keeping
     def update_info(self, event):
         if event.type == 'join':
             self.create_user(event.source)
@@ -310,24 +311,26 @@ class Event:
             self.from_to = str(target).split('!')[0]
 
 
+unescape_dict = {
+    '/' : '/',  # unescape real slashes
+    'b' : '\x02',  # bold
+    'c' : '\x03',  # color
+    'i' : '\x1d',  # italic
+    'u' : '\x1f',  # underline
+    'r' : '\x0f',  # reset
+}
+
+
 def escape(string):
     """Change IRC codes into goshu codes."""
-    string = string.replace('/', '//') # escape real slashes
-    string = string.replace('\x02', '/b') # bold
-    string = string.replace('\x03', '/c') # color
-    string = string.replace('\x1d', '/i') # italic
-    string = string.replace('\x1f', '/u') # underline
-    string = string.replace('\x0f', '/r') # reset
+    string = string.replace('/', '//')  # escape real slashes
+    string = string.replace('\x02', '/b')  # bold
+    string = string.replace('\x03', '/c')  # color
+    string = string.replace('\x1d', '/i')  # italic
+    string = string.replace('\x1f', '/u')  # underline
+    string = string.replace('\x0f', '/r')  # reset
     return string
 
-unescape_dict = {
-    '/' : '/', # unescape real slashes
-    'b' : '\x02', # bold
-    'c' : '\x03', # color
-    'i' : '\x1d', # italic
-    'u' : '\x1f', # underline
-    'r' : '\x0f', # reset
-}
 
 def unescape(in_string):
     """Change goshu codes into IRC codes."""
@@ -352,12 +355,13 @@ def unescape(in_string):
 
 # todo: Automatically populate this from server join info
 mode_dict = {
-    'v' : '+', # voice
-    'h' : '%', # hop
-    'o' : '@', # op
-    'a' : '&', # protected
-    'q' : '~'  # owner
+    'v' : '+',  # voice
+    'h' : '%',  # hop
+    'o' : '@',  # op
+    'a' : '&',  # protected
+    'q' : '~'   # owner
 }
+
 
 class NickMask(irc.client.NickMask):
     ...

@@ -10,6 +10,7 @@
 from .libs import girclib
 import time
 
+
 class IRC(girclib.IRC):
     """Manages goshubot's IRC communications."""
 
@@ -66,7 +67,7 @@ class IRC(girclib.IRC):
                 s.privmsg('nickserv', 'identify '+info.store[name]['connection']['nickserv_password'])
 
             if 'vhost_wait' in info.store[name]['connection']:
-                time.sleep(info.store[name]['connection']['vhost_wait']) # waiting for vhost to get set, in seconds
+                time.sleep(info.store[name]['connection']['vhost_wait'])  # waiting for vhost to get set, in seconds
 
             if 'autojoin_channels' in info.store[name]['connection']:
                 for channel in info.store[name]['connection']['autojoin_channels']:

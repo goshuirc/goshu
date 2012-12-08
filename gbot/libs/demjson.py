@@ -32,7 +32,7 @@ r""" A JSON data encoder and decoder.
     String                 str or unicode  ( "..." or u"..." )
     Array [a, ...]         list  ( [...] )
     Object {a:b, ...}      dict  ( {...} )
-    
+
     -- Note 1. an 'undefined' object is declared in this module which
        represents the native Python value for this type when in
        non-strict mode.

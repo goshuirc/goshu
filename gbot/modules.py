@@ -63,7 +63,7 @@ class Modules:
         output = output[:-2]
         output += ' loaded'
         print(output)
-    
+
     def load(self, name):
         whole_module = importlib.import_module(name)
         imp.reload(whole_module)  # so reloading works
@@ -112,9 +112,9 @@ class Modules:
     def handle_command(self, event):
         if self.bot.settings.store['prefix'] in event.arguments[0] and event.arguments[0].split(self.bot.settings.store['prefix'])[0] == '':
             if len(event.arguments[0].split(self.bot.settings.store['prefix'])[1].strip()) < 1:
-                return # empty
+                return  # empty
             elif len(event.arguments[0].split(self.bot.settings.store['prefix'])[1].split()[0]) < 1:
-                return # no command
+                return  # no command
             command_name = event.arguments[0][1:].split()[0].lower()
             try:
                 command_args = event.arguments[0][1:].split(' ', 1)[1]
@@ -138,6 +138,7 @@ class Modules:
                                     self.modules[module].events['commands'][search_command][0](event, Command(command_name, command_args))
                             else:
                                 print('no privs mang')
+
 
 class Command:
     """Command from a client."""
