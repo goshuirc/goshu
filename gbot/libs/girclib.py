@@ -148,6 +148,7 @@ class ServerConnection:
             Factory = irc.connection.Factory(ipv6=ipv6)
 
         self.connection.connect(address, port, nick, password, username, ircname, Factory)
+        self.connection.buffer.errors = 'replace'
 
     def disconnect(self, message):
         self.info = {
