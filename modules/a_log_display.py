@@ -195,7 +195,8 @@ class a_log_display(Module):
             output += str(event.direction) + ' ' + str(event.type) + ' ' + str(event.source) + ' ' + str(event.target) + ' ' + escape(str(event.arguments))
             #print('    unknown:', output)
 
-        print(display_unescape(output + '/c'))
+        #print(display_unescape(output + '/c'))
+        self.bot.curses.pad_addline(output)
         self.log(output, event.server, targets)
 
     def log(self, output, server='global', targets=['global']):

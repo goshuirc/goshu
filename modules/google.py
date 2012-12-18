@@ -33,7 +33,6 @@ class google(Module):
     def commands(self):
         output = Module.commands(self)
         for (dirpath, dirs, files) in os.walk(self.dynamic_path):
-            print((dirpath, dirs, files))
             for file in files:
                 try:
                     (name, ext) = os.path.splitext(file)

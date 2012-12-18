@@ -49,7 +49,7 @@ def split_num(line, chars=' ', maxsplits=1):
     return line
 
 
-def is_ok(prompt, blank='', clearline=False):
+def is_ok(func, prompt, blank='', clearline=False):
     """Prompt the user for yes/no and returns True/False
 
     Arguments:
@@ -63,7 +63,7 @@ def is_ok(prompt, blank='', clearline=False):
 
     """
     while True:
-        ok = new_input(prompt, newline=False, clearline=clearline).lower().strip()
+        ok = func(prompt).lower().strip()
 
         try:
             if ok[0] == 'y' or ok[0] == 't' or ok[0] == '1':  # yes, true, 1
@@ -95,7 +95,7 @@ def bytes_to_str(bytes, base=2, precision=0):
     elif base == 10:
         multiplexer = 1000
     else:
-        return None  #raise error
+        return None  # raise error
 
     precision_string = '%.' + str(precision) + 'f'
 
@@ -257,169 +257,9 @@ value (of key/value pair) will be None if unable to get that specific info
 """
 
 
-def _fallback_new_input(prompt, password=False, newline=None, clearline=False):
-    if password:
-        return getpass(prompt)
-    else:
-        return input(prompt)
-
-
-def _win_new_input(prompt, password=False, newline=True, clearline=False):
-    if sys.stdin is not sys.__stdin__:
-        return _fallback_new_input(prompt, newline, clearline)
-    import msvcrt
-    for c in prompt:
-        msvcrt.putwch(c)
-
-    if password:
-        pw = ""
-
-        while 1:
-            c = msvcrt.getwch()
-            if c == '\r' or c == '\n':
-                break
-            if c == '\003':
-                raise KeyboardInterrupt
-            if c == '\b':
-                if len(pw) > 0:
-                    pw = pw[:-1]
-            else:
-                pw += c
-
-        if clearline:
-            for c in prompt:
-                msvcrt.putwch('\b')
-                msvcrt.putwch(' ')
-                msvcrt.putwch('\b')
-
-        if newline:
-            msvcrt.putwch('\n')
-
-        return pw
-
-    else:
-        pw = ""
-        pwcursor = 0
-        arrowkey = False
-
-        while 1:
-            c = msvcrt.getwch()
-            if c == '\r' or c == '\n':
-                break
-            if c == '\003':
-                raise KeyboardInterrupt
-            if c == '\b':
-                if len(pw) > 0 and pwcursor > 0:
-                    msvcrt.putwch('\b')
-                    msvcrt.putwch(' ')
-                    msvcrt.putwch('\b')
-                    pwcursor -= 1
-                    pw = pw[:pwcursor] + pw[pwcursor+1:]
-                    pw += ' '
-                    for ch in pw[pwcursor:]:
-                        msvcrt.putwch(' ')
-                    for ch in pw[pwcursor:]:
-                        msvcrt.putwch('\b')
-                    for ch in pw[pwcursor:]:
-                        msvcrt.putwch(ch)
-                    for ch in pw[pwcursor:]:
-                        msvcrt.putwch('\b')
-                    pw = pw[:-1]
-            elif c.encode('utf-8') == b'\xc3\xa0':
-                arrowkey = True
-                continue
-            elif arrowkey:
-                if c == 'K':  # left arrow
-                    if pwcursor > 0:
-                        pwcursor -= 1
-                        msvcrt.putwch('\b')
-                    arrowkey = False
-                    continue
-                elif c == 'M':  # right arrow
-                    if pwcursor < len(pw):
-                        pwcursor += 1
-                        msvcrt.putwch(pw[pwcursor-1])
-                    arrowkey = False
-                    continue
-                elif c == 'G':  # home
-                    while pwcursor > 0:
-                        pwcursor -= 1
-                        msvcrt.putwch('\b')
-                    arrowkey = False
-                    continue
-                elif c == 'O':  # end
-                    while pwcursor < len(pw):
-                        pwcursor += 1
-                        msvcrt.putwch(pw[pwcursor-1])
-                    arrowkey = False
-                    continue
-                else:
-                    arrowkey = False
-                    continue
-            else:
-                pw = pw[:pwcursor] + c + pw[pwcursor:]
-                for ch in pw[pwcursor:]:
-                    msvcrt.putwch(ch)
-                for ch in pw[pwcursor+1:]:
-                    msvcrt.putwch('\b')
-                pwcursor += 1
-
-        if clearline:
-            while pwcursor < len(pw):
-                msvcrt.putwch(' ')
-                pwcursor += 1
-            for c in pw:
-                msvcrt.putwch('\b')
-                msvcrt.putwch(' ')
-                msvcrt.putwch('\b')
-            for c in prompt:
-                msvcrt.putwch('\b')
-                msvcrt.putwch(' ')
-                msvcrt.putwch('\b')
-
-        if newline:
-            msvcrt.putwch('\n')
-
-        return pw
-
-# bind new_input to correct os-specific function
-try:
-    import termios
-    # it's possible there is an incompatible termios from the
-    # McMillan Installer, make sure we have a UNIX-compatible termios
-    termios.tcgetattr, termios.tcsetattr
-except (ImportError, AttributeError):
-    try:
-        import msvcrt
-    except ImportError:
-        new_input = _fallback_new_input
-    else:
-        new_input = _win_new_input
-else:
-    #new_input = _unix_new_input
-    new_input = _fallback_new_input
-
-if not terminal_info()['x']:  # probably means we're running under an ide or similar
-    new_input = _fallback_new_input
-
-new_input.__doc__ = """Extends the input() builtin
-
-Arguments:
-prompt -- Prompt for the user
-password -- If True, don't show characters
-newline -- If True, print a newline after input
-clearline -- If True, clear line after input, only works when newline is
-             True
-
-Returns:
-Input the user provides, same as the input() builtin
-
-"""
-
-
-def print(*args):
-    __builtins__.print(*args)
-    sys.stdout.flush()
+#def print(*args):
+#    __builtins__.print(*args)
+#    sys.stdout.flush()
 
 
 import string

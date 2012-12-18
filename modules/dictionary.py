@@ -14,7 +14,6 @@ import urllib.request, urllib.parse, urllib.error
 import socket
 import json
 import os
-from pprint import pprint
 
 class dictionary(Module):
     name = 'dictionary'
@@ -33,7 +32,7 @@ class dictionary(Module):
         try:
             dictionary_info = json.loads(open('config'+os.sep+'modules'+os.sep+filename_escape(self.name)+os.extsep+'json').read())
         except:
-            print('no api key file')
+            self.bot.curses.pad_addline('no api key file')
             return
 
         url = 'http://api.wordnik.com/v4/word.json/'

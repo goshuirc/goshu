@@ -7,8 +7,11 @@
 # ----------------------------------------------------------------------------
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 
-from . import info, irc, modules
+from . import curses, info, irc, modules
 import logging
+import threading
+import select
+import sys
 
 
 class Bot:
@@ -23,11 +26,21 @@ class Bot:
         self.info = info.Info(self)
         self.irc = irc.IRC(self)
         self.modules = modules.Modules(self)
+        self.curses = curses.Curses(self)
 
     def start(self):
         self.irc.add_handler('all', 'all', self.modules.handle)
         self.irc.connect_info(self.info, self.settings)
         try:
+            self.curses.start()
             self.irc.process_forever()
         except KeyboardInterrupt:
             self.irc.disconnect_all('Goodbye')
+
+            for thread in threading.enumerate():
+                if thread.getName() == 'CursesInput':
+                    thread.stop()
+
+        self.curses.pad_addline('Press Enter to exit')
+        select.select([sys.stdin], [], [])
+        self.curses.shutdown()

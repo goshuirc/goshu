@@ -62,7 +62,7 @@ class Modules:
                 output += module + '[FAILED], '
         output = output[:-2]
         output += ' loaded'
-        print(output)
+        self.bot.curses.pad_addline(output)
 
     def load(self, name):
         whole_module = importlib.import_module(name)
@@ -90,7 +90,7 @@ class Modules:
 
     def unload(self, name):
         if name not in self.modules:
-            print('module', name, 'not in', self.modules)
+            self.bot.curses.pad_addline('module', name, 'not in', self.modules)
             return False
 
         del self.modules[name]
@@ -137,7 +137,7 @@ class Modules:
                                     called.append(self.modules[module].events['commands'][search_command][0])
                                     self.modules[module].events['commands'][search_command][0](event, Command(command_name, command_args))
                             else:
-                                print('no privs mang')
+                                self.bot.curses.pad_addline('no privs mang')
 
 
 class Command:

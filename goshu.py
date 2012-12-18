@@ -18,8 +18,6 @@ if sys.stdout.encoding.lower() != 'utf-8':
 
 import gbot.bot
 
-print('Goshubot - IRC Bot')
-
 bot = gbot.bot.Bot(debug=True)
 
 accountinfo_path = 'config/info.json'
@@ -35,4 +33,3 @@ modules_path = 'modules'
 bot.modules.load_init(modules_path)
 
 bot.start()
-print('\nfin~')

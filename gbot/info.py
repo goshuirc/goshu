@@ -68,7 +68,7 @@ class Manager():
         else:
             self.store = {}
             if self.bot.DEBUG:
-                print(self.name+'.load : no path to load from')
+                self.bot.curses.pad_addline(self.name+'.load : no path to load from')
 
     def save(self, path=None):
         """Save `self.store` in file at `path`, or `self.path`."""
@@ -78,7 +78,7 @@ class Manager():
             save_path = self.path
         else:
             if self.bot.DEBUG:
-                print(self.name+'.save : no path to save to')
+                self.bot.curses.pad_addline(self.name+'.save : no path to save to')
             return
 
         save_dir = save_path.rsplit(os.sep, 1)[0]
@@ -113,7 +113,7 @@ class Info(Manager):
         if len(old_store) < 1:
             self._update_server(new_store, None)
 
-        for server in old_store:
+        for server in old_store.copy():
             prompt = ' '
             prompt += server + ' '
             prompt += old_store[server]['connection']['address'] + ':'
@@ -123,7 +123,7 @@ class Info(Manager):
             if 'ipv6' in old_store[server]['connection'] and old_store[server]['connection']['ipv6'] == True:
                 prompt += 'ipv6 '
             prompt += '- ok? [y]: '
-            if helper.is_ok(prompt, True, True):
+            if helper.is_ok(self.bot.curses.get_input, prompt, True, True):
                 new_store[server] = old_store[server]
             else:
                 if self._update_server(old_store, server):
@@ -135,7 +135,7 @@ class Info(Manager):
         if server:
             old_server = store[server]
             del store[server]
-            if helper.is_ok(' delete server? [n]: ', False, True):
+            if helper.is_ok(self.bot.curses.get_input, ' delete server? [n]: ', False, True):
                 return False
         else:
             old_server = {}
@@ -145,14 +145,14 @@ class Info(Manager):
             new_server_name = ''
             while new_server_name == '':
                 try:
-                    new_server_name = helper.new_input(' server nickname [%s]: ' % server, False, False, True).split()[0].strip()
+                    new_server_name = self.bot.curses.get_input(' server nickname [%s]: ' % server).split()[0].strip()
                 except IndexError:
                     new_server_name = server
         else:
             new_server_name = ''
             while new_server_name == '':
                 try:
-                    new_server_name = helper.new_input(' server nickname: ', False, False, True).split()[0].strip()
+                    new_server_name = self.bot.curses.get_input(' server nickname: ').split()[0].strip()
                 except IndexError:
                     new_server_name = ''
 
@@ -192,9 +192,9 @@ class Info(Manager):
 
         if old_value != None:
             if truefalse:
-                new_value = helper.is_ok('    %s [%s]: ' % (display_name, str(old_value)), old_value, True)
+                new_value = helper.is_ok(self.bot.curses.get_input, '    %s [%s]: ' % (display_name, str(old_value)), old_value, True)
             else:
-                new_value = helper.new_input('    %s [%s]: ' % (display_name, str(old_value)), False, False, True).strip()
+                new_value = self.bot.curses.get_input('  %s [%s]: ' % (display_name, str(old_value))).strip()
             if new_value == '':
                 new_value = old_value
         else:
@@ -202,9 +202,9 @@ class Info(Manager):
             while new_value == '':
                 try:
                     if truefalse:
-                        new_value = helper.is_ok('    %s: ' % display_name, '', True)
+                        new_value = helper.is_ok(self.bot.curses.get_input, '    %s: ' % display_name, '', True)
                     else:
-                        new_value = helper.new_input('    %s: ' % display_name, False, False, True).strip()
+                        new_value = self.bot.curses.get_input('  %s: ' % display_name).strip()
                 except IndexError:
                     if can_ignore:
                         new_value = None
@@ -242,7 +242,7 @@ class Settings(Manager):
             try:
                 old_data = store[name]
                 if password:
-                    new_data = helper.new_input(' %s [*****]: ' % display_name, newline=False, clearline=True, password=password).strip()
+                    new_data = self.bot.curses.get_input(' %s [*****]: ' % display_name, password=True).strip()
                     if new_data != '':
                         return self._encrypt(new_data.encode('utf8'))
                     else:
@@ -250,13 +250,13 @@ class Settings(Manager):
             except KeyError:
                 data = ''
                 while data == '':
-                    data = helper.new_input(' %s: ' % display_name, newline=False, clearline=True, password=password).strip()
+                    data = self.bot.curses.get_input(' %s: ' % display_name, password=password).strip()
                 return self._encrypt(data.split()[0].encode('utf8'))
 
         else:
             try:
                 old_data = store[name]
-                new_data = helper.new_input(' %s [%s]: ' % (display_name, old_data), newline=False, clearline=True).strip()
+                new_data = self.bot.curses.get_input(' %s [%s]: ' % (display_name, old_data)).strip()
                 if new_data != '':
                     return new_data
                 else:
@@ -264,7 +264,7 @@ class Settings(Manager):
             except KeyError:
                 data = ''
                 while data == '':
-                    data = helper.new_input(' %s: ' % display_name, newline=False, clearline=True).strip()
+                    data = self.bot.curses.get_input(' %s: ' % display_name).strip()
                 return data.split()[0]
 
 
