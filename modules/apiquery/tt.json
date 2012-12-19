@@ -1,0 +1,11 @@
+{
+    "name": "TokyoTosho", 
+    "description": "<query> --- torrent search", 
+    "url": "http://tokyotosho.info/search.php?terms=/{escaped_query}", 
+    "format": "xml", 
+    "response": [
+        ["jquery", "#main .listing tr:nth-child(2) .desc-top"], 
+        ["escaped_text", " - http://tokyotosho.info/"], 
+        ["jquery_attr", "#main .listing tr:nth-child(2) .web a:last-child", "href"]
+    ]
+}

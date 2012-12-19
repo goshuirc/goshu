@@ -12,6 +12,7 @@ from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import filename_escape, html_unescape
 import urllib.request, urllib.parse, urllib.error
 import socket  # for timeout
+from pyquery import PyQuery as pq
 import json
 import sys
 import os
@@ -23,7 +24,7 @@ class apiquery(Module):
     def __init__(self):
         self.events = {
             'commands' : {
-                '*' : [self.combined, '<query> --- json api query', 0],
+                '*' : [self.combined, '<query> --- api query', 0],
             },
         }
 
@@ -73,19 +74,36 @@ class apiquery(Module):
         url = querydata['url']
         if command.arguments == '':
             command.arguments = ' '
-        url += urllib.parse.urlencode({b'q' : unescape(command.arguments)})[2:]
+
+        url = url.replace('/{escaped_query}', urllib.parse.urlencode({b'q' : unescape(command.arguments)})[2:])
+
         if 'urlpost' in querydata:
             url += querydata['urlpost']
 
         try:
-            query_results = urllib.request.urlopen(url, timeout=5)  # seconds
-            json_results = json.loads(query_results.read().decode('utf-8'))
-            if 'html_unescape' in querydata:
-                do_unescape = querydata['html_unescape']
-            else:
-                do_unescape = False
+            req = urllib.request.Request(url, headers={'User-Agent': 'Goshubot IRC bot'})
+            query_results = urllib.request.urlopen(req, timeout=5)  # seconds
+            query_read = query_results.read().decode('utf-8')
+
             try:
-                result = self.json_data_exctact(json_results, querydata['response'], do_unescape)
+                if querydata['format'] == 'json':
+                    json_results = json.loads(query_read)
+
+                    if 'html_unescape' in querydata:
+                        do_unescape = querydata['html_unescape']
+                    else:
+                        do_unescape = False
+
+                    result = self.json_data_exctact(json_results, querydata['response'], do_unescape)
+
+                elif querydata['format'] == 'xml':
+                    # xmlns replace is a fix for lxml, here: https://bitbucket.org/olauzanne/pyquery/issue/17
+                    query_xmlsafe = query_read.replace(' xmlns:', ' xmlnamespace:').replace(' xmlns=', ' xmlnamespace=')
+                    result = self.xml_data_extract(query_xmlsafe, querydata['response'])
+
+                else:
+                    raise ApiQueryError
+
             except ApiQueryError:
                 result = 'No Results'
         except urllib.error.URLError:
@@ -118,6 +136,25 @@ class apiquery(Module):
                     raise ApiQueryError
 
         return response.replace('\n', ' ')
+
+    def xml_data_extract(self, results, response_format):
+        pq_results = pq(results)
+        response = ''
+
+        try:
+            for term in response_format:
+                if term[0] == 'text':
+                    response += term[1]
+                elif term[0] == 'escaped_text':
+                    response += escape(term[1])
+                elif term[0] == 'jquery':
+                    response += pq_results(term[1]).text()
+                elif term[0] == 'jquery_attr':
+                    response += pq_results(term[1]).attr(term[2])
+        except TypeError:
+            raise ApiQueryError
+
+        return response
 
 
 class ApiQueryError(Exception):

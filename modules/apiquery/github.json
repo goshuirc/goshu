@@ -1,7 +1,8 @@
 {
     "name": "github", 
     "description": "<query> --- github repo search", 
-    "url": "https://github.com/api/v2/json/repos/search/", 
+    "url": "https://github.com/api/v2/json/repos/search//{escaped_query}", 
+    "format": "json", 
     "response": [
         ["json", "['repositories'][0]['name']"], 
         ["text", " --- "], 
