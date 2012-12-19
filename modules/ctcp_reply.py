@@ -11,6 +11,7 @@ from time import strftime, localtime, gmtime
 from gbot.modules import Module
 from gbot.libs.girclib import NickMask
 
+
 class ctcp_reply(Module):
     name = "ctcp_reply"
 
