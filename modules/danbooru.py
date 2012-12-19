@@ -17,6 +17,7 @@ import sys
 import os
 import hashlib
 
+
 class danbooru(Module):
     name = 'danbooru'
 
@@ -27,7 +28,6 @@ class danbooru(Module):
             },
         }
         self.booru_path = 'modules'+os.sep+'danbooru'
-
 
     def commands(self):
         output = Module.commands(self)
@@ -53,7 +53,6 @@ class danbooru(Module):
 
                 output[name] = [self.combined, command_description, command_permission]
         return output
-
 
     def combined(self, event, command):
         module_path = None
@@ -83,22 +82,21 @@ class danbooru(Module):
 
         if 'url' not in booru:
             return
-        
+
         if 'version' not in booru:
             booru['version'] = 1
-        
+
         if command.command in booruaccounts:
             booru['username'] = booruaccounts[command.command]['username']
             booru['password'] = booruaccounts[command.command]['password']
         else:
             booru['username'] = None
             booru['password'] = None
-        
+
         response += self.retrieve_url(booru['url'], command.arguments, booru['version'],
                                       booru['username'], booru['password'])
 
-        self.bot.irc.servers[event.server].privmsg(event.from_to, response)
-
+        self.bot.irc.msg(event, response, 'public')
 
     def retrieve_url(self, url, tags, version, username=None, password=None):
         post = {
@@ -111,10 +109,10 @@ class danbooru(Module):
 
         if password:
             post['password_hash'] = str(hashlib.sha1(b'choujin-steiner--' + password.encode('utf-8') + b'--').hexdigest())
-        
+
         encoded_tags = urllib.parse.urlencode(post)
 
-
+        # version
         if version == 1:
             api_position = '/post/index.json?'
         elif version == 2:
@@ -125,7 +123,7 @@ class danbooru(Module):
             search_results = urllib.request.urlopen(api_url)
 
         except socket.timeout:
-            result = 'Connection timed out'
+            return 'Connection timed out'
 
         except urllib.error.URLError:
             return 'Connection Error'
@@ -134,7 +132,7 @@ class danbooru(Module):
 
         try:
             results_json = json.loads(results_http)
-            
+
         except ValueError:
             return "Not a JSON response"
 

@@ -10,6 +10,7 @@
 from gbot.modules import Module
 from gbot.libs.helper import split_num
 
+
 class commands(Module):
     name = 'commands'
 
@@ -33,6 +34,6 @@ class commands(Module):
         self.bot.irc.servers[event.server].action(msg_target, msg_msg)
 
     def join(self, event, command):
-        (msg_target, msg_msg) = split_num(command.arguments)
+        (channel, key) = split_num(command.arguments)
 
-        self.bot.irc.servers[event.server].action(msg_target, msg_msg)
+        self.bot.irc.servers[event.server].join(channel, key)

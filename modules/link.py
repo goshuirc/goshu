@@ -12,6 +12,7 @@ from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import html_unescape
 import urllib.request, urllib.parse, urllib.error
 
+
 class link(Module):
     name = 'link'
 
@@ -28,23 +29,25 @@ class link(Module):
 
         for url in url_list:
             if ('youtu' not in url) and ('nicovideo.jp/watch/sm' not in url):
-                break # only do this for youtube/niconico links
+                break  # only do this for youtube/niconico links
             if '/user/' in url:
-                break # don't do this for user pages, no useful info in title
+                break  # don't do this for user pages, no useful info in title
             if 'youtuberepeat.com' in url:
-                break # don't do this for youtuberepeat.com, no title in there
+                break  # don't do this for youtuberepeat.com, no title in there
             title = gettitle(url)
             if title == '':
                 continue
             response = '*** title: ' + escape(html_unescape(title))
-            self.bot.irc.servers[event.server].privmsg(event.from_to, response)
-            return # don't spam us tryna return every title
+            self.bot.irc.msg(event, response, 'public')
+            return  # don't spam us tryna return every title
+
 
 def urls(input_str):
     url_list = []
     url_list += urls_protocol(input_str)
     url_list += urls_protocol(input_str, 'https')
     return url_list
+
 
 def urls_protocol(input_str, protocol='http'):
     url_list = []
@@ -61,6 +64,7 @@ def urls_protocol(input_str, protocol='http'):
             break
 
     return url_list
+
 
 def gettitle(url):
     try:

@@ -9,6 +9,7 @@
 
 from gbot.modules import Module
 
+
 class status(Module):
     name = 'status'
 
@@ -32,4 +33,4 @@ class status(Module):
 
         response = '*** Status:  ' + server_info[:-5]
 
-        self.bot.irc.servers[event.server].privmsg(event.from_to, response)
+        self.bot.irc.msg(event, response, 'public')

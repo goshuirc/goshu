@@ -366,3 +366,7 @@ mode_dict = {
 
 class NickMask(irc.client.NickMask):
     ...
+
+
+def is_channel(name):
+    return irc.client.is_channel(name)

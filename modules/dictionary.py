@@ -76,4 +76,4 @@ class dictionary(Module):
         except IndexError:
             response += 'Definition Not Found'
 
-        self.bot.irc.servers[event.server].privmsg(event.from_to, response)
+        self.bot.irc.msg(event, response, 'public')

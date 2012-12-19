@@ -13,6 +13,7 @@ import random
 import json
 import os
 
+
 class pokemon(Module):
     name = 'pokemon'
 
@@ -46,24 +47,25 @@ class pokemon(Module):
             response += 'a '
 
         for team_member in team:
-            response += 'lvl ' + str(team_member.level) + ' ' + team_member.name + ', '# + ' (' + pad(str(team_member.number)) + '), '
+            response += 'lvl ' + str(team_member.level) + ' ' + team_member.name + ', '  # + ' (' + pad(str(team_member.number)) + '), '
         response = response[:-2]
 
         for team_member in team:
             if team_member.number == 0:
                 self.corrupted = True
 
-        self.bot.irc.servers[event.server].privmsg(event.from_to, response)
+        self.bot.irc.msg(event, response, 'public')
 
     def reset_pokemon(self, event, command):
         if not self.corrupted:
             return
 
         self.corrupted = None
-        self.bot.irc.servers[event.server].action(event.from_to, 'takes out the cartridge, blows on it, and puts it back in')
+        self.bot.irc.msg(event, 'takes out the cartridge, blows on it, and puts it back in', 'public')
+
 
 class Monster:
-    def __init__(self, corrupted=False, path='', files=['',''], generate=False):
+    def __init__(self, corrupted=False, path='', files=['', ''], generate=False):
         self.number = 0
         self.name = ''
         self.level = 0
@@ -71,7 +73,7 @@ class Monster:
         if generate:
             self.generate(corrupted, path, files)
 
-    def generate(self, corrupted=False, path='', files=['','']):
+    def generate(self, corrupted=False, path='', files=['', '']):
         if corrupted:
             poke_list = json.loads(open(path+files[1]).read())
             self.number = random.randint(0, len(poke_list)-1)
@@ -83,6 +85,7 @@ class Monster:
             self.number = random.randint(0, len(poke_list)-1)
             self.name = poke_list[self.number]
             self.level = str(random.randint(1, 100))
+
 
 def pad(input, pad_num=3, pad_char='0'):
     output = ''

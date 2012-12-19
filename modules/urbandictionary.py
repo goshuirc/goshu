@@ -12,6 +12,7 @@ from gbot.libs.girclib import escape, unescape
 import urllib.request, urllib.parse, urllib.error
 import json
 
+
 class urbandictionary(Module):
     name = 'urbandictionary'
 
@@ -39,4 +40,4 @@ class urbandictionary(Module):
 
         response = '*** UrbanDictionary: ' + url_result
 
-        self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], response)
+        self.bot.irc.msg(event, response)

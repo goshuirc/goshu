@@ -11,6 +11,7 @@ from gbot.modules import Module
 import os
 import json
 
+
 class info(Module):
     name = "info"
 
@@ -23,8 +24,6 @@ class info(Module):
 
     def info(self, event, command):
         pretty_json = json.dumps(self.bot.irc.servers[event.server].info, sort_keys=True, indent=4)
-
-        #print(pretty_json)
 
         info_file = open('config'+os.sep+'modules'+os.sep+'info.json', 'w', encoding='utf-8')
         info_file.write(pretty_json)

@@ -25,8 +25,8 @@ class list(Module):
 
     def privmsg(self, event):
         if event.arguments[0].lower() in ['help', 'hello', 'hi']:
-            line = 'Hello! I am a bot, to view the avaliable commands, please type ' + self.bot.settings.store['prefix'] + 'list'
-            self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], line)
+            response = 'Hello! I am a bot, to view the avaliable commands, please type ' + self.bot.settings.store['prefix'] + 'list'
+            self.bot.irc.msg(event, response)
 
     def list(self, event, command):
         bot_commands = []
@@ -50,17 +50,17 @@ class list(Module):
             # single command info
             for bot_command in bot_commands:
                 if bot_command[0] == command.arguments.split()[0]:
-                    
+
                     # fix help display for single help strings
                     if isinstance(bot_command[1], str):
                         bot_command[1] = [bot_command[1]]
 
                     for help_string in bot_command[1]:
-                        output = '*** Command:  ' + self.bot.settings.store['prefix']
-                        output += bot_command[0] + ' '
-                        output += help_string
+                        response = '*** Command:  ' + self.bot.settings.store['prefix']
+                        response += bot_command[0] + ' '
+                        response += help_string
 
-                        self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], output)
+                        self.bot.irc.msg(event, response)
 
         else:
             # list commands
@@ -72,9 +72,9 @@ class list(Module):
                     output.append('    ')
                     i += 1
                 output[i] += bot_command[0] + ', '
-            output[i] = output[i][:-2] # remove last ', '
+            output[i] = output[i][:-2]  # remove last ', '
 
-            output.append('Note: to display information on a specific command, use /i'+self.bot.settings.store['prefix']+'list <command>/i. eg: /i'+self.bot.settings.store['prefix']+'list 8ball');
+            output.append('Note: to display information on a specific command, use /i'+self.bot.settings.store['prefix']+'list <command>/i. eg: /i'+self.bot.settings.store['prefix']+'list 8ball')
 
             for line in output:
-                self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], line)
+                self.bot.irc.msg(event, line)

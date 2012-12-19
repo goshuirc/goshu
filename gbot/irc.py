@@ -72,3 +72,25 @@ class IRC(girclib.IRC):
             if 'autojoin_channels' in info.store[name]['connection']:
                 for channel in info.store[name]['connection']['autojoin_channels']:
                     s.join(channel)
+
+    def action(self, event, message, zone='private'):
+        """Automagically message someone. Zone can be public or private, for preferring channel or user."""
+        target = get_target(event, zone)
+        self.servers[event.server].action(target, message)
+
+    def msg(self, event, message, zone='private'):
+        """Automagically message someone. Zone can be public or private, for preferring channel or user."""
+        target = get_target(event, zone)
+        self.servers[event.server].privmsg(target, message)
+
+
+def get_target(event, zone):
+    """Return the target to msg/action given the event and zone."""
+    if zone is 'public':
+        target = event.from_to
+    else:
+        if girclib.is_channel(event.source):
+            target = event.source
+        else:
+            target = event.source.split('!')[0]
+    return target

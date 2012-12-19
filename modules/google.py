@@ -18,6 +18,7 @@ import urllib.request, urllib.parse, urllib.error
 import socket
 import xml.sax.saxutils as saxutils
 
+
 class google(Module):
     name = 'google'
 
@@ -55,7 +56,6 @@ class google(Module):
                 output[name] = [self.dynamic_search, command_description, command_permission]
         return output
 
-
     def dynamic_search(self, event, command):
         module_path = None
         for (dirpath, dirs, files) in os.walk(self.dynamic_path):
@@ -86,7 +86,7 @@ class google(Module):
         response = '*** ' + name + ': '
         response += self.google_result_search(query)
 
-        self.bot.irc.servers[event.server].privmsg(event.from_to, response)
+        self.bot.irc.msg(event, response, 'public')
 
     def google_search(self, event, command):
         response = '*** /c12G/c4o/c8o/c12g/c3l/c4e/c: '
@@ -97,8 +97,7 @@ class google(Module):
         else:
             response += self.google_result_search(command.arguments)
 
-        self.bot.irc.servers[event.server].privmsg(event.from_to, response)
-
+        self.bot.irc.msg(event, response, 'public')
 
     def google_result_search(self, query):
         url = 'https://ajax.googleapis.com/ajax/services/search/web?v=1.0&'
@@ -118,8 +117,8 @@ class google(Module):
             url_result = 'Connection Error'
 
         except socket.timeout:
-            result = 'Connection timed out'
-            
+            url_result = 'Connection timed out'
+
         return url_result
 
     def google_calc_search(self, query):

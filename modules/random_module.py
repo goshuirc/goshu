@@ -10,7 +10,8 @@
 from gbot.modules import Module
 import random
 
-class random_module(Module): # so named to prevent random lib issues
+
+class random_module(Module):  # so named to prevent random lib issues
     name = 'random_module'
 
     def __init__(self):
@@ -20,15 +21,14 @@ class random_module(Module): # so named to prevent random lib issues
             },
         }
         random.seed()
-    
-    
+
     def random_command(self, event, command):
         response = event.source.split('!')[0] + ': '
-        
+
         random_list = command.arguments.split('|')
-        random_num =  random.randint(1, len(random_list)) - 1
-        
+        random_num = random.randint(1, len(random_list)) - 1
+
         response += random_list[random_num].strip()
-        
+
         if random_list[random_num].strip() != '':
-            self.bot.irc.servers[event.server].privmsg(event.from_to, response)
+            self.bot.irc.msg(event, response, 'public')

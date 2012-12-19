@@ -35,7 +35,6 @@ class accounts(Module):
         #self.bot.irc.servers[event.server].privmsg('nickserv', 'info '+event.arguments[0].split()[0])
         self.bot.curses.pad_addline('/msg nickserv info '+event.arguments[0].split()[0])
 
-
     def register(self, event, command):
         user_args = command.arguments.split()
 
@@ -43,7 +42,7 @@ class accounts(Module):
             return
 
         if self.bot.accounts.account_exists(command.arguments.split()[0].lower()):
-            self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], 'Sorry, that name is already registered')
+            self.bot.irc.msg(event, 'Sorry, that name is already registered')
             return
 
         self.bot.accounts.add_account(user_args[0].lower(), user_args[1])
@@ -51,8 +50,7 @@ class accounts(Module):
         #if len(user_args) > 2:
         #    self.bot.accounts.store[user_args[0].lower()]['email'] = user_args[2]
 
-        self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], 'Account Registered!')
-
+        self.bot.irc.msg(event, 'Account registered!')
 
     def login(self, event, command):
         user_args = command.arguments.split()
@@ -62,21 +60,19 @@ class accounts(Module):
             ...
 
         elif (len(user_args) > 1) and self.bot.accounts.login(user_args[0].lower(), user_args[1], event.server, event.source):
-            self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], 'Login Accepted!')
-
+            self.bot.irc.msg(event, 'Login accepted!')
 
     def loggedin(self, event, command):
         name = self.bot.accounts.account(event.source, event.server)
         if name:
-            self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], 'Logged into '+name)
-
+            self.bot.irc.msg(event, 'Logged into ' + name)
 
     def owner(self, event, command):
         name = self.bot.accounts.account(event.source, event.server)
         if name:
             if self.bot.settings._encrypt(command.arguments) == self.bot.settings.store['passhash']:
                 self.bot.accounts.set_access_level(name, 10)
-                self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], 'You are now a bot owner')
+                self.bot.irc.msg(event, 'You are now a bot owner')
 
     def setaccess(self, event, command):
         splitargs = command.arguments.split()
@@ -90,5 +86,5 @@ class accounts(Module):
             return
 
         if splitargs[1].isdecimal() and accesslevel >= int(splitargs[1]):
-            self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], 'Setting ' + splitargs[0] + "'s Access Level to " + splitargs[1])
+            self.bot.irc.msg(event, 'Setting ' + splitargs[0] + "'s Access Level to " + splitargs[1])
             self.bot.accounts.set_access_level(splitargs[0], int(splitargs[1]))

@@ -10,6 +10,7 @@
 from gbot.modules import Module
 import random
 
+
 class dice(Module):
     name = 'dice'
 
@@ -30,7 +31,7 @@ class dice(Module):
                 raise Exception
 
             if iline[0] == '-':
-                iline = '0' + iline # fixes negatives
+                iline = '0' + iline  # fixes negatives
             oline = []
             idice = []
             odice = []
@@ -47,7 +48,7 @@ class dice(Module):
                             raise Exception
                         idice.append(line.split('d'))
                     else:
-                        idice.append(['1',line.split('d')[1]])
+                        idice.append(['1', line.split('d')[1]])
                 else:
                     idice.append(line.split('d'))
 
@@ -80,7 +81,7 @@ class dice(Module):
                             out_dice_line += str(result)+', '
                         i += 1
                         if i > 10000:
-                            raise exception
+                            raise Exception
                 else:
                     dice += split
 
@@ -97,15 +98,14 @@ class dice(Module):
             if len(out_dice_line.split(',')) < 13:
                 output += '    =    '+out_dice_line[:-2]
 
-            self.bot.irc.servers[event.server].privmsg(event.from_to, output)
-
+            self.bot.irc.msg(event, output, 'public')
 
         except:
             output_lines = ['DICE SYNTAX: '+self.bot.settings.store['prefix']+'d <dice>',
                             '        <dice> is a string like d12+4d8-13',
-                            '        or any other permutation of rpg dice and numbers',]
+                            '        or any other permutation of rpg dice and numbers', ]
 
             for i in range(0, len(output_lines)):
                 output = output_lines[i]
 
-                self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], output)
+                self.bot.irc.msg(event, output)

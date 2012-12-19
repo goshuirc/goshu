@@ -14,6 +14,7 @@ import os
 import sys
 import json
 
+
 class responses(Module):
     name = 'responses'
 
@@ -25,7 +26,6 @@ class responses(Module):
         }
         self.responses_path = 'modules'+os.sep+'responses'
         random.seed()
-
 
     def commands(self):
         output = Module.commands(self)
@@ -125,7 +125,7 @@ class responses(Module):
             line = line.replace('/S', source.upper()).replace('/T', target.upper())
             line = line.replace('/s', source).replace('/t', target)
             line = line.replace('/{prefix}', self.bot.settings.store['prefix'])
-            
+
             line_split = line.split('/{randomchannelnick}')
             if len(line_split) > 1:
                 i = 0
@@ -144,10 +144,10 @@ class responses(Module):
                         except:
                             actual_line += event.source.split('!')[0]
                 line = actual_line
-            
+
             line = line.replace('/{slash}', '//')
 
             if line[0:2] == '/m':
-                self.bot.irc.servers[event.server].action(event.from_to, line[2:].strip())
+                self.bot.irc.action(event, line[2:].strip(), 'public')
             else:
-                self.bot.irc.servers[event.server].privmsg(event.from_to, line)
+                self.bot.irc.msg(event, line, 'public')

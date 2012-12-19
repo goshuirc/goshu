@@ -9,6 +9,7 @@
 
 from gbot.modules import Module
 
+
 class modules(Module):
     name = 'modules'
 
@@ -19,7 +20,6 @@ class modules(Module):
             },
         }
 
-
     def handle(self, event, command):
         if not command.arguments:
             return
@@ -27,7 +27,8 @@ class modules(Module):
         do = command.arguments.split()[0]
 
         if do == 'list':
-            self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], 'Loaded modules: ' + ', '.join(sorted(list(self.bot.modules.modules.keys()))))
+            response = 'Loaded modules: ' + ', '.join(sorted(list(self.bot.modules.modules.keys())))
+            self.bot.irc.msg(event, response)
             additional_modules = []
             for path in self.bot.modules.paths:
                 modules = self.bot.modules.modules_from_path(path)
@@ -35,7 +36,8 @@ class modules(Module):
                     if module not in self.bot.modules.modules:
                         additional_modules.append(module)
             if len(additional_modules) > 0:
-                self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], 'Additional avaliable modules: ' + ', '.join(sorted(additional_modules)))
+                response = 'Additional avaliable modules: ' + ', '.join(sorted(additional_modules))
+                self.bot.irc.msg(event, response)
 
         elif do in ['load', 'unload', 'reload']:
             if len(command.arguments.split()) < 2:
@@ -59,7 +61,6 @@ class modules(Module):
                     fail.append(module)
             action = do[0].upper() + do[1:]
             if succeed:
-                self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], action + 'ed: ' + ', '.join(sorted(succeed)))
+                self.bot.irc.msg(event, action + 'ed: ' + ', '.join(sorted(succeed)))
             if fail:
-                self.bot.irc.servers[event.server].privmsg(event.source.split('!')[0], action + ' Failed: ' + ', '.join(sorted(fail)))
-
+                self.bot.irc.msg(event, action + ' Failed: ' + ', '.join(sorted(fail)))

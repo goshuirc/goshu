@@ -11,10 +11,11 @@ from gbot.modules import Module
 from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import filename_escape, html_unescape
 import urllib.request, urllib.parse, urllib.error
-import socket # for timeout
+import socket  # for timeout
 import json
 import sys
 import os
+
 
 class apiquery(Module):
     name = 'apiquery'
@@ -77,7 +78,7 @@ class apiquery(Module):
             url += querydata['urlpost']
 
         try:
-            query_results = urllib.request.urlopen(url, timeout=5) #seconds
+            query_results = urllib.request.urlopen(url, timeout=5)  # seconds
             json_results = json.loads(query_results.read().decode('utf-8'))
             if 'html_unescape' in querydata:
                 do_unescape = querydata['html_unescape']
@@ -95,7 +96,7 @@ class apiquery(Module):
             result = 'Connection timed out'
 
         response = '*** ' + querydata['name'] + ': ' + result
-        self.bot.irc.servers[event.server].privmsg(event.from_to, response)
+        self.bot.irc.msg(event, response, 'public')
 
     def json_data_exctact(self, results, response_format, do_unescape=False):
         response = ''
@@ -117,6 +118,7 @@ class apiquery(Module):
                     raise ApiQueryError
 
         return response.replace('\n', ' ')
+
 
 class ApiQueryError(Exception):
     ...
