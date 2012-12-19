@@ -184,12 +184,12 @@ class CursesInput(threading.Thread):
 
         buff = ''
         while True:
+            select.select([sys.stdin], [], [])  # allows shutdown to work properly
             if self.stopped():
                 return
             char = self.bot.curses.wins['input'].get_wch()
-            #if char == curses.KEY_RESIZE:
             if type(char) is int:
-                ...
+                continue
             elif char is '\n':
                 self.bot.curses.wins['input'].erase()
                 self.bot.curses.wins['input'].refresh()
@@ -197,5 +197,3 @@ class CursesInput(threading.Thread):
                 buff = ''
             else:
                 buff += char
-            self.bot.curses.pad_addline("Resize code is: " + str([curses.KEY_RESIZE]))
-            self.bot.curses.pad_addline("Char code is: " + str([char]))

@@ -45,6 +45,4 @@ class Bot:
                 if thread.getName() == 'CursesInput':
                     thread.stop()
 
-        self.curses.pad_addline('Press Enter to exit')
-        select.select([sys.stdin], [], [])
-        self.curses.shutdown()
+            self.curses.shutdown()
