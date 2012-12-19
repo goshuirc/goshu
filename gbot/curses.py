@@ -19,26 +19,38 @@ class Curses:
 
     def __init__(self, bot):
         self.bot = bot
+        self.wins = {}
+        self.pad = None
+        self.old_values = {}
+        self.stdscr = None
 
-        # Setup curses everything
         self.stdscr = curses.initscr()
 
         curses.start_color()
         curses.use_default_colors()
+        self.stdscr.keypad(1)  # keypad input
 
         # Setup nice environment
         # curses.noecho()  # don't echo keys
         curses.cbreak()  # no enter-buffering
-        self.stdscr.keypad(1)  # keypad input
-
-        self.stdscr.clear()
-        self.stdscr.border(0)
 
         curses.init_pair(1, curses.COLOR_BLUE, curses.COLOR_WHITE)
         curses.init_pair(2, curses.COLOR_WHITE, -1)
 
+        self.init_screen()
+
+    def init_screen(self):
         # Various windows
-        self.wins = {}
+        for win in ['info', 'buffer', 'input']:
+            if win in self.wins:
+                del self.wins[win]
+        if self.pad:
+            del self.pad
+
+        self.stdscr.refresh()
+
+        self.stdscr.clear()
+        self.stdscr.border(0)
 
         # Status bar, window info
         self.wins['info'] = curses.newwin(0, self.stdscr.getmaxyx()[1], 0, 0)
@@ -49,7 +61,8 @@ class Curses:
         self.wins['info'].erase()
         self.wins['info'].noutrefresh()
 
-        self.wins['info'].addstr(('Goshubot - connected to 40 zillion servers - eating 40,995 sudo sandwiches')[:self.stdscr.getmaxyx()[1]])
+        if 'info' not in self.old_values:
+            self.old_values['info'] = ''
 
         # Messages
         self.pad = curses.newpad(self.stdscr.getmaxyx()[0]-3, self.stdscr.getmaxyx()[1])
@@ -62,6 +75,9 @@ class Curses:
                 except curses.error:
                     pass
 
+        if 'pad' not in self.old_values:
+            self.old_values['pad'] = []
+
         # Displays current buffer, etc
         self.wins['buffer'] = curses.newwin(0, self.stdscr.getmaxyx()[1], self.stdscr.getmaxyx()[0]-2, 0)
         self.wins['buffer'].idlok(0)
@@ -71,7 +87,8 @@ class Curses:
         self.wins['buffer'].erase()
         self.wins['buffer'].noutrefresh()
 
-        self.wins['buffer'].addstr(('Goshubot - '*40)[:self.stdscr.getmaxyx()[1]])
+        if 'buffer' not in self.old_values:
+            self.old_values['buffer'] = ''
 
         # Input bar
         self.wins['input'] = curses.newwin(0, self.stdscr.getmaxyx()[1], self.stdscr.getmaxyx()[0]-1, 0)
@@ -86,6 +103,8 @@ class Curses:
         self.refresh()
 
     def start(self):
+        self.win_addline('info', 'Goshubot - connected to 40 zillion servers - eating 40,995 sudo sandwiches')
+        self.win_addline('buffer', 'Goshubot - '*40)
         CursesInput(self.bot).start()
 
     def shutdown(self):
@@ -95,13 +114,20 @@ class Curses:
         curses.endwin()
 
     # Display functions
+    def term_resize(self):
+        self.init_screen()
+        for win in ['info', 'buffer']:
+            self.win_addline(win, self.old_values[win])
+        for line in self.old_values['pad']:
+            self.pad_addline(line, history=False)
+
     def refresh(self):
-        self.pad.refresh(0, 0,  1, 0,  self.stdscr.getmaxyx()[0]-3, self.stdscr.getmaxyx()[1])
         self.wins['info'].refresh()
         self.wins['buffer'].refresh()
         self.wins['input'].refresh()
+        self.pad.refresh(0, 0,  1, 0,  self.stdscr.getmaxyx()[0]-3, self.stdscr.getmaxyx()[1])
 
-    def pad_addline(self, line):
+    def pad_addline(self, line, history=True):
         num_lines = math.ceil(len(line)/self.stdscr.getmaxyx()[1])
         while num_lines > 0:
             num_lines -= 1
@@ -117,6 +143,15 @@ class Curses:
             self.pad.addstr(self.stdscr.getmaxyx()[0] - 4, 0, show)  # Add new line
 
             self.refresh()
+
+        if history:
+            self.old_values['pad'].append(line)
+            while len(self.old_values['pad']) > 100:
+                self.old_values['pad'] = self.old_values['pad'][1:]
+
+    def win_addline(self, window, line):
+        self.wins[window].addstr((line)[:self.stdscr.getmaxyx()[1]])
+        self.old_values[window] = line
 
     # Input functions
     def get_input(self, prefix='>  ', password=False):
@@ -149,14 +184,18 @@ class CursesInput(threading.Thread):
 
         buff = ''
         while True:
-            select.select([sys.stdin], [], [])
             if self.stopped():
                 return
             char = self.bot.curses.wins['input'].get_wch()
-            if char is '\n':
+            #if char == curses.KEY_RESIZE:
+            if type(char) is int:
+                ...
+            elif char is '\n':
                 self.bot.curses.wins['input'].erase()
                 self.bot.curses.wins['input'].refresh()
                 self.bot.curses.pad_addline(buff)
                 buff = ''
             else:
                 buff += char
+            self.bot.curses.pad_addline("Resize code is: " + str([curses.KEY_RESIZE]))
+            self.bot.curses.pad_addline("Char code is: " + str([char]))

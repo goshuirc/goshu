@@ -29,11 +29,15 @@ class Bot:
         self.curses = curses.Curses(self)
 
     def start(self):
+        self.curses.start()
         self.irc.add_handler('all', 'all', self.modules.handle)
         self.irc.connect_info(self.info, self.settings)
         try:
-            self.curses.start()
-            self.irc.process_forever()
+            while True:
+                try:
+                    self.irc.process_forever()
+                except InterruptedError:  # curses terminal size change
+                    self.curses.term_resize()
         except KeyboardInterrupt:
             self.irc.disconnect_all('Goodbye')
 

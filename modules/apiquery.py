@@ -126,6 +126,7 @@ class apiquery(Module):
                 response += escape(term[1])
             else:
                 try:
+                    # todo: Really, no better way than to eval?
                     if do_unescape:
                         response += escape(html_unescape(str(eval('results' + term[1]))))
                     else:
