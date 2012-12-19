@@ -11,15 +11,16 @@ from time import strftime, localtime, gmtime
 import random
 import os
 from colorama import init
-init() #colorama
+init()  #colorama
 from colorama import Fore, Back, Style
 
 from gbot.modules import Module
-from gbot.libs.girclib import escape, unescape
+from gbot.libs.girclib import escape, unescape, remove_control_codes
 from gbot.libs.helper import filename_escape
 
+
 class a_log_display(Module):
-    name = "a_log_display" # a_ at the beginning so goshu calls this module first
+    name = "a_log_display"  # a_ at the beginning so goshu calls this module first
 
     def __init__(self):
         self.events = {
@@ -135,7 +136,7 @@ class a_log_display(Module):
             output += '/c14[/c'
             for arg in event.arguments:
                 output += arg + ' '
-            output = output[:-1] #strip last space
+            output = output[:-1]  # strip last space
             output += '/c14]/c'
             output += ' by /b'
             output += event.source.split('!')[0]
@@ -187,7 +188,7 @@ class a_log_display(Module):
         elif event.type in ['ctcp', ] and event.arguments[0] == 'ACTION':
             return
 
-        elif event.type in ['ping', 'pong' ]:
+        elif event.type in ['ping', 'pong', ]:
             return
 
         else:
@@ -196,7 +197,7 @@ class a_log_display(Module):
             #print('    unknown:', output)
 
         #print(display_unescape(output + '/c'))
-        self.bot.curses.pad_addline(output)
+        self.bot.curses.pad_addline(remove_control_codes(output))
         self.log(output, event.server, targets)
 
     def log(self, output, server='global', targets=['global']):
@@ -225,8 +226,9 @@ class a_log_display(Module):
     def nick_color(self, nickhost):
         nick = nickhost.split('!')[0]
         if nick not in self.nick_colors:
-            self.nick_colors[nick] = random.randint(2,13)
+            self.nick_colors[nick] = random.randint(2, 13)
         return '/c' + str(self.nick_colors[nick]) + nick
+
 
 def display_unescape(input):
     output = ''

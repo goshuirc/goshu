@@ -370,3 +370,41 @@ class NickMask(irc.client.NickMask):
 
 def is_channel(name):
     return irc.client.is_channel(name)
+
+
+def remove_control_codes(line):
+    new_line = ''
+    while len(line) > 0:
+        try:
+            if line[0] == '/':
+                line = line[1:]
+
+                if line[0] == '/':
+                    new_line += '/'
+                    line = line[1:]
+
+                elif line[0] == 'c':
+                    line = line[1:]
+                    if line[0].isdigit():
+                        line = line[1:]
+                        if line[0].isdigit():
+                            line = line[1:]
+                            if line[0] == ',':
+                                line = line[1:]
+                                if line[0].isdigit():
+                                    line = line[1:]
+                                    if line[0].isdigit():
+                                        line = line[1:]
+
+                #elif line[0] in ['b', 'i', 'u', 'r']:
+                #    line = line[1:]
+
+                else:
+                    line = line[1:]
+
+            else:
+                new_line += line[0]
+                line = line[1:]
+        except IndexError:
+            ...
+    return new_line
