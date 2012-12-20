@@ -168,7 +168,6 @@ class Curses:
 
     # Update
     def update_info(self):
-        self.pad_addline('Info updated')
         line = 'Goshubot - '
         for server in self.bot.irc.servers:
             line += self.bot.irc.servers[server].info['name'] + ' - '
