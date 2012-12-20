@@ -18,6 +18,8 @@ class IRC:
     def __init__(self):
         self.irc = irc.client.IRC()
 
+        self.info_funcs = []  # funcs to call when info updates
+
         self.servers = {}  # server connections
         self.connections = []  # dcc connections
         self.handlers = {
@@ -208,10 +210,13 @@ class ServerConnection:
 
     # Internal book-keeping
     def update_info(self, event):
+        changed = False
+
         if event.type == 'join':
             self.create_user(event.source)
             self.create_channel(event.target)
             self.info['channels'][event.target]['users'][event.source.split('!')[0]] = ''
+            changed = True
 
         elif event.type == 'namreply':
             # only create new dict if it doesn't exist, bakabaka
@@ -226,15 +231,18 @@ class ServerConnection:
                     user_priv = ''
                 self.create_user(user_nick)
                 self.info['channels'][event.arguments[1]]['users'][user_nick] = user_priv
+                changed = True
 
         elif event.type == 'currenttopic':
             self.create_channel(event.arguments[0])
             self.info['channels'][event.arguments[0]]['topic']['topic'] = event.arguments[1]
+            changed = True
 
         elif event.type == 'topicinfo':
             self.create_channel(event.arguments[0])
             self.info['channels'][event.arguments[0]]['topic']['user'] = event.arguments[1]
             self.info['channels'][event.arguments[0]]['topic']['time'] = event.arguments[2]
+            changed = True
 
         elif event.type == 'nick':
             for channel in self.info['channels'].copy():
@@ -243,24 +251,29 @@ class ServerConnection:
                     del self.info['channels'][channel]['users'][event.source.split('!')[0]]
             self.info['users'][event.target] = self.info['users'][event.source.split('!')[0]]
             del self.info['users'][event.source.split('!')[0]]
+            changed = True
 
         elif event.type == 'part':
             try:
                 del self.info['channels'][event.target]['users'][event.source.split('!')[0]]
             except:
                 ...
+            changed = True
 
         elif event.type == 'kick':
             try:
+                # todo: when we are kicked, lol
                 del self.info['channels'][event.target]['users'][event.arguments[0]]
             except:
                 ...
+            changed = True
 
         elif event.type == 'quit':
             for channel in self.info['channels']:
                 if event.source.split('!')[0] in self.info['channels'][channel]['users']:
                     del self.info['channels'][channel]['users'][event.source.split('!')[0]]
             del self.info['users'][event.source.split('!')[0]]
+            changed = True
 
         elif event.type == 'mode':
             # todo: channel modes, and user-only modes. Automagically populate mode tables from server join info
@@ -274,6 +287,11 @@ class ServerConnection:
                 elif mode[0] == '+':
                     if mode_dict[mode[1]] not in self.info['channels'][event.target]['users'][mode[2]]:
                         self.info['channels'][event.target]['users'][mode[2]] += mode_dict[mode[1]]
+            changed = True
+
+        if changed:
+            for func in self.irc.info_funcs:
+                func()
 
     def create_user(self, user):
         user_nick = user.split('!')[0]

@@ -37,6 +37,8 @@ class Curses:
         curses.init_pair(1, curses.COLOR_BLUE, curses.COLOR_WHITE)
         curses.init_pair(2, curses.COLOR_WHITE, -1)
 
+        self.bot.irc.info_funcs.append(self.update_info)
+
         self.init_screen()
 
     def init_screen(self):
@@ -103,7 +105,7 @@ class Curses:
         self.refresh()
 
     def start(self):
-        self.win_addline('info', 'Goshubot - connected to 40 zillion servers - eating 40,995 sudo sandwiches')
+        self.win_addline('info', 'Goshubot - Loading')
         self.win_addline('buffer', 'Goshubot - '*40)
         CursesInput(self.bot).start()
 
@@ -150,7 +152,9 @@ class Curses:
                 self.old_values['pad'] = self.old_values['pad'][1:]
 
     def win_addline(self, window, line):
-        self.wins[window].addstr((line)[:self.stdscr.getmaxyx()[1]])
+        if len(line) < self.stdscr.getmaxyx()[1]:
+            line += ' ' * (self.stdscr.getmaxyx()[1] - len(line))
+        self.wins[window].addstr(0, 0, (line)[:self.stdscr.getmaxyx()[1]])
         self.old_values[window] = line
 
     # Input functions
@@ -161,6 +165,16 @@ class Curses:
         # Todo: if password, obscure chars
         line = self.wins['input'].getstr(0, len(prefix))
         return line.decode('utf-8')
+
+    # Update
+    def update_info(self):
+        self.pad_addline('Info updated')
+        line = 'Goshubot - '
+        for server in self.bot.irc.servers:
+            line += self.bot.irc.servers[server].info['name'] + ' - '
+            line += str(len(self.bot.irc.servers[server].info['channels'])) + ' Channels, '
+            line += str(len(self.bot.irc.servers[server].info['users'])) + ' Users ; '
+        self.win_addline('info', line[:-3])
 
 
 class CursesInput(threading.Thread):
