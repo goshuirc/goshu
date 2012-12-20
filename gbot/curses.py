@@ -207,6 +207,13 @@ class CursesInput(threading.Thread):
                 self.bot.curses.wins['input'].erase()
                 self.bot.curses.wins['input'].refresh()
                 self.bot.curses.pad_addline(buff)
+                if ':' in buff:
+                    buff_list = []
+                    for cha in buff.split(':')[1]:
+                        buff_list.append(cha)
+                    line = 'Characters are:  ' + buff.split(':')[0] + ' : ' + str(buff_list[1:])
+                    self.bot.curses.pad_addline(line)
+                    open('chars.txt', 'a', encoding='utf8').write(line + '\n')
                 buff = ''
             else:
                 buff += char

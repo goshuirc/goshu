@@ -215,7 +215,7 @@ class ServerConnection:
         if event.type == 'join':
             self.create_user(event.source)
             self.create_channel(event.target)
-            self.info['channels'][event.target]['users'][event.source.split('!')[0]] = ''
+            self.info['channels'][event.target]['users'][NickMask(event.source).nick] = ''
             changed = True
 
         elif event.type == 'namreply':
@@ -246,33 +246,32 @@ class ServerConnection:
 
         elif event.type == 'nick':
             for channel in self.info['channels'].copy():
-                if event.source.split('!')[0] in self.info['channels'][channel]['users']:
-                    self.info['channels'][channel]['users'][event.target] = self.info['channels'][channel]['users'][event.source.split('!')[0]]
-                    del self.info['channels'][channel]['users'][event.source.split('!')[0]]
-            self.info['users'][event.target] = self.info['users'][event.source.split('!')[0]]
-            del self.info['users'][event.source.split('!')[0]]
+                if NickMask(event.source).nick in self.info['channels'][channel]['users']:
+                    self.info['channels'][channel]['users'][event.target] = self.info['channels'][channel]['users'][NickMask(event.source).nick]
+                    del self.info['channels'][channel]['users'][NickMask(event.source).nick]
+            self.info['users'][event.target] = self.info['users'][NickMask(event.source).nick]
+            del self.info['users'][NickMask(event.source).nick]
             changed = True
 
         elif event.type == 'part':
-            try:
-                del self.info['channels'][event.target]['users'][event.source.split('!')[0]]
-            except:
-                ...
+            if NickMask(event.source).nick == self.info['connection']['nick']:
+                del self.info['channels'][event.target]
+            else:
+                del self.info['channels'][event.target]['users'][NickMask(event.source).nick]
             changed = True
 
         elif event.type == 'kick':
-            try:
-                # todo: when we are kicked, lol
+            if event.arguments[0] == self.info['connection']['nick']:
+                del self.info['channels'][event.target]
+            else:
                 del self.info['channels'][event.target]['users'][event.arguments[0]]
-            except:
-                ...
             changed = True
 
         elif event.type == 'quit':
             for channel in self.info['channels']:
-                if event.source.split('!')[0] in self.info['channels'][channel]['users']:
-                    del self.info['channels'][channel]['users'][event.source.split('!')[0]]
-            del self.info['users'][event.source.split('!')[0]]
+                if NickMask(event.source).nick in self.info['channels'][channel]['users']:
+                    del self.info['channels'][channel]['users'][NickMask(event.source).nick]
+            del self.info['users'][NickMask(event.source).nick]
             changed = True
 
         elif event.type == 'mode':
@@ -294,7 +293,7 @@ class ServerConnection:
                 func()
 
     def create_user(self, user):
-        user_nick = user.split('!')[0]
+        user_nick = NickMask(user).nick
         #user_host = user.split('@')[1]
         #user_uname = user.split('!')[1].split('@')[0]
         if user_nick not in self.info['users']:
