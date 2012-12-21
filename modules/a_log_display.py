@@ -55,8 +55,9 @@ class a_log_display(Module):
                             'luserchannels', 'luserme', 'n_local',
                             'n_global', 'luserconns', 'luserunknown',
                             'motdstart', 'motd', 'endofmotd', '042', ]:
-            for message in event.arguments:
-                output += message + ' '
+            #for message in event.arguments:
+            #    output += message + ' '
+            output += str(event.arguments)
 
         elif event.type in ['privnotice', '439', ]:
             targets.append(event.source.split('!')[0])
@@ -197,6 +198,7 @@ class a_log_display(Module):
             #print('    unknown:', output)
 
         #print(display_unescape(output + '/c'))
+        self.bot.curses.pad_addline(event.type)
         self.bot.curses.pad_addline(remove_control_codes(output))
         self.log(output, event.server, targets)
 

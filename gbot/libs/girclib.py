@@ -119,6 +119,7 @@ class ServerConnection:
             'connection' : {},
             'channels' : {},
             'users' : {},
+            'server' : {}
         }
 
     # Connection
@@ -212,23 +213,49 @@ class ServerConnection:
     def update_info(self, event):
         changed = False
 
-        if event.type == 'join':
+        if event.type == 'featurelist':
+            if 'isupport' not in self.info['server']:
+                self.info['server']['isupport'] = {}
+
+            for feature in event.arguments[:-1]:
+                # negating
+                if feature[0] == '-':
+                    feature = feature[1:]
+                    if feature in self.info['server']['isupport']:
+                        del self.info['server']['isupport'][feature]
+                # setting
+                elif ('=' in feature) and (len(feature.split('=')) > 1):
+                    feature_name, feature_value = feature.split('=')
+
+                    if feature_name == 'PREFIX':  # channel user prefixes
+                        channel_modes, channel_chars = feature_value.split(')')
+                        channel_modes = channel_modes[1:]
+                        self.info['server']['isupport'][feature_name] = [channel_modes, channel_chars]
+
+                    else:
+                        self.info['server']['isupport'][feature_name] = feature_value
+                else:
+                    if feature[-1] == '=':
+                        feature = feature[:-1]
+                    self.info['server']['isupport'][feature] = True
+
+        elif event.type == 'join':
             self.create_user(event.source)
             self.create_channel(event.target)
             self.info['channels'][event.target]['users'][NickMask(event.source).nick] = ''
             changed = True
 
         elif event.type == 'namreply':
-            # only create new dict if it doesn't exist, bakabaka
+            # merge user list if it already exists, used for heaps of nicks
             if 'users' not in self.info['channels'][event.arguments[1]]:
                 self.info['channels'][event.arguments[1]]['users'] = {}
             for user in event.arguments[2].split():
-                if user[0] in '+%@&~':
-                    user_priv = user[0]
-                    user_nick = user[1:]
-                else:
-                    user_nick = user
-                    user_priv = ''
+                # supports multi_prefix
+                user_priv = ''
+                while user[0] in self.info['server']['isupport']['PREFIX'][1]:
+                    user_priv = user.pop(0)
+                user_nick = user
+
                 self.create_user(user_nick)
                 self.info['channels'][event.arguments[1]]['users'][user_nick] = user_priv
                 changed = True
@@ -277,15 +304,17 @@ class ServerConnection:
         elif event.type == 'mode':
             # todo: channel modes, and user-only modes. Automagically populate mode tables from server join info
             for mode in irc.modes._parse_modes(" ".join(event.arguments), "bklvohaq"):
-                if mode[1] not in mode_dict:
+                if mode[1] not in self.info['server']['isupport']['PREFIX'][0]:
                     continue
 
+                mode_letter, mode_char = mode[1], self.info['server']['isupport']['PREFIX'][1][self.info['server']['isupport']['PREFIX'][0].index(mode[1])]
+
                 if mode[0] == '-':
-                    if mode_dict[mode[1]] in self.info['channels'][event.target]['users'][mode[2]]:
-                        self.info['channels'][event.target]['users'][mode[2]] = self.info['channels'][event.target]['users'][mode[2]].replace(mode_dict[mode[1]], '')
+                    if mode_char in self.info['channels'][event.target]['users'][mode_letter]:
+                        self.info['channels'][event.target]['users'][mode_letter] = self.info['channels'][event.target]['users'][mode_letter].replace(mode_char, '')
                 elif mode[0] == '+':
-                    if mode_dict[mode[1]] not in self.info['channels'][event.target]['users'][mode[2]]:
-                        self.info['channels'][event.target]['users'][mode[2]] += mode_dict[mode[1]]
+                    if mode_char not in self.info['channels'][event.target]['users'][mode[2]]:
+                        self.info['channels'][event.target]['users'][mode_letter] += mode_char
             changed = True
 
         if changed:
@@ -370,15 +399,6 @@ def unescape(in_string):
         if len(in_string) < 1:
             break
     return out_string
-
-# todo: Automatically populate this from server join info
-mode_dict = {
-    'v' : '+',  # voice
-    'h' : '%',  # hop
-    'o' : '@',  # op
-    'a' : '&',  # protected
-    'q' : '~'   # owner
-}
 
 
 class NickMask(irc.client.NickMask):

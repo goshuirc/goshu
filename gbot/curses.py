@@ -175,20 +175,40 @@ class Curses:
             line += str(len(self.bot.irc.servers[server].info['users'])) + ' Users ; '
         self.win_addline('info', line[:-3])
 
+    # Buffer control
+    def buffer_prev(self):
+        """Go to the previous buffer."""
+        ...
+
+    def buffer_next(self):
+        """Go to the next buffer."""
+        ...
+
 
 class CursesInput(threading.Thread):
 
     def __init__(self, bot):
         threading.Thread.__init__(self, name='CursesInput')
         self.bot = bot
-        self._stopp = threading.Event()
+        self._stopflag = threading.Event()
+
+        self.specials = {
+            '\x1b[A': self.input_up,
+            '\x1b[B': self.input_down,
+            '\x1b[C': self.input_left,
+            '\x1b[D': self.input_right,
+            '\x1b[1;3A': self.bot.curses.buffer_prev,
+            '\x1b[1;3C': self.bot.curses.buffer_prev,
+            '\x1b[1;3B': self.bot.curses.buffer_next,
+            '\x1b[1;3D': self.bot.curses.buffer_next,
+        }
 
     # flag functions
     def stop(self):
-        self._stopp.set()
+        self._stopflag.set()
 
     def stopped(self):
-        return self._stopp.isSet()
+        return self._stopflag.isSet()
 
     # Handling input
     def run(self):
@@ -196,14 +216,30 @@ class CursesInput(threading.Thread):
         self.bot.curses.wins['input'].refresh()
 
         buff = ''
+        special_buff = ''  # special characters, arrow keys, etc
         while True:
             select.select([sys.stdin], [], [])  # allows shutdown to work properly
             if self.stopped():
                 return
             char = self.bot.curses.wins['input'].get_wch()
-            if type(char) is int:
+
+            # special chars
+            if char == '\x1b':
+                special_buff += char
+            elif special_buff:
+                special_buff += char
+                if special_buff in self.specials:
+                    self.specials[special_buff]()
+                elif len(special_buff) > 10:
+                    self.bot.curses.pad_addline('unknown key: ' + str([special_buff]))
+                    special_buff = ''
+
+            # various curses keys, screen_resize, etc
+            elif type(char) is int:
                 continue
-            elif char is '\n':
+
+            # actual chars we care about
+            elif char == '\n':
                 self.bot.curses.wins['input'].erase()
                 self.bot.curses.wins['input'].refresh()
                 self.bot.curses.pad_addline(buff)
@@ -217,3 +253,20 @@ class CursesInput(threading.Thread):
                 buff = ''
             else:
                 buff += char
+
+    # Input window control
+    def input_up(self):
+        """Up arrow, browse prev lines in the input list."""
+        ...
+
+    def input_down(self):
+        """Down arrow, browse next lines in the input list."""
+        ...
+
+    def input_left(self):
+        """Left arrow, previous character."""
+        ...
+
+    def input_right(self):
+        """Right arrow, next character."""
+        ...
