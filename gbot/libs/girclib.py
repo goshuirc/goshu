@@ -234,8 +234,11 @@ class ServerConnection:
                 self.info['server']['cap'] = {}  # dict for future compatability
 
             if len(event.arguments) > 0 and event.arguments[0] == 'ACK':
-                for capability in event.arguments[1]:
-                    self.info['server']['cap'][capability] = True
+                for capability in event.arguments[1].split():
+                    if capability[0] == '-':
+                        self.info['server']['cap'][capability[1:]] = False
+                    else:
+                        self.info['server']['cap'][capability] = True
 
         elif event.type == 'featurelist':
             if 'isupport' not in self.info['server']:
