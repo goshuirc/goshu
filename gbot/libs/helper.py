@@ -260,8 +260,6 @@ value (of key/value pair) will be None if unable to get that specific info
 #def print(*args):
 #    __builtins__.print(*args)
 #    sys.stdout.flush()
-
-
 import string
 
 

@@ -31,6 +31,7 @@ class IRC:
         self.irc.add_global_handler('all_events', self._handle_irclib)
         self.irc.remove_global_handler('irc', irc.client._ping_ponger)
         self.add_handler('in', 'ping', self._handle_ping, -42)
+        self.add_handler('in', 'cap', self._handle_cap)
 
     # Servers
     def server(self, name):
@@ -101,6 +102,11 @@ class IRC:
     def _handle_ping(self, event):
         self.servers[event.server].pong(event.arguments[0])
 
+    def _handle_cap(self, event):
+        if event.arguments[0] == 'ACK':
+            if self.servers[event.server]._first_cap:
+                self.servers[event.server].cap('END')
+
     # Disconnect
     def disconnect_all(self, message):
         for name in self.servers.copy():
@@ -153,6 +159,9 @@ class ServerConnection:
         self.connection.connect(address, port, nick, password, username, ircname, Factory)
         self.connection.buffer.errors = 'replace'
 
+        self._first_cap = True
+        self.cap('REQ', 'multi-prefix')
+
     def disconnect(self, message):
         self.info = {
             'connection' : {},
@@ -170,6 +179,13 @@ class ServerConnection:
     def admin(self, server=''):
         self.connection.admin(server)
         self.irc._handle_event(Event(self.irc, self.name, 'out', 'admin', self.info['connection']['nick'], server))
+
+    def cap(self, subcommand, args=''):
+        self.connection.cap(subcommand, args)
+        if args:
+            self.irc._handle_event(Event(self.irc, self.name, 'out', 'cap', self.info['connection']['nick'], [subcommand, args]))
+        else:
+            self.irc._handle_event(Event(self.irc, self.name, 'out', 'cap', self.info['connection']['nick'], [subcommand]))
 
     def ctcp(self, type, target, string):
         self.connection.ctcp(type, target, string)
@@ -213,7 +229,15 @@ class ServerConnection:
     def update_info(self, event):
         changed = False
 
-        if event.type == 'featurelist':
+        if event.type == 'cap':
+            if 'cap' not in self.info['server']:
+                self.info['server']['cap'] = {}  # dict for future compatability
+
+            if len(event.arguments) > 0 and event.arguments[0] == 'ACK':
+                for capability in event.arguments[1]:
+                    ...
+
+        elif event.type == 'featurelist':
             if 'isupport' not in self.info['server']:
                 self.info['server']['isupport'] = {}
 
@@ -250,10 +274,11 @@ class ServerConnection:
             if 'users' not in self.info['channels'][event.arguments[1]]:
                 self.info['channels'][event.arguments[1]]['users'] = {}
             for user in event.arguments[2].split():
-                # supports multi_prefix
+                # supports multi-prefix
                 user_priv = ''
                 while user[0] in self.info['server']['isupport']['PREFIX'][1]:
-                    user_priv = user.pop(0)
+                    user_priv += user[0]
+                    user = user[1:]
                 user_nick = user
 
                 self.create_user(user_nick)

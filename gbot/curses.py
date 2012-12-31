@@ -7,7 +7,7 @@
 # ----------------------------------------------------------------------------
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 
-import curses
+import curses, curses.ascii
 import threading
 import select
 import math
@@ -31,7 +31,7 @@ class Curses:
         self.stdscr.keypad(1)  # keypad input
 
         # Setup nice environment
-        # curses.noecho()  # don't echo keys
+        #curses.noecho()  # don't echo keys
         curses.cbreak()  # no enter-buffering
 
         curses.init_pair(1, curses.COLOR_BLUE, curses.COLOR_WHITE)
@@ -158,7 +158,7 @@ class Curses:
         self.old_values[window] = line
 
     # Input functions
-    def get_input(self, prefix='>  ', password=False):
+    def get_input(self, prefix='', password=False):
         self.wins['input'].erase()
         self.wins['input'].addstr(prefix)
         self.wins['input'].refresh()
@@ -178,11 +178,15 @@ class Curses:
     # Buffer control
     def buffer_prev(self):
         """Go to the previous buffer."""
-        ...
+        self.pad_addline('Previous Buffer', history=False)
 
     def buffer_next(self):
         """Go to the next buffer."""
-        ...
+        self.pad_addline('Next Buffer', history=False)
+
+    def buffer_cycle(self):
+        """Cycle through the seperate buffers on the current merged buffer."""
+        self.pad_addline('Cycle Buffer', history=False)
 
 
 class CursesInput(threading.Thread):
@@ -193,14 +197,15 @@ class CursesInput(threading.Thread):
         self._stopflag = threading.Event()
 
         self.specials = {
-            '\x1b[A': self.input_up,
-            '\x1b[B': self.input_down,
-            '\x1b[C': self.input_left,
-            '\x1b[D': self.input_right,
-            '\x1b[1;3A': self.bot.curses.buffer_prev,
-            '\x1b[1;3C': self.bot.curses.buffer_prev,
-            '\x1b[1;3B': self.bot.curses.buffer_next,
-            '\x1b[1;3D': self.bot.curses.buffer_next,
+            '\x1b[A': self.input_up,     # up arrow
+            '\x1b[B': self.input_down,   # down arrow
+            '\x1b[C': self.input_left,   # left arrow
+            '\x1b[D': self.input_right,  # right arrow
+            '\x1b[1;3A': self.bot.curses.buffer_prev,  # alt + up arrow
+            '\x1b[1;3B': self.bot.curses.buffer_next,  # alt + down arrow
+            '\x1b[1;3C': self.bot.curses.buffer_prev,  # alt + left arrow
+            '\x1b[1;3D': self.bot.curses.buffer_next,  # alt + right arrow
+            '\x18': self.bot.curses.buffer_cycle,  # ctrl + x
         }
 
     # flag functions
@@ -209,6 +214,12 @@ class CursesInput(threading.Thread):
 
     def stopped(self):
         return self._stopflag.isSet()
+
+    def handle_special(self, code):
+        if code in self.specials:
+            self.specials[code]()
+        else:
+            self.bot.curses.pad_addline('unknown key: ' + str([code]))
 
     # Handling input
     def run(self):
@@ -228,11 +239,12 @@ class CursesInput(threading.Thread):
                 special_buff += char
             elif special_buff:
                 special_buff += char
-                if special_buff in self.specials:
-                    self.specials[special_buff]()
-                elif len(special_buff) > 10:
-                    self.bot.curses.pad_addline('unknown key: ' + str([special_buff]))
+                if curses.ascii.isalpha(char):  # afaik, all specials end with an alpha char
+                    self.handle_special(special_buff)
                     special_buff = ''
+
+            elif char in self.specials:
+                self.handle_special(char)
 
             # various curses keys, screen_resize, etc
             elif type(char) is int:
