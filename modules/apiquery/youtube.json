@@ -1,5 +1,5 @@
 {
-    "name": "You/c5Tube/c", 
+    "name": "You@c5Tube@c", 
     "description": "<query> --- stupid videos and all that fun stuff", 
     "url": "https://gdata.youtube.com/feeds/api/videos?alt=jsonc&v=2&max-results=1&q=/{escaped_query}", 
     "format": "json", 

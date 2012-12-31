@@ -75,7 +75,7 @@ class apiquery(Module):
         if command.arguments == '':
             command.arguments = ' '
 
-        url = url.replace('/{escaped_query}', urllib.parse.urlencode({b'q' : unescape(command.arguments)})[2:])
+        url = url.replace('@{escaped_query}', urllib.parse.urlencode({b'q' : unescape(command.arguments)})[2:])
 
         if 'urlpost' in querydata:
             url += querydata['urlpost']

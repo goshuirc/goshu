@@ -121,12 +121,12 @@ class responses(Module):
             output.append(pre + line + post)
 
         for line in output:
-            line = line.replace('//', '/{slash}')
-            line = line.replace('/S', source.upper()).replace('/T', target.upper())
-            line = line.replace('/s', source).replace('/t', target)
-            line = line.replace('/{prefix}', self.bot.settings.store['prefix'])
+            line = line.replace('@@', '@{and}')
+            line = line.replace('@S', source.upper()).replace('@T', target.upper())
+            line = line.replace('@s', source).replace('@t', target)
+            line = line.replace('@{prefix}', self.bot.settings.store['prefix'])
 
-            line_split = line.split('/{randomchannelnick}')
+            line_split = line.split('@{randomchannelnick}')
             if len(line_split) > 1:
                 i = 0
                 actual_line = ''
@@ -145,9 +145,9 @@ class responses(Module):
                             actual_line += event.source.split('!')[0]
                 line = actual_line
 
-            line = line.replace('/{slash}', '//')
+            line = line.replace('@{and}', '@@')
 
-            if line[0:2] == '/m':
+            if line[0:2] == '@m':
                 self.bot.irc.action(event, line[2:].strip(), 'public')
             else:
                 self.bot.irc.msg(event, line, 'public')

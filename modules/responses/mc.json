@@ -1,8 +1,8 @@
 {
     "description": "[someone] --- looting, minecraft style!", 
-    "1pre": "/s finds ", 
+    "1pre": "@s finds ", 
     "1post": "!", 
-    "2pre": "/t finds ", 
+    "2pre": "@t finds ", 
     "2post": "!", 
     "1": [
         "stone", 
