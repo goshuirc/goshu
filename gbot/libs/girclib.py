@@ -235,7 +235,7 @@ class ServerConnection:
 
             if len(event.arguments) > 0 and event.arguments[0] == 'ACK':
                 for capability in event.arguments[1]:
-                    ...
+                    self.info['server']['cap'][capability] = True
 
         elif event.type == 'featurelist':
             if 'isupport' not in self.info['server']:
