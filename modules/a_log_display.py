@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr@bin/env python
 # ----------------------------------------------------------------------------
 # "THE BEER-WARE LICENSE" (Revision 42):
 # <danneh@danneh.net> wrote this file. As long as you retain this notice you
@@ -117,8 +117,8 @@ class a_log_display(Module):
             else:
                 output += event.target
                 targets.append(event.target)
-            output += '@c3-@c  /b* '
-            output += event.source.split('!')[0] + '/b '
+            output += '@c3-@c  @b* '
+            output += event.source.split('!')[0] + '@b '
             output += event.arguments[0]
 
         elif event.type in ['umode', ]:
@@ -139,7 +139,7 @@ class a_log_display(Module):
                 output += arg + ' '
             output = output[:-1]  # strip last space
             output += '@c14]@c'
-            output += ' by /b'
+            output += ' by @b'
             output += event.source.split('!')[0]
 
         elif event.type in ['kick', ]:
@@ -156,12 +156,12 @@ class a_log_display(Module):
 
         elif event.type in ['join', ]:
             targets.append(event.target)
-            output += '@c6-@c!@c6-/b@c10 '
+            output += '@c6-@c!@c6-@b@c10 '
             output += event.source.split('!')[0]
-            output += '/b @c14[@c10'
+            output += '@b @c14[@c10'
             output += event.source.split('!')[1]
             output += '@c14]@c '
-            output += 'has joined /b'
+            output += 'has joined @b'
             output += escape(event.target)
 
         elif event.type in ['nick', ]:
