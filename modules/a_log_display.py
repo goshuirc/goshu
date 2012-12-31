@@ -37,13 +37,13 @@ class a_log_display(Module):
             return
 
         #> 15:26:43
-        output = '/c14'
+        output = '@c14'
         output += strftime("%H:%M:%S", localtime())
 
         #> -rizon-
-        output += ' /c2-/c'
+        output += ' @c2-@c'
         output += event.server
-        output += '/c2-/c '
+        output += '@c2-@c '
 
         targets = ['all']
 
@@ -61,23 +61,23 @@ class a_log_display(Module):
 
         elif event.type in ['privnotice', '439', ]:
             targets.append(event.source.split('!')[0])
-            output += '/c14-'
-            output += '/c13' + event.source.split('!')[0]
+            output += '@c14-'
+            output += '@c13' + event.source.split('!')[0]
             try:
-                output += '/c14('
-                output += '/c13' + event.source.split('!')[1]
-                output += '/c14)'
+                output += '@c14('
+                output += '@c13' + event.source.split('!')[1]
+                output += '@c14)'
             except IndexError:
                 output = output[:-1]
-            output += '-/c '
+            output += '-@c '
             output += event.arguments[0]
 
         elif event.type in ['pubmsg', ]:
             targets.append(event.target)
-            output += '/c3-/c'
+            output += '@c3-@c'
             output += event.target
-            output += '/c3- '
-            output += '/c14</c'
+            output += '@c3- '
+            output += '@c14<@c'
             try:
                 selected_mode = ''
 
@@ -92,99 +92,99 @@ class a_log_display(Module):
             except:
                 output += ' '
             output += self.nick_color(event.source.split('!')[0])
-            output += '/c14>/c '
+            output += '@c14>@c '
             output += event.arguments[0]
 
         elif event.type in ['privmsg', ]:
-            output += '/c3-/c'
+            output += '@c3-@c'
             if event.direction == 'in':
                 output += event.source.split('!')[0]
                 targets.append(event.source.split('!')[0])
             else:
                 output += event.target
                 targets.append(event.target)
-            output += '/c3- '
-            output += '/c14</c'
+            output += '@c3- '
+            output += '@c14<@c'
             output += self.nick_color(event.source.split('!')[0])
-            output += '/c14>/c '
+            output += '@c14>@c '
             output += event.arguments[0]
 
         elif event.type in ['action', ]:
-            output += '/c3-/c'
+            output += '@c3-@c'
             if event.direction == 'in':
                 output += event.from_to
                 targets.append(event.from_to)
             else:
                 output += event.target
                 targets.append(event.target)
-            output += '/c3-/c  /b* '
+            output += '@c3-@c  /b* '
             output += event.source.split('!')[0] + '/b '
             output += event.arguments[0]
 
         elif event.type in ['umode', ]:
             output += 'Mode change '
-            output += '/c14[/c'
+            output += '@c14[@c'
             output += event.arguments[0]
-            output += '/c14]/c'
+            output += '@c14]@c'
             output += ' for user '
             output += event.target
 
         elif event.type in ['mode', ]:
             targets.append(event.target)
-            output += '/c6-/c!/c6-/c '
+            output += '@c6-@c!@c6-@c '
             output += 'mode//'
-            output += '/c10' + event.target + '/c '
-            output += '/c14[/c'
+            output += '@c10' + event.target + '@c '
+            output += '@c14[@c'
             for arg in event.arguments:
                 output += arg + ' '
             output = output[:-1]  # strip last space
-            output += '/c14]/c'
+            output += '@c14]@c'
             output += ' by /b'
             output += event.source.split('!')[0]
 
         elif event.type in ['kick', ]:
             targets.append(escape(event.target))
-            output += '/c6-/c!/c6-/c10 '
+            output += '@c6-@c!@c6-@c10 '
             output += event.arguments[0]
-            output += '/c was kicked from '
+            output += '@c was kicked from '
             output += escape(event.target)
             output += ' by '
             output += event.source.split('!')[0]
-            output += ' /c14[/c'
+            output += ' @c14[@c'
             output += event.arguments[1]
-            output += '/c14]/c'
+            output += '@c14]@c'
 
         elif event.type in ['join', ]:
             targets.append(event.target)
-            output += '/c6-/c!/c6-/b/c10 '
+            output += '@c6-@c!@c6-/b@c10 '
             output += event.source.split('!')[0]
-            output += '/b /c14[/c10'
+            output += '/b @c14[@c10'
             output += event.source.split('!')[1]
-            output += '/c14]/c '
+            output += '@c14]@c '
             output += 'has joined /b'
             output += escape(event.target)
 
         elif event.type in ['nick', ]:
-            output += '/c6-/c!/c6-/c10 '
+            output += '@c6-@c!@c6-@c10 '
             output += event.source.split('!')[0]
-            output += '/c is now known as /c10'
+            output += '@c is now known as @c10'
             output += str(event.target)
 
         elif event.type in ['currenttopic', ]:
             targets.append(event.arguments[0])
-            output += '/c6-/c!/c6-/c10 Topic for /c10'
+            output += '@c6-@c!@c6-@c10 Topic for @c10'
             output += event.arguments[0]
-            output += '/c: '
+            output += '@c: '
             output += event.arguments[1]
 
         elif event.type in ['quit', ]:
-            output += '/c6-/c!/c6-/c10 '
+            output += '@c6-@c!@c6-@c10 '
             output += event.source.split('!')[0]
-            output += ' /c14[/c'
+            output += ' @c14[@c'
             output += event.source.split('!')[1]
-            output += '/c14]/c has quit /c14[/c'
+            output += '@c14]@c has quit @c14[@c'
             output += event.arguments[0]
-            output += '/c14]/c'
+            output += '@c14]@c'
 
         elif event.type in ['ctcp', ] and event.arguments[0] == 'ACTION':
             return
@@ -197,7 +197,7 @@ class a_log_display(Module):
             output += str(event.direction) + ' ' + str(event.type) + ' ' + str(event.source) + ' ' + str(event.target) + ' ' + escape(str(event.arguments))
             #print('    unknown:', output)
 
-        #print(display_unescape(output + '/c'))
+        #print(display_unescape(output + '@c'))
         self.bot.curses.pad_addline(event.type)
         self.bot.curses.pad_addline(remove_control_codes(output))
         self.log(output, event.server, targets)
@@ -215,10 +215,10 @@ class a_log_display(Module):
             path = 'logs/'+server_escape+'/'+target+'.log'
 
             if target not in self.logfiles_open or not os.path.exists(path):
-                output = '/c14 Logfile Opened - ' + strftime("%A %B %d, %H:%M:%S %Y", localtime()) + '\n' + output
+                output = '@c14 Logfile Opened - ' + strftime("%A %B %d, %H:%M:%S %Y", localtime()) + '\n' + output
                 self.logfiles_open[target] = strftime("%A %B %d", localtime())
             elif self.logfiles_open[target] != strftime("%A %B %d", localtime()):
-                output = '/c14 New Day - ' + strftime("%A %B %d, %H:%M:%S %Y", localtime()) + '\n' + output
+                output = '@c14 New Day - ' + strftime("%A %B %d, %H:%M:%S %Y", localtime()) + '\n' + output
                 self.logfiles_open[target] = strftime("%A %B %d", localtime())
 
             outfile = open(path.lower(), 'a', encoding='utf-8')
@@ -229,16 +229,16 @@ class a_log_display(Module):
         nick = nickhost.split('!')[0]
         if nick not in self.nick_colors:
             self.nick_colors[nick] = random.randint(2, 13)
-        return '/c' + str(self.nick_colors[nick]) + nick
+        return '@c' + str(self.nick_colors[nick]) + nick
 
 
 def display_unescape(input):
     output = ''
     while input != '':
-        if input[0] == '/':
-            if len(input) > 1 and input[1] == '/':
+        if input[0] == '@':
+            if len(input) > 1 and input[1] == '@':
                 input = input[2:]
-                output += '/'
+                output += '@'
             elif len(input) > 1 and input[1] == 'c':
                 fore = ''
                 back = ''

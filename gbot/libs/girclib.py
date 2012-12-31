@@ -387,7 +387,7 @@ class Event:
 
 
 unescape_dict = {
-    '/' : '/',  # unescape real slashes
+    '@' : '@',
     'b' : '\x02',  # bold
     'c' : '\x03',  # color
     'i' : '\x1d',  # italic
@@ -398,12 +398,12 @@ unescape_dict = {
 
 def escape(string):
     """Change IRC codes into goshu codes."""
-    string = string.replace('/', '//')  # escape real slashes
-    string = string.replace('\x02', '/b')  # bold
-    string = string.replace('\x03', '/c')  # color
-    string = string.replace('\x1d', '/i')  # italic
-    string = string.replace('\x1f', '/u')  # underline
-    string = string.replace('\x0f', '/r')  # reset
+    string = string.replace('@', '@@')
+    string = string.replace('\x02', '@b')  # bold
+    string = string.replace('\x03', '@c')  # color
+    string = string.replace('\x1d', '@i')  # italic
+    string = string.replace('\x1f', '@u')  # underline
+    string = string.replace('\x0f', '@r')  # reset
     return string
 
 
@@ -413,7 +413,7 @@ def unescape(in_string):
         return ''
     out_string = ''
     while 1:
-        if in_string[0] == '/':
+        if in_string[0] == '@':
             if len(in_string) < 2:
                 break
             if in_string[1] in unescape_dict:
@@ -441,11 +441,11 @@ def remove_control_codes(line):
     new_line = ''
     while len(line) > 0:
         try:
-            if line[0] == '/':
+            if line[0] == '@':
                 line = line[1:]
 
-                if line[0] == '/':
-                    new_line += '/'
+                if line[0] == '@':
+                    new_line += '@'
                     line = line[1:]
 
                 elif line[0] == 'c':
