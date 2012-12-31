@@ -334,12 +334,14 @@ class ServerConnection:
 
                 mode_letter, mode_char = mode[1], self.info['server']['isupport']['PREFIX'][1][self.info['server']['isupport']['PREFIX'][0].index(mode[1])]
 
+                self.bot.curses.pad_addline(' -- '.join([mode_letter, mode_char, event.target, event.source, str(event.arguments)]))
+
                 if mode[0] == '-':
-                    if mode_char in self.info['channels'][event.target]['users'][NickMask(event.source).nick]:
-                        self.info['channels'][event.target]['users'][NickMask(event.source).nick] = self.info['channels'][event.target]['users'][mode_letter].replace(mode_char, '')
+                    if mode_char in self.info['channels'][event.target]['users'][mode_letter]:
+                        self.info['channels'][event.target]['users'][mode_letter] = self.info['channels'][event.target]['users'][mode_letter].replace(mode_char, '')
                 elif mode[0] == '+':
                     if mode_char not in self.info['channels'][event.target]['users'][mode[2]]:
-                        self.info['channels'][event.target]['users'][NickMask(event.source).nick] += mode_char
+                        self.info['channels'][event.target]['users'][mode_letter] += mode_char
             changed = True
 
         if changed:
