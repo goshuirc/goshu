@@ -89,7 +89,7 @@ class google(Module):
         self.bot.irc.msg(event, response, 'public')
 
     def google_search(self, event, command):
-        response = '*** /c12G/c4o/c8o/c12g/c3l/c4e/c: '
+        response = '*** @c12G@c4o@c8o@c12g@c3l@c4e@c: '
 
         calc_result = self.google_calc_search(command.arguments)
         if calc_result:
