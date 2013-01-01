@@ -216,7 +216,7 @@ class ServerConnection:
             command = 'pubmsg'
             if chanserv_escape and message[0] == '.':
                 message_escaped = message[0]
-                message_escaped += '/b/b'
+                message_escaped += '@b@b'
                 message_escaped += message[1:]
                 message = message_escaped
         else:
