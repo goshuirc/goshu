@@ -207,6 +207,9 @@ class ServerConnection:
         self.connection.join(channel, key)
         #self.irc._handle_event(Event(self.irc, self.name, 'out', 'join', self.info['connection']['nick'], channel, [key]))
 
+    def mode(self, target, modes=''):
+        self.connection.mode(target, modes)
+
     def pong(self, target):
         self.connection.pong(target)
         self.irc._handle_event(Event(self.irc, self.name, 'out', 'pong', self.info['connection']['nick'], target))
@@ -272,7 +275,8 @@ class ServerConnection:
         elif event.type == 'join':
             self.create_user(event.source)
             self.create_channel(event.target)
-            self.info['channels'][event.target]['users'][NickMask(event.source).nick] = ''
+            self.info['channels'][event.target]['users'][NickMask(event.source).nick] = ''  # todo: what is this line for?
+            self.mode(event.target)
             changed = True
 
         elif event.type == 'namreply':
@@ -332,45 +336,55 @@ class ServerConnection:
             del self.info['users'][NickMask(event.source).nick]
             changed = True
 
-        elif event.type == 'mode':
+        elif event.type == 'channelcreate':
+            self.info['channels'][event.arguments[0]]['created'] = event.arguments[1]
+
+        elif event.type in ['mode', 'channelmodeis']:
             unary_modes = self.info['server']['isupport']['PREFIX'][0] + self.info['server']['isupport']['CHANMODES'][0] + self.info['server']['isupport']['CHANMODES'][1] + self.info['server']['isupport']['CHANMODES'][2]
 
-            for mode in irc.modes._parse_modes(' '.join(event.arguments), unary_modes):
+            if event.type == 'mode':
+                channel = event.target
+                mode_list = ' '.join(event.arguments)
+            elif event.type == 'channelmodeis':
+                channel = event.arguments[0]
+                mode_list = ' '.join(event.arguments[1:])
+
+            for mode in irc.modes._parse_modes(mode_list, unary_modes):
 
                 # User prefix modes - voice, op, etc
                 if mode[1] in self.info['server']['isupport']['PREFIX'][0]:
                     mode_letter, mode_char = mode[1], self.info['server']['isupport']['PREFIX'][1][self.info['server']['isupport']['PREFIX'][0].index(mode[1])]
 
                     if mode[0] == '-':
-                        if mode_char in self.info['channels'][event.target]['users'][mode[2]]:
-                            self.info['channels'][event.target]['users'][mode[2]] = self.info['channels'][event.target]['users'][mode[2]].replace(mode_char, '')
+                        if mode_char in self.info['channels'][channel]['users'][mode[2]]:
+                            self.info['channels'][channel]['users'][mode[2]] = self.info['channels'][channel]['users'][mode[2]].replace(mode_char, '')
                     elif mode[0] == '+':
-                        if mode_char not in self.info['channels'][event.target]['users'][mode[2]]:
-                            self.info['channels'][event.target]['users'][mode[2]] += mode_char
+                        if mode_char not in self.info['channels'][channel]['users'][mode[2]]:
+                            self.info['channels'][channel]['users'][mode[2]] += mode_char
 
                 # List modes
                 if mode[1] in self.info['server']['isupport']['CHANMODES'][0]:
                     if mode[0] == '-':
-                        if mode[2] in self.info['channels'][event.target]['modes'][mode[1]]:
-                            del self.info['channels'][event.target]['modes'][mode[1]][self.info['channels'][event.target]['modes'][mode[1]].index(mode[2])]
+                        if mode[2] in self.info['channels'][channel]['modes'][mode[1]]:
+                            del self.info['channels'][channel]['modes'][mode[1]][self.info['channels'][channel]['modes'][mode[1]].index(mode[2])]
                     elif mode[0] == '+':
-                        self.info['channels'][event.target]['modes'][mode[1]].append(mode[2])
+                        self.info['channels'][channel]['modes'][mode[1]].append(mode[2])
 
                 # Channel modes, paramaters
                 if mode[1] in (self.info['server']['isupport']['CHANMODES'][1] + self.info['server']['isupport']['CHANMODES'][2]):
                     if mode[0] == '-':
-                        if mode[1] in self.info['channels'][event.target]['modes']:
-                            del self.info['channels'][event.target]['modes'][mode[1]]
+                        if mode[1] in self.info['channels'][channel]['modes']:
+                            del self.info['channels'][channel]['modes'][mode[1]]
                     elif mode[0] == '+':
-                        self.info['channels'][event.target]['modes'][mode[1]] = mode[2]
+                        self.info['channels'][channel]['modes'][mode[1]] = mode[2]
 
                 # Channel modes, no params
                 if mode[1] in self.info['server']['isupport']['CHANMODES'][3]:
                     if mode[0] == '-':
-                        if mode[1] in self.info['channels'][event.target]['modes']:
-                            del self.info['channels'][event.target]['modes'][mode[1]]
+                        if mode[1] in self.info['channels'][channel]['modes']:
+                            del self.info['channels'][channel]['modes'][mode[1]]
                     elif mode[0] == '+':
-                        self.info['channels'][event.target]['modes'][mode[1]] = True
+                        self.info['channels'][channel]['modes'][mode[1]] = True
 
             changed = True
 
