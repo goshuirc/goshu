@@ -259,6 +259,9 @@ class ServerConnection:
                         channel_modes = channel_modes[1:]
                         self.info['server']['isupport'][feature_name] = [channel_modes, channel_chars]
 
+                    elif feature_name == 'CHANMODES':  # channel mode letters
+                        self.info['server']['isupport'][feature_name] = feature_value.split(',')
+
                     else:
                         self.info['server']['isupport'][feature_name] = feature_value
                 else:
@@ -330,19 +333,21 @@ class ServerConnection:
             changed = True
 
         elif event.type == 'mode':
-            # todo: channel modes, and user-only modes. Automagically populate mode tables from server join info
-            for mode in irc.modes._parse_modes(" ".join(event.arguments), "bklvohaq"):
-                if mode[1] not in self.info['server']['isupport']['PREFIX'][0]:
-                    continue
+            unary_modes = self.info['server']['isupport']['PREFIX'][0] + self.info['server']['isupport']['CHANMODES'][0] + self.info['server']['isupport']['CHANMODES'][1]
 
-                mode_letter, mode_char = mode[1], self.info['server']['isupport']['PREFIX'][1][self.info['server']['isupport']['PREFIX'][0].index(mode[1])]
+            for mode in irc.modes._parse_modes(" ".join(event.arguments), unary_modes):
 
-                if mode[0] == '-':
-                    if mode_char in self.info['channels'][event.target]['users'][event.arguments[1]]:
-                        self.info['channels'][event.target]['users'][event.arguments[1]] = self.info['channels'][event.target]['users'][event.arguments[1]].replace(mode_char, '')
-                elif mode[0] == '+':
-                    if mode_char not in self.info['channels'][event.target]['users'][mode[2]]:
-                        self.info['channels'][event.target]['users'][event.arguments[1]] += mode_char
+                # User prefix modes - voice, op, etc
+                if mode[1] in self.info['server']['isupport']['PREFIX'][0]:
+                    mode_letter, mode_char = mode[1], self.info['server']['isupport']['PREFIX'][1][self.info['server']['isupport']['PREFIX'][0].index(mode[1])]
+
+                    if mode[0] == '-':
+                        if mode_char in self.info['channels'][event.target]['users'][mode[2]]:
+                            self.info['channels'][event.target]['users'][mode[2]] = self.info['channels'][event.target]['users'][mode[2]].replace(mode_char, '')
+                    elif mode[0] == '+':
+                        if mode_char not in self.info['channels'][event.target]['users'][mode[2]]:
+                            self.info['channels'][event.target]['users'][mode[2]] += mode_char
+
             changed = True
 
         if changed:
