@@ -338,8 +338,8 @@ class ServerConnection:
                 mode_letter, mode_char = mode[1], self.info['server']['isupport']['PREFIX'][1][self.info['server']['isupport']['PREFIX'][0].index(mode[1])]
 
                 if mode[0] == '-':
-                    if mode_char in self.info['channels'][event.target]['users'][mode_letter]:
-                        self.info['channels'][event.target]['users'][event.arguments[1]] = self.info['channels'][event.target]['users'][mode_letter].replace(mode_char, '')
+                    if mode_char in self.info['channels'][event.target]['users'][event.arguments[1]]:
+                        self.info['channels'][event.target]['users'][event.arguments[1]] = self.info['channels'][event.target]['users'][event.arguments[1]].replace(mode_char, '')
                 elif mode[0] == '+':
                     if mode_char not in self.info['channels'][event.target]['users'][mode[2]]:
                         self.info['channels'][event.target]['users'][event.arguments[1]] += mode_char
