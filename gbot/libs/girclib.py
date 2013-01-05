@@ -472,7 +472,7 @@ def unescape(in_string, unescape=_unescape_dict):
             if curly_buffer in unescape:
                 # you can also pass functions, rather than strings
                 # needed for stuff like {randomchannelnick}
-                unescape_format(unescape[curly_buffer])
+                out_string += unescape_format(unescape[curly_buffer])
             else:
                 out_string += '{{!s}}'.format(curly_buffer)
             curly_buffer = ''
@@ -490,7 +490,7 @@ def unescape(in_string, unescape=_unescape_dict):
                 curly_buffer_active = True
 
             if in_string[1] in unescape:
-                unescape_format(unescape[in_string[1]])
+                out_string += unescape_format(unescape[in_string[1]])
 
             else:
                 out_string += '@' + in_string[1]
