@@ -7,6 +7,7 @@
 # ----------------------------------------------------------------------------
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 
+import collections
 import bisect
 import ssl
 import irc, irc.client, irc.modes
@@ -432,7 +433,7 @@ class Event:
             self.from_to = str(target).split('!')[0]
 
 
-unescape_dict = {
+_unescape_dict = {
     '@' : '@',
     'b' : '\x02',  # bold
     'c' : '\x03',  # color
@@ -453,26 +454,69 @@ def escape(string):
     return string
 
 
-def unescape(in_string):
-    """Change goshu codes into IRC codes."""
+def unescape(in_string, unescape=_unescape_dict):
+    """Change goshu codes into IRC codes.
+
+    Basically, you can either have a one-character control code after @,
+    or you can have curly brackets, along with a string."""
     if len(in_string) < 1:
         return ''
+
     out_string = ''
-    while 1:
-        if in_string[0] == '@':
+    curly_buffer = ''
+    curly_buffer_active = False
+    while True:
+
+        # multi-char sequences
+        if curly_buffer_active and (in_string[0] == '}'):
+            if curly_buffer in unescape:
+                # you can also pass functions, rather than strings
+                # needed for stuff like {randomchannelnick}
+                unescape_format(unescape[curly_buffer])
+            else:
+                out_string += '{{!s}}'.format(curly_buffer)
+            curly_buffer = ''
+            curly_buffer_active = False
+
+        elif curly_buffer_active:
+            curly_buffer += in_string[0]
+
+        # single-char
+        elif in_string[0] == '@':
             if len(in_string) < 2:
                 break
-            if in_string[1] in unescape_dict:
-                out_string += unescape_dict[in_string[1]]
+
+            if in_string[1] == '{':
+                curly_buffer_active = True
+
+            if in_string[1] in unescape:
+                unescape_format(unescape[in_string[1]])
+
             else:
-                out_string += in_string[0] + '?' + in_string[1] + '?'
-            in_string = in_string[2:]
+                out_string += '@' + in_string[1]
+
+            in_string = in_string[1:]
+
+        # regular text
         else:
             out_string += in_string[0]
-            in_string = in_string[1:]
+
+        # book-keeping
+        in_string = in_string[1:]
+
         if len(in_string) < 1:
             break
+
     return out_string
+
+
+def unescape_format(format):
+    if isinstance(format, str):
+        return format
+    elif isinstance(format, collections.Sequence):
+        return format[0](format[1])
+    elif isinstance(format, collections.Callable):
+        return unescape[curly_buffer]()
 
 
 class NickMask(irc.client.NickMask):
