@@ -122,8 +122,8 @@ class responses(Module):
             output.append(pre + line + post)
 
         for line in output:
-            output = unescape(output)
-            output = unescape(output, {
+            line = unescape(line)
+            line = unescape(line, {
                 's': source,
                 'S': source.upper(),
                 't': target,

@@ -474,7 +474,7 @@ def unescape(in_string, unescape=_unescape_dict):
                 # needed for stuff like {randomchannelnick}
                 out_string += unescape_format(unescape[curly_buffer])
             else:
-                out_string += '{{!s}}'.format(curly_buffer)
+                out_string += '@{' + curly_buffer + '}'
             curly_buffer = ''
             curly_buffer_active = False
 
