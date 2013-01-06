@@ -489,7 +489,7 @@ def unescape(in_string, unescape=_unescape_dict):
             if in_string[1] == '{':
                 curly_buffer_active = True
 
-            if in_string[1] in unescape:
+            elif in_string[1] in unescape:
                 out_string += unescape_format(unescape[in_string[1]])
 
             else:
@@ -516,7 +516,7 @@ def unescape_format(format):
     elif isinstance(format, collections.Sequence):
         return format[0](format[1])
     elif isinstance(format, collections.Callable):
-        return unescape[curly_buffer]()
+        return format()
 
 
 class NickMask(irc.client.NickMask):
@@ -551,8 +551,10 @@ def remove_control_codes(line):
                                     if line[0].isdigit():
                                         line = line[1:]
 
-                #elif line[0] in ['b', 'i', 'u', 'r']:
-                #    line = line[1:]
+                elif line[0] == '{':
+                    while line[0] != '}':
+                        line = line[1:]
+                    line = line[1:]
 
                 else:
                     line = line[1:]

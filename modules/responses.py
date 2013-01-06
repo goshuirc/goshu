@@ -8,6 +8,7 @@
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 
 from gbot.modules import Module
+from gbot.libs.girclib import unescape
 from gbot.libs.helper import filename_escape, utf8_bom
 import random
 import os
@@ -121,8 +122,8 @@ class responses(Module):
             output.append(pre + line + post)
 
         for line in output:
-            output = self.bot.irc.unescape(output)
-            output = self.bot.irc.unescape(output, {
+            output = unescape(output)
+            output = unescape(output, {
                 's': source,
                 'S': source.upper(),
                 't': target,
