@@ -9,6 +9,23 @@
 
 from .libs import girclib
 import time
+import threading
+
+
+class ChannelJoiner(threading.Thread):
+
+    def __init__(self, server, name, channels, wait_time):
+        threading.Thread.__init__(self, name='ChannelJoiner-'+name)
+
+        self.server = server
+        self.channels = channels
+        self.wait_time = wait_time
+
+    def run(self):
+        time.sleep(self.wait_time)
+
+        for channel in self.channels:
+            self.server.join(channel)
 
 
 class IRC(girclib.IRC):
@@ -66,12 +83,12 @@ class IRC(girclib.IRC):
             if 'nickserv_password' in info.store[name]['connection']:
                 s.privmsg('nickserv', 'identify '+info.store[name]['connection']['nickserv_password'])
 
-            if 'vhost_wait' in info.store[name]['connection']:
-                time.sleep(info.store[name]['connection']['vhost_wait'])  # waiting for vhost to get set, in seconds
-
             if 'autojoin_channels' in info.store[name]['connection']:
-                for channel in info.store[name]['connection']['autojoin_channels']:
-                    s.join(channel)
+                wait_time = 0
+                if 'vhost_wait' in info.store[name]['connection']:
+                    wait_time = info.store[name]['connection']['vhost_wait']
+
+                ChannelJoiner(s, name, info.store[name]['connection']['autojoin_channels'], wait_time).start()
 
     def action(self, event, message, zone='private'):
         """Automagically message someone. Zone can be public or private, for preferring channel or user."""

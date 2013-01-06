@@ -74,7 +74,7 @@ class list(Module):
                 output[i] += bot_command[0] + ', '
             output[i] = output[i][:-2]  # remove last ', '
 
-            output.append('Note: to display information on a specific command, use /i'+self.bot.settings.store['prefix']+'list <command>/i. eg: /i'+self.bot.settings.store['prefix']+'list 8ball')
+            output.append('Note: to display information on a specific command, use @i'+self.bot.settings.store['prefix']+'list <command>@i. eg: @i'+self.bot.settings.store['prefix']+'list 8ball')
 
             for line in output:
                 self.bot.irc.msg(event, line)
