@@ -16,9 +16,9 @@ if sys.stdout.encoding.lower() != 'utf-8':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding=sys.stdout.encoding, errors='replace', line_buffering=True)
 
 
-import gbot.bot
+import gbot
 
-bot = gbot.bot.Bot(debug=True)
+bot = gbot.Bot(debug=True)
 
 accountinfo_path = 'config/info.json'
 bot.accounts.use_file(accountinfo_path)
