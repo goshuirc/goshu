@@ -206,10 +206,13 @@ class ServerConnection:
 
     def join(self, channel, key=''):
         self.connection.join(channel, key)
-        #self.irc._handle_event(Event(self.irc, self.name, 'out', 'join', self.info['connection']['nick'], channel, [key]))
+        self.irc._handle_event(Event(self.irc, self.name, 'out', 'join', self.info['connection']['nick'], channel, [key]))
 
     def mode(self, target, modes=''):
         self.connection.mode(target, modes)
+
+    def part(self, channel, message=''):
+        self.connection.part(channel, message)
 
     def pong(self, target):
         self.connection.pong(target)
@@ -273,7 +276,7 @@ class ServerConnection:
                         feature = feature[:-1]
                     self.info['server']['isupport'][feature] = True
 
-        elif event.type == 'join':
+        elif event.type == 'join' and event.direction == 'in':
             self.create_user(event.source)
             self.create_channel(event.target)
             self.info['channels'][event.target]['users'][NickMask(event.source).nick] = ''
@@ -436,6 +439,7 @@ class Event:
             self.from_to = str(target).split('!')[0]
 
 
+## String escaping/unescaping
 _unescape_dict = {
     '@' : '@',
     'b' : '\x02',  # bold
@@ -522,14 +526,6 @@ def unescape_format(format):
         return format()
 
 
-class NickMask(irc.client.NickMask):
-    ...
-
-
-def is_channel(name):
-    return irc.client.is_channel(name)
-
-
 def remove_control_codes(line):
     new_line = ''
     while len(line) > 0:
@@ -568,3 +564,12 @@ def remove_control_codes(line):
         except IndexError:
             ...
     return new_line
+
+
+## Wrappers to default irc classes/functions
+class NickMask(irc.client.NickMask):
+    ...
+
+
+def is_channel(name):
+    return irc.client.is_channel(name)

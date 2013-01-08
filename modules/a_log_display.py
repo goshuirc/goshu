@@ -154,7 +154,7 @@ class a_log_display(Module):
             output += event.arguments[1]
             output += '@c14]@c'
 
-        elif event.type in ['join', ]:
+        elif event.type in ['join', ] and event.direction == 'in':
             targets.append(event.target)
             output += '@c6-@c!@c6-@b@c10 '
             output += event.source.split('!')[0]

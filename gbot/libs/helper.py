@@ -16,26 +16,26 @@ meter function---small interesting stuff like that.
 
 Functions:
 
+split_num() -- /lazy/ wrapper, to stop us bounds-checking when splitting
 is_ok() -- prompt the user for yes/no and returns True/False
 bytes_to_str() -- convert number of bytes to a human-readable format
 filename_escape() -- escapes a filename (slashes removed, etc)
-html_unescape() -- unescapes a string's &str; characters to normal
+html_unescape() -- turns any html-escaped characters back to their normal equivalents
 utf8_bom() -- removes the utf8 bom, because open() decides to leave it in
 
 """
 
-import os
-import sys
-from getpass import getpass
+import string
 
 
-def split_num(line, chars=' ', maxsplits=1):
-    """.split(chars, maxsplit) wrapper, to mitigate 'more values to unpack'
+def split_num(line, chars=' ', maxsplits=1, empty=''):
+    """/lazy/ wrapper, to stop us having to bounds-check when splitting
 
     Arguments:
     line -- line to split
     chars -- character(s) to split line on
     maxsplits -- how many split items are returned
+    empty -- character to put in place of nothing
 
     Returns:
     line.split(chars, items); return value is padded until `maxsplits + 1`
@@ -44,7 +44,7 @@ def split_num(line, chars=' ', maxsplits=1):
     """
     line = line.split(chars, maxsplits)
     while len(line) <= maxsplits:
-        line.append('')
+        line.append(empty)
 
     return line
 
@@ -119,148 +119,6 @@ def bytes_to_str(bytes, base=2, precision=0):
         output = (precision_string % float(bytes)) + 'b'
 
     return output
-
-
-def print_progress_meter(percent, boxes=None, l_indent=1, r_indent=1, newline=False):
-    """Prints a progress meter with the given percentage/options.
-
-    Arguments:
-    percent -- current percentage, from 0 to 100
-    boxes -- if set, the progress meter will be `boxes` wide, otherwise it will
-             expand to take up the terminal
-    l_indent -- left indent
-    r_indent -- right indent, making space for other info if needed
-    newline -- whether to print a newline after the progress meter
-
-    Details:
-    print_progress_meter is meant to be used consecutively, and update the
-    current progress meter line, rather than printing on a new line each
-    iteration. Leaving `newline` as False will make it occur this way.
-
-    """
-    output = '\r'
-    output += ' ' * l_indent
-    output += '[ '
-
-    if boxes == None:
-        terminalinfo = terminal_info()
-        boxes = terminalinfo['x']
-        if boxes == None:  # could not find width
-            boxes = 10
-        boxes = boxes - len(output) - 2 - r_indent
-    output += progress_meter(percent, boxes)
-    output += ' ]'
-    if newline:
-        print(output)
-    else:
-        print(output, end='')
-
-
-def progress_meter(percent, boxes=10):
-    """Returns a progress meter for the given percent.
-
-    Arguments:
-    percent -- current percentage, from 0 to 100
-    boxes -- meter will be `boxes` wide, empty boxes as spaces
-
-    Returns:
-    progress meter string, such as '######=     '
-
-    """
-    filledboxes = (percent / 100) * boxes
-    (filledboxes, splitbox) = str(filledboxes).split('.')
-    splitbox = float('0.'+splitbox)
-
-    progressmeter = '#' * int(filledboxes)
-    if splitbox == 0:
-        progressmeter += ' ' * (boxes - int(filledboxes))
-    elif splitbox < 0.5:
-        progressmeter += '-'
-        progressmeter += ' ' * (boxes - int(filledboxes) - 1)
-    else:
-        progressmeter += '='
-        progressmeter += ' ' * (boxes - int(filledboxes) - 1)
-
-    return progressmeter
-
-
-def _fallback_terminal_info():
-    x = None
-    y = None
-
-    return {
-        'x' : x,
-        'y' : y,
-    }
-
-
-def _win_terminal_info():
-    from ctypes import windll, create_string_buffer
-    h = windll.kernel32.GetStdHandle(-12)
-    csbi = create_string_buffer(22)
-    res = windll.kernel32.GetConsoleScreenBufferInfo(h, csbi)
-
-    if res:
-        import struct
-
-        (bufx, bufy, curx, cury, wattr, left, top, right, bottom, maxx, maxy)\
-        = struct.unpack("hhhhHhhhhhh", csbi.raw)
-
-        x = right - left + 1
-        y = bottom - top + 1
-
-    else:
-        x = None
-        y = None
-
-    return {
-        'x' : x,
-        'y' : y,
-    }
-
-
-def _unix_terminal_info():
-    x = int(os.popen('tput cols', 'r').readline())
-    y = int(os.popen('tput lines', 'r').readline())
-
-    return {
-        'x' : x,
-        'y' : y,
-    }
-
-# bind terminal_info to correct os-specific function
-try:
-    import termios
-    # it's possible there is an incompatible termios from the
-    # McMillan Installer, make sure we have a UNIX-compatible termios
-    termios.tcgetattr, termios.tcsetattr
-except (ImportError, AttributeError):
-    try:
-        import msvcrt
-    except ImportError:
-        terminal_info = _fallback_terminal_info
-    else:
-        terminal_info = _win_terminal_info
-else:
-    terminal_info = _unix_terminal_info
-
-terminal_info.__doc__ = """Returns info about the current terminal, if working within one.
-
-Returns:
-Dictionary with the following keys/values:
-    'x' -- width of terminal in number of characters
-    'y' -- height of terminal in number of characters
-
-Note:
-value (of key/value pair) will be None if unable to get that specific info
-
-"""
-
-
-#def print(*args):
-#    __builtins__.print(*args)
-#    sys.stdout.flush()
-import string
 
 
 def filename_escape(unsafe, replace_char='_', valid_chars=string.ascii_letters+string.digits+'#._- '):

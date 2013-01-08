@@ -13,6 +13,7 @@ import threading
 
 
 class ChannelJoiner(threading.Thread):
+    """Thread to async join the server's channels, to not pause the server for ages."""
 
     def __init__(self, server, name, channels, wait_time):
         threading.Thread.__init__(self, name='ChannelJoiner-'+name)

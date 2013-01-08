@@ -17,23 +17,29 @@ class commands(Module):
     def __init__(self):
         self.events = {
             'commands' : {
-                'msg' : [self.msg, '<user> <message> --- send a /msg', 5],
-                'me' : [self.me, '<user> <message> --- send a /me', 5],
+                'msg' : [self.msg, '<target> <message> --- send a /msg', 5],
+                'me' : [self.me, '<target> <message> --- send a /me', 5],
                 'join' : [self.join, '<channel> --- join channel', 5],
+                'part' : [self.part, '<channel> [reason] --- leave channel', 5],
             },
         }
 
     def msg(self, event, command):
-        (msg_target, msg_msg) = split_num(command.arguments)
+        msg_target, msg_msg = split_num(command.arguments)
 
         self.bot.irc.servers[event.server].privmsg(msg_target, msg_msg)
 
     def me(self, event, command):
-        (msg_target, msg_msg) = split_num(command.arguments)
+        msg_target, msg_msg = split_num(command.arguments)
 
         self.bot.irc.servers[event.server].action(msg_target, msg_msg)
 
     def join(self, event, command):
-        (channel, key) = split_num(command.arguments)
+        channel, key = split_num(command.arguments)
 
         self.bot.irc.servers[event.server].join(channel, key)
+
+    def part(self, event, command):
+        channel, reason = split_num(command.arguments)
+
+        self.bot.irc.servers[event.server].part(channel, reason)
