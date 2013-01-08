@@ -276,8 +276,11 @@ class ServerConnection:
         elif event.type == 'join':
             self.create_user(event.source)
             self.create_channel(event.target)
-            self.info['channels'][event.target]['users'][NickMask(event.source).nick] = ''  # todo: what is this line for?
-            self.mode(event.target)
+            self.info['channels'][event.target]['users'][NickMask(event.source).nick] = ''
+
+            # request channel modes on join
+            if NickMask(event.source).nick == self.info['connection']['nick']:
+                self.mode(event.target)
             changed = True
 
         elif event.type == 'namreply':
