@@ -137,7 +137,7 @@ class Curses:
             self.pad.addstr(0, 0, 'Nope')  # Move cursor, delete old line
             self.pad.deleteln()
 
-            if len(line) > self.stdscr.getmaxyx()[1]:
+            if len(line) >= self.stdscr.getmaxyx()[1]:
                 show = line[:self.stdscr.getmaxyx()[1]-1]
                 line = line[self.stdscr.getmaxyx()[1]-1:]
             else:

@@ -33,7 +33,7 @@ class accounts(Module):
 
     def nickserv_listener(self, event):
         #self.bot.irc.servers[event.server].privmsg('nickserv', 'info '+event.arguments[0].split()[0])
-        self.bot.curses.pad_addline('/msg nickserv info '+event.arguments[0].split()[0])
+        self.bot.curses.pad_addline('Nickserv NOTICE response: '+event.arguments[0].split()[0])
 
     def register(self, event, command):
         user_args = command.arguments.split()

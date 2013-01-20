@@ -132,7 +132,7 @@ class a_log_display(Module):
         elif event.type in ['mode', ]:
             targets.append(event.target)
             output += '@c6-@c!@c6-@c '
-            output += 'mode//'
+            output += 'mode/'
             output += '@c10' + event.target + '@c '
             output += '@c14[@c'
             for arg in event.arguments:
