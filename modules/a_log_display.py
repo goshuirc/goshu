@@ -198,7 +198,7 @@ class a_log_display(Module):
             #print('    unknown:', output)
 
         #print(display_unescape(output + '@c'))
-        self.bot.curses.pad_addline(event.type)
+        #self.bot.curses.pad_addline(event.type)
         self.bot.curses.pad_addline(remove_control_codes(output))
         self.log(output, event.server, targets)
 
