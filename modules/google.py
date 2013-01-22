@@ -139,7 +139,7 @@ class google(Module):
 
             if q_from == '' or q_to == '':
                 return False
-            final_result = '/i' + escape(q_from) + '/i is /i' + escape(q_to) + '/i'
+            final_result = '@i' + escape(q_from) + '@i is @i' + escape(q_to) + '@i'
         except:
             final_result = False
 
