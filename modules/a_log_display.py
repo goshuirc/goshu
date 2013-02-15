@@ -83,7 +83,7 @@ class a_log_display(Module):
 
                 for mode in ['~', '&', '@', '%', '+']:
                     if mode in self.bot.irc.servers[event.server].info['channels'][event.target]['users'][event.source.split('!')[0]]:
-                        output += mode
+                        output += escape(mode)
                         selected_mode = mode
                         break
 
