@@ -549,6 +549,12 @@ def remove_control_codes(line):
                                     line = line[1:]
                                     if line[0].isdigit():
                                         line = line[1:]
+                        elif line[0] == ',':
+                            line = line[1:]
+                            if line[0].isdigit():
+                                line = line[1:]
+                                if line[0].isdigit():
+                                    line = line[1:]
 
                 elif line[0] == '{':
                     while line[0] != '}':
