@@ -25,7 +25,7 @@ class a_log_display(Module):
     def __init__(self):
         self.events = {
             '*' : {
-                '*' : [(-20, self.handler)],
+                '*' : [(-20, self.handler, True)],  # sync
             }
         }
         self.nick_colors = {}

@@ -12,6 +12,7 @@ import sys
 import inspect
 import imp
 import importlib
+import threading
 
 
 class Module:
@@ -105,7 +106,10 @@ class Modules:
                         for h in self.modules[module].events[search_direction][search_type]:
                             if h[1] not in called:
                                 called.append(h[1])
-                                h[1](event)
+                                if len(h) > 2 and h[2]:
+                                    h[1](event)
+                                else:
+                                    threading.Thread(target=h[1], args=[event]).start()
         if event.type == 'privmsg' or event.type == 'pubmsg' and event.direction == 'in':
             self.handle_command(event)
 
@@ -135,7 +139,8 @@ class Modules:
                             if userlevel >= self.modules[module].events['commands'][search_command][2]:
                                 if self.modules[module].events['commands'][search_command][0] not in called:
                                     called.append(self.modules[module].events['commands'][search_command][0])
-                                    self.modules[module].events['commands'][search_command][0](event, Command(command_name, command_args))
+                                    threading.Thread(target=self.modules[module].events['commands'][search_command][0],
+                                                     args=(event, Command(command_name, command_args))).start()
                             else:
                                 self.bot.curses.pad_addline('no privs mang')
 
