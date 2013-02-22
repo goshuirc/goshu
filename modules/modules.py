@@ -11,38 +11,38 @@ from gbot.modules import Module
 
 
 class modules(Module):
-    name = 'modules'
 
     def __init__(self):
+        Module.__init__(self)
         self.events = {
             'commands' : {
                 'module' : [self.handle, ['<load/unload/reload> [name] --- load/unload/reload module specified by <name>', 'list --- list loaded modules'], 5],
             },
         }
 
-    def handle(self, event, command):
-        if not command.arguments:
+    def handle(self, event, command, usercommand):
+        if not usercommand.arguments:
             return
 
-        do = command.arguments.split()[0]
+        do = usercommand.arguments.split()[0]
 
         if do == 'list':
-            response = 'Loaded modules: ' + ', '.join(sorted(list(self.bot.modules.modules.keys())))
+            response = 'Loaded modules: ' + ', '.join(sorted(list(self.bot.modules.whole_modules.keys())))
             self.bot.irc.msg(event, response)
             additional_modules = []
             for path in self.bot.modules.paths:
                 modules = self.bot.modules.modules_from_path(path)
                 for module in modules:
-                    if module not in self.bot.modules.modules:
+                    if module not in self.bot.modules.whole_modules:
                         additional_modules.append(module)
             if len(additional_modules) > 0:
                 response = 'Additional avaliable modules: ' + ', '.join(sorted(additional_modules))
                 self.bot.irc.msg(event, response)
 
         elif do in ['load', 'unload', 'reload']:
-            if len(command.arguments.split()) < 2:
+            if len(usercommand.arguments.split()) < 2:
                 return
-            modules = command.arguments.split(' ', 1)[1].split()
+            modules = usercommand.arguments.split(' ', 1)[1].split()
             succeed = []
             fail = []
             for module in modules:

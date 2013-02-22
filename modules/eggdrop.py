@@ -16,9 +16,9 @@ import base64
 
 
 class eggdrop(Module):
-    name = 'eggdrop'
 
     def __init__(self):
+        Module.__init__(self)
         self.events = {
             'commands' : {
                 'egg' : [self.cmd_handler, '[-section] <suggestion> --- eggdrop', 0],
@@ -46,17 +46,17 @@ class eggdrop(Module):
             conn.commit()
             c.close()
 
-    def cmd_handler(self, event, command):
-        if len(command.arguments.split()) < 1:
+    def cmd_handler(self, event, command, usercommand):
+        if len(usercommand.arguments.split()) < 1:
             return
 
-        egg_command = command.arguments.split()[0]
+        egg_command = usercommand.arguments.split()[0]
 
         if egg_command == 'add':
-            if len(command.arguments.split()) < 2:
+            if len(usercommand.arguments.split()) < 2:
                 return
 
-            qa_string = command.arguments.split(' ', 1)[1]
+            qa_string = usercommand.arguments.split(' ', 1)[1]
 
             if len(qa_string.split('|')) < 2:
                 return

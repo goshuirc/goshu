@@ -1,4 +1,4 @@
-#!/usr@bin/env python
+#!/usr/bin/env python3
 # ----------------------------------------------------------------------------
 # "THE BEER-WARE LICENSE" (Revision 42):
 # <danneh@danneh.net> wrote this file. As long as you retain this notice you
@@ -10,19 +10,16 @@
 from time import strftime, localtime, gmtime
 import random
 import os
-from colorama import init
-init()  #colorama
-from colorama import Fore, Back, Style
 
 from gbot.modules import Module
-from gbot.libs.girclib import escape, unescape, remove_control_codes
+from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import filename_escape
 
 
-class a_log_display(Module):
-    name = "a_log_display"  # a_ at the beginning so goshu calls this module first
+class a_log_display(Module):  # a_ at the beginning so goshu calls this module first… apparently priority's broken, too
 
     def __init__(self):
+        Module.__init__(self)
         self.events = {
             '*' : {
                 '*' : [(-20, self.handler, True)],  # sync
@@ -65,7 +62,7 @@ class a_log_display(Module):
             output += '@c13' + event.source.split('!')[0]
             try:
                 output += '@c14('
-                output += '@c13' + event.source.split('!')[1]
+                output += '@c13' + escape(event.source.split('!')[1])
                 output += '@c14)'
             except IndexError:
                 output = output[:-1]
@@ -75,7 +72,7 @@ class a_log_display(Module):
         elif event.type in ['pubmsg', ]:
             targets.append(event.target)
             output += '@c3-@c'
-            output += event.target
+            output += escape(event.target)
             output += '@c3- '
             output += '@c14<@c'
             try:
@@ -98,7 +95,7 @@ class a_log_display(Module):
         elif event.type in ['privmsg', ]:
             output += '@c3-@c'
             if event.direction == 'in':
-                output += event.source.split('!')[0]
+                output += escape(event.source.split('!')[0])
                 targets.append(event.source.split('!')[0])
             else:
                 output += event.target
@@ -195,11 +192,8 @@ class a_log_display(Module):
         else:
             targets.append('tofix')
             output += str(event.direction) + ' ' + str(event.type) + ' ' + str(event.source) + ' ' + str(event.target) + ' ' + escape(str(event.arguments))
-            #print('    unknown:', output)
 
-        #print(display_unescape(output + '@c'))
-        #self.bot.curses.pad_addline(event.type)
-        self.bot.curses.pad_addline(remove_control_codes(output))
+        self.bot.curses.pad_addline(output)
         self.log(output, event.server, targets)
 
     def log(self, output, server='global', targets=['global']):
@@ -230,132 +224,3 @@ class a_log_display(Module):
         if nick not in self.nick_colors:
             self.nick_colors[nick] = random.randint(2, 13)
         return '@c' + str(self.nick_colors[nick]) + nick
-
-
-def display_unescape(input):
-    output = ''
-    while input != '':
-        if input[0] == '@':
-            if len(input) > 1 and input[1] == '@':
-                input = input[2:]
-                output += '@'
-            elif len(input) > 1 and input[1] == 'c':
-                fore = ''
-                back = ''
-                input = input[2:]
-                in_fore = True
-
-                while True:
-                    if len(input) > 0 and input[0].isdigit():
-                        digit = input[0]
-                        input = input[1:]
-
-                        if in_fore:
-                            if len(fore) < 2:
-                                fore += digit
-                            else:
-                                input = digit + input
-                                break
-                        else:
-                            if len(back) < 2:
-                                back += digit
-                            else:
-                                input = digit + input
-                                break
-
-                    elif len(input) > 0 and input[0] == ',':
-                        if in_fore:
-                            input = input[1:]
-                            in_fore = False
-                        else:
-                            break
-
-                    else:
-                        break
-
-                if fore != '':
-                    if int(fore) > 15:
-                        while int(fore) > 15:
-                            fore = str(int(fore) - 14)
-                    output += fore_colors[str(int(fore))]
-                    if back != '':
-                        if int(back) > 15:
-                            while int(back) > 15:
-                                back = str(int(back) - 14)
-                        output += back_colors[str(int(back))]
-
-                else:
-                    output += Fore.RESET+Style.NORMAL
-                    output += Back.RESET+Style.NORMAL
-
-            elif len(input) > 1 and input[1] in ['b', 'i', 'u', 'r']:
-                input = input[2:]
-
-            elif len(input) >= 2:
-                input = input[2:]
-
-        elif len(input) > 0:
-            output += input[0]
-            if len(input) > 0:
-                input = input[1:]
-
-        else:
-            break
-
-    return output
-
-
-fore_colors = {
-    '0' : Fore.WHITE+Style.NORMAL,
-    '1' : Fore.BLACK+Style.NORMAL,
-    '2' : Fore.BLUE+Style.NORMAL,
-    '3' : Fore.GREEN+Style.NORMAL,
-    '4' : Fore.RED+Style.BRIGHT,
-    '5' : Fore.RED+Style.NORMAL,
-    '6' : Fore.MAGENTA+Style.NORMAL,
-    '7' : Fore.YELLOW+Style.NORMAL,
-    '8' : Fore.YELLOW+Style.BRIGHT,
-    '9' : Fore.GREEN+Style.BRIGHT,
-    '10' : Fore.CYAN+Style.NORMAL,
-    '11' : Fore.CYAN+Style.BRIGHT,
-    '12' : Fore.BLUE+Style.BRIGHT,
-    '13' : Fore.MAGENTA+Style.BRIGHT,
-    '14' : Fore.BLACK+Style.BRIGHT,
-    '15' : Fore.WHITE+Style.NORMAL,
-}
-bold_fore_colors = {
-    '0' : Fore.WHITE+Style.BRIGHT,
-    '1' : Fore.BLACK+Style.DIM,
-    '2' : Fore.BLUE+Style.NORMAL,
-    '3' : Fore.GREEN+Style.NORMAL,
-    '4' : Fore.RED+Style.BRIGHT,
-    '5' : Fore.RED+Style.NORMAL,
-    '6' : Fore.MAGENTA+Style.NORMAL,
-    '7' : Fore.YELLOW+Style.NORMAL,
-    '8' : Fore.YELLOW+Style.BRIGHT,
-    '9' : Fore.GREEN+Style.BRIGHT,
-    '10' : Fore.CYAN+Style.NORMAL,
-    '11' : Fore.CYAN+Style.BRIGHT,
-    '12' : Fore.BLUE+Style.BRIGHT,
-    '13' : Fore.MAGENTA+Style.BRIGHT,
-    '14' : Fore.BLACK+Style.BRIGHT,
-    '15' : Fore.WHITE+Style.BRIGHT,
-}
-back_colors = {
-    '0' : '',
-    '1' : '',
-    '2' : '',
-    '3' : '',
-    '4' : '',
-    '5' : '',
-    '6' : '',
-    '7' : '',
-    '8' : '',
-    '9' : '',
-    '10' : '',
-    '11' : '',
-    '12' : '',
-    '13' : '',
-    '14' : '',
-    '15' : '',
-}

@@ -1,5 +1,5 @@
 {
-    "name": "NyaaTorrents", 
+    "display_name": "NyaaTorrents", 
     "description": "<query> --- search nyaatorrents", 
     "url": "nyaa.eu inurl:tid"
 }

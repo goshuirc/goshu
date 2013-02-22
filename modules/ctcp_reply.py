@@ -13,9 +13,9 @@ from gbot.libs.girclib import NickMask
 
 
 class ctcp_reply(Module):
-    name = "ctcp_reply"
 
     def __init__(self):
+        Module.__init__(self)
         self.events = {
             'in' : {
                 'ctcp' : [(-30, self.ctcp_reply)],

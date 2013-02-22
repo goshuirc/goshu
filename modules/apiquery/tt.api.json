@@ -1,6 +1,6 @@
 {
-    "name": "TokyoTosho", 
-    "description": "<query> --- torrent search", 
+    "display_name": "TokyoTosho", 
+    "desc": "<query> --- torrent search", 
     "url": "http://tokyotosho.info/search.php?terms=@{escaped_query}", 
     "format": "xml", 
     "response": [

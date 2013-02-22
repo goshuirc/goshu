@@ -15,18 +15,19 @@ import socket
 import json
 import os
 
+
 class dictionary(Module):
-    name = 'dictionary'
 
     def __init__(self):
+        Module.__init__(self)
         self.events = {
             'commands' : {
                 'def' : [self.dictionary_definition, '<word> --- returns word definition', 0],
             },
         }
 
-    def dictionary_definition(self, event, command):
-        if command.arguments.strip() == '':
+    def dictionary_definition(self, event, command, usercommand):
+        if usercommand.arguments.strip() == '':
             return
 
         try:
@@ -36,7 +37,7 @@ class dictionary(Module):
             return
 
         url = 'http://api.wordnik.com/v4/word.json/'
-        url += urllib.parse.urlencode({b'' : unescape(command.arguments.strip())})[1:]
+        url += urllib.parse.urlencode({b'' : unescape(usercommand.arguments.strip())})[1:]
         url += '/definitions?'
         url += urllib.parse.urlencode({
             b'limit' : b'1',

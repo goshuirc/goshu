@@ -1,5 +1,5 @@
 {
-    "name": "MediaFire", 
+    "display_name": "MediaFire", 
     "description": "<query> --- search mediafire", 
     "url": "mediafire.com"
 }

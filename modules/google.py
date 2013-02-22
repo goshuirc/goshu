@@ -20,82 +20,38 @@ import xml.sax.saxutils as saxutils
 
 
 class google(Module):
-    name = 'google'
 
     def __init__(self):
+        Module.__init__(self)
         self.events = {
             'commands' : {
-                '*' : [self.dynamic_search, '--- dynamic searches', 0],
-                'google' : [self.google_search, '<query> --- google something, get results', 0],
+                ('google', 'g'): [self.google_search, '<query> --- google something, get results', 0],
+                ('calc', 'c'): [self.google_calc, '<expression> --- calculate something', 0],
             },
         }
-        self.dynamic_path = 'modules'+os.sep+self.name
 
-    def commands(self):
-        output = Module.commands(self)
-        for (dirpath, dirs, files) in os.walk(self.dynamic_path):
-            for file in files:
-                try:
-                    (name, ext) = os.path.splitext(file)
-                    if ext == os.extsep + 'json':
-                        info = json.loads(open(dirpath+os.sep+file).read())
-                    else:
-                        continue
-                except ValueError:
-                    continue
-
-                if 'description' in info:
-                    command_description = info['description']
-                else:
-                    command_description = ''
-                if 'permission' in info:
-                    command_permission = info['permission']
-                else:
-                    command_permission = 0
-
-                output[name] = [self.dynamic_search, command_description, command_permission]
-        return output
-
-    def dynamic_search(self, event, command):
-        module_path = None
-        for (dirpath, dirs, files) in os.walk(self.dynamic_path):
-            for file in files:
-                if not dirpath in sys.path:
-                    sys.path.insert(0, dirpath)
-                (name, ext) = os.path.splitext(file)
-                if ext == os.extsep + 'json':
-                    if name == filename_escape(command.command):
-                        module_path = dirpath
-        if not module_path:
-            return
-
-        try:
-            responses = json.loads(open(module_path+os.sep+filename_escape(command.command)+os.extsep+'json').read())
-        except ValueError:
-            return
-
+    def combined(self, event, command, usercommand):
         query = ''
-        if 'url' in responses:
-            query += 'site:' + responses['url'] + ' '
-        query += command.arguments
+        if 'url' in command.json:
+            query += 'site:' + command.json['url'] + ' '
+        query += usercommand.arguments
 
-        if 'name' in responses:
-            name = responses['name']
+        if 'display_name' in command.json:
+            name = command.json['display_name']
         else:
-            name = 'Search'
+            name = usercommand.command
         response = '*** ' + name + ': '
         response += self.google_result_search(query)
 
         self.bot.irc.msg(event, response, 'public')
 
-    def google_search(self, event, command):
-        response = '*** @c12G@c4o@c8o@c12g@c3l@c4e@c: '
+    def google_search(self, event, command, usercommand):
+        response = '*** @c12G@c4o@c8o@c12g@c3l@c4e@c: {}'.format(self.google_result_search(usercommand.arguments))
 
-        calc_result = self.google_calc_search(command.arguments)
-        if calc_result:
-            response += calc_result
-        else:
-            response += self.google_result_search(command.arguments)
+        self.bot.irc.msg(event, response, 'public')
+
+    def google_calc(self, event, command, usercommand):
+        response = '*** @c12G@c4o@c8o@c12g@c3l@c4e@c: {}'.format(self.google_calc_search(usercommand.arguments))
 
         self.bot.irc.msg(event, response, 'public')
 
@@ -138,9 +94,9 @@ class google(Module):
             q_to = saxutils.unescape(json_result['rhs'].replace('<sup>', '^').replace('</sup>', '').replace('&#215;', '×'))
 
             if q_from == '' or q_to == '':
-                return False
+                return 'Invalid expression'
             final_result = '@i' + escape(q_from) + '@i is @i' + escape(q_to) + '@i'
         except:
-            final_result = False
+            final_result = 'Invalid expression'
 
         return final_result

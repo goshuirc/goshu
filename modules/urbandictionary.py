@@ -14,17 +14,17 @@ import json
 
 
 class urbandictionary(Module):
-    name = 'urbandictionary'
 
     def __init__(self):
+        Module.__init__(self)
         self.events = {
             'commands' : {
                 'ud' : [self.ud_search, '<query> --- see UrbanDictionary definition', 0],
             },
         }
 
-    def ud_search(self, event, command):
-        encoded_query = urllib.parse.urlencode({b'term' : unescape(command.arguments)})
+    def ud_search(self, event, command, usercommand):
+        encoded_query = urllib.parse.urlencode({b'term' : unescape(usercommand.arguments)})
         url = 'http://www.urbandictionary.com/iphone/search/define?%s' % (encoded_query)
         try:
             search_results = urllib.request.urlopen(url)

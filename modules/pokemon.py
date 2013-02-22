@@ -15,9 +15,9 @@ import os
 
 
 class pokemon(Module):
-    name = 'pokemon'
 
     def __init__(self):
+        Module.__init__(self)
         self.events = {
             'commands' : {
                 'pokemon' : [self.get_pokemon, '--- get a random pokemon', 0],
@@ -28,13 +28,13 @@ class pokemon(Module):
 
         self.path = 'modules'+os.sep+'pokemon'+os.sep
         self.files = ['pokemon_list.json', 'corrupt_list.json']
-        self.corrupted = None
+        self.corrupted = False
 
         random.seed()
 
-    def get_pokemon(self, event, command):
+    def get_pokemon(self, event, command, usercommand):
         team = []
-        if command.command == 'pokemon' or self.corrupted:
+        if usercommand.command == 'pokemon' or self.corrupted:
             team.append(Monster(self.corrupted, self.path, self.files, True))
         else:
             while len(team) < 6:
@@ -56,7 +56,7 @@ class pokemon(Module):
 
         self.bot.irc.msg(event, response, 'public')
 
-    def reset_pokemon(self, event, command):
+    def reset_pokemon(self, event, command, usercommand):
         if not self.corrupted:
             return
 

@@ -1,5 +1,5 @@
 {
-    "name": "Pixiv", 
+    "display_name": "Pixiv", 
     "description": "<query> --- search pixiv", 
     "url": "pixiv.net inurl:illust_id"
 }

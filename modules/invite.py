@@ -9,10 +9,11 @@
 
 from gbot.modules import Module
 
+
 class invite(Module):
-    name = "invite"
 
     def __init__(self):
+        Module.__init__(self)
         self.events = {
             'in' : {
                 'invite' : [(0, self.invite)],

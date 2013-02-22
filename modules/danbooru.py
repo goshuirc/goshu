@@ -13,88 +13,41 @@ from gbot.libs.helper import filename_escape
 import urllib.request, urllib.parse, urllib.error
 import socket
 import json
-import sys
 import os
 import hashlib
 
 
 class danbooru(Module):
-    name = 'danbooru'
 
-    def __init__(self):
-        self.events = {
-            'commands' : {
-                '*' : [self.combined, '--- handle danbooru', 0],
-            },
-        }
-        self.booru_path = 'modules'+os.sep+'danbooru'
-
-    def commands(self):
-        output = Module.commands(self)
-        for (dirpath, dirs, files) in os.walk(self.booru_path):
-            for file in files:
-                try:
-                    (name, ext) = os.path.splitext(file)
-                    if ext == os.extsep + 'json':
-                        info = json.loads(open(dirpath+os.sep+file).read())
-                    else:
-                        continue
-                except ValueError:
-                    continue
-
-                if 'description' in info:
-                    command_description = info['description']
-                else:
-                    command_description = ''
-                if 'permission' in info:
-                    command_permission = info['permission']
-                else:
-                    command_permission = 0
-
-                output[name] = [self.combined, command_description, command_permission]
-        return output
-
-    def combined(self, event, command):
-        module_path = None
-        for (dirpath, dirs, files) in os.walk(self.booru_path):
-            for file in files:
-                if not dirpath in sys.path:
-                    sys.path.insert(0, dirpath)
-                (name, ext) = os.path.splitext(file)
-                if ext == os.extsep + 'json':
-                    if name == filename_escape(command.command):
-                        module_path = dirpath
-        if not module_path:
-            return
-
+    def combined(self, event, command, usercommand):
         try:
-            booru = json.loads(open(module_path+os.sep+filename_escape(command.command)+os.extsep+'json').read())
             booruaccounts = json.loads(open('config'+os.sep+'modules'+os.sep+filename_escape(self.name)+os.extsep+'json').read())
         except ValueError:
             return
         except IOError:
             booruaccounts = {}
 
-        if 'display_name' in booru:
-            response = booru['display_name']
-        else:
-            response = '*** BooruNameHere: '
+        response = '*** '
 
-        if 'url' not in booru:
+        if 'display_name' in command.json:
+            response += command.json['display_name']
+        else:
+            response += usercommand.command
+
+        if 'url' not in command.json:
             return
 
-        if 'version' not in booru:
-            booru['version'] = 1
+        if 'version' not in command.json:
+            command.json['version'] = 1
 
-        if command.command in booruaccounts:
-            booru['username'] = booruaccounts[command.command]['username']
-            booru['password'] = booruaccounts[command.command]['password']
+        if usercommand.command in booruaccounts:
+            username = booruaccounts[usercommand.command]['username']
+            password = booruaccounts[usercommand.command]['password']
         else:
-            booru['username'] = None
-            booru['password'] = None
+            username = None
+            password = None
 
-        response += self.retrieve_url(booru['url'], command.arguments, booru['version'],
-                                      booru['username'], booru['password'])
+        response += self.retrieve_url(command.json['url'], usercommand.arguments, command.json['version'], username, password)
 
         self.bot.irc.msg(event, response, 'public')
 

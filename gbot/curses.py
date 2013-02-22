@@ -13,6 +13,8 @@ import select
 import math
 import sys
 
+from gbot.libs.girclib import remove_control_codes
+
 
 class Curses:
     """Handles the goshu terminal display."""
@@ -130,6 +132,7 @@ class Curses:
         self.pad.refresh(0, 0,  1, 0,  self.stdscr.getmaxyx()[0]-3, self.stdscr.getmaxyx()[1])
 
     def pad_addline(self, line, history=True):
+        line = remove_control_codes(line)
         num_lines = math.ceil(len(line)/self.stdscr.getmaxyx()[1])
         while num_lines > 0:
             num_lines -= 1
@@ -195,6 +198,7 @@ class CursesInput(threading.Thread):
         threading.Thread.__init__(self, name='CursesInput')
         self.bot = bot
         self._stopflag = threading.Event()
+        self.daemon = True
 
         self.specials = {
             '\x1b[A': self.input_up,     # up arrow

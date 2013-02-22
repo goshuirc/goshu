@@ -12,9 +12,9 @@ from gbot.libs.helper import split_num
 
 
 class commands(Module):
-    name = 'commands'
 
     def __init__(self):
+        Module.__init__(self)
         self.events = {
             'commands' : {
                 'msg' : [self.msg, '<target> <message> --- send a /msg', 5],
@@ -24,22 +24,22 @@ class commands(Module):
             },
         }
 
-    def msg(self, event, command):
-        msg_target, msg_msg = split_num(command.arguments)
+    def msg(self, event, command, usercommand):
+        msg_target, msg_msg = split_num(usercommand.arguments)
 
         self.bot.irc.servers[event.server].privmsg(msg_target, msg_msg)
 
-    def me(self, event, command):
-        msg_target, msg_msg = split_num(command.arguments)
+    def me(self, event, command, usercommand):
+        msg_target, msg_msg = split_num(usercommand.arguments)
 
         self.bot.irc.servers[event.server].action(msg_target, msg_msg)
 
-    def join(self, event, command):
-        channel, key = split_num(command.arguments)
+    def join(self, event, command, usercommand):
+        channel, key = split_num(usercommand.arguments)
 
         self.bot.irc.servers[event.server].join(channel, key)
 
-    def part(self, event, command):
-        channel, reason = split_num(command.arguments)
+    def part(self, event, command, usercommand):
+        channel, reason = split_num(usercommand.arguments)
 
         self.bot.irc.servers[event.server].part(channel, reason)

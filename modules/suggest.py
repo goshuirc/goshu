@@ -13,27 +13,28 @@ from gbot.modules import Module
 from gbot.libs.girclib import escape
 from gbot.libs.helper import filename_escape
 
+
 class suggest(Module):
-    name = 'suggest'
 
     def __init__(self):
+        Module.__init__(self)
         self.events = {
             'commands' : {
                 'suggest' : [self.suggest, '[-section] <suggestion> --- suggest something, anything at all', 0],
             },
         }
 
-    def suggest(self, event, command):
-        if command.arguments == '':
+    def suggest(self, event, command, usercommand):
+        if usercommand.arguments == '':
             return
-        if command.arguments[0] == '-':
-            if len(command.arguments[1:].split()) < 2:
+        if usercommand.arguments[0] == '-':
+            if len(usercommand.arguments[1:].split()) < 2:
                 return
-            section = filename_escape(command.arguments[1:].split()[0]) # first word excluding leading -
-            suggestion = command.arguments[1:].split(' ', 1)[1]
+            section = filename_escape(usercommand.arguments[1:].split()[0]) # first word excluding leading -
+            suggestion = usercommand.arguments[1:].split(' ', 1)[1]
         else:
             section = 'global'
-            suggestion = command.arguments
+            suggestion = usercommand.arguments
 
         output = [
             event.server + ' ' + event.source,

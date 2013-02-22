@@ -9,10 +9,11 @@
 
 from gbot.modules import Module
 
+
 class list(Module):
-    name = "list"
 
     def __init__(self):
+        Module.__init__(self)
         self.events = {
             'commands' : {
                 'list' : [self.list, "[command] --- list all commands; if command is present, display info on that command instead~", 0],
@@ -25,56 +26,50 @@ class list(Module):
 
     def privmsg(self, event):
         if event.arguments[0].lower() in ['help', 'hello', 'hi']:
-            response = 'Hello! I am a bot, to view the avaliable commands, please type ' + self.bot.settings.store['prefix'] + 'list'
+            response = 'Hello! I am a bot, to view the avaliable commands, please type {format}list'.format(format=self.bot.settings.store['prefix'])
             self.bot.irc.msg(event, response)
 
-    def list(self, event, command):
-        bot_commands = []
+    def list(self, event, command, usercommand):
+        bot_commands = {}
 
         for module in self.bot.modules.modules:
             module_commands = self.bot.modules.modules[module].commands()
-            for command_name in module_commands:
-                if command_name == '*':
+            for name in module_commands:
+                if name == '*':
                     continue
-                command_description = module_commands[command_name][1]
-                command_permission = module_commands[command_name][2]
-                if len(module_commands[command_name]) >= 4:
-                    command_view_permission = module_commands[command_name][3]
-                else:
-                    command_view_permission = command_permission
-                if self.bot.accounts.access_level(self.bot.accounts.account(event.source, event.server)) >= command_view_permission:
-                    bot_commands.append([command_name, command_description, command_permission])
-        bot_commands = sorted(bot_commands)
+                command = module_commands[name]
 
-        if command.arguments:
+                if self.bot.accounts.access_level(self.bot.accounts.account(event.source, event.server)) >= command.view_level:
+                    bot_commands[name] = command
+
+        if usercommand.arguments:
             # single command info
-            for bot_command in bot_commands:
-                if bot_command[0] == command.arguments.split()[0]:
+            name = usercommand.arguments.split()[0].lower()
+            if name in bot_commands:
+                command = bot_commands[name]
 
-                    # fix help display for single help strings
-                    if isinstance(bot_command[1], str):
-                        bot_command[1] = [bot_command[1]]
-
-                    for help_string in bot_command[1]:
-                        response = '*** Command:  ' + self.bot.settings.store['prefix']
-                        response += bot_command[0] + ' '
-                        response += help_string
-
-                        self.bot.irc.msg(event, response)
+                # fix help display for single help strings
+                for help_string in command.desc:
+                    response = '*** Command:  {prefix}{cmd} {desc}'.format(prefix=self.bot.settings.store['prefix'],
+                                                                           cmd=name,
+                                                                           desc=help_string)
+                    self.bot.irc.msg(event, response)
 
         else:
             # list commands
             output = ['*** Commands: ']
             i = 0
-            limit = 350
-            for bot_command in bot_commands:
-                if (len(output[i]) + len(bot_command[0])) > limit:
+            limit = 256
+            for name in sorted(bot_commands.keys()):
+                if bot_commands[name].alias:
+                    continue
+                if (len(output[i]) + len(name)) > limit:
                     output.append('    ')
                     i += 1
-                output[i] += bot_command[0] + ', '
+                output[i] += name + ', '
             output[i] = output[i][:-2]  # remove last ', '
 
-            output.append('Note: to display information on a specific command, use @i'+self.bot.settings.store['prefix']+'list <command>@i. eg: @i'+self.bot.settings.store['prefix']+'list 8ball')
+            output.append('Note: to display information on a specific command, use @i{prefix}list <command>@i. eg: @i{prefix}list 8ball'.format(prefix=self.bot.settings.store['prefix']))
 
             for line in output:
                 self.bot.irc.msg(event, line)

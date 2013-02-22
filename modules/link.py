@@ -10,13 +10,13 @@
 from gbot.modules import Module
 from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import html_unescape
-import urllib.request, urllib.parse, urllib.error
+import requests
 
 
 class link(Module):
-    name = 'link'
 
     def __init__(self):
+        Module.__init__(self)
         self.events = {
             'in' : {
                 'pubmsg' : [(0, self.link)],
@@ -35,7 +35,7 @@ class link(Module):
             if 'youtuberepeat.com' in url:
                 break  # don't do this for youtuberepeat.com, no title in there
             title = gettitle(url)
-            if title == '':
+            if not title:
                 continue
             response = '*** title: ' + escape(html_unescape(title))
             self.bot.irc.msg(event, response, 'public')
@@ -44,12 +44,12 @@ class link(Module):
 
 def urls(input_str):
     url_list = []
-    url_list += urls_protocol(input_str)
+    url_list += urls_protocol(input_str, 'http')
     url_list += urls_protocol(input_str, 'https')
     return url_list
 
 
-def urls_protocol(input_str, protocol='http'):
+def urls_protocol(input_str, protocol):
     url_list = []
     while 1:
         if protocol+'://' in input_str:
@@ -67,9 +67,10 @@ def urls_protocol(input_str, protocol='http'):
 
 
 def gettitle(url):
-    try:
-        page = urllib.request.urlopen(url)
-        old_title = page.read().decode('utf-8').split('<title>')[1].split('</title>')[0].strip()
+    r = requests.get(url, timeout=20)
+
+    if r.status_code == requests.codes.ok:
+        old_title = r.text.split('<title>')[1].split('</title>')[0].strip()
         new_title = ''
         last_char_is_whitespace = False
         for title_char in old_title:
@@ -84,5 +85,5 @@ def gettitle(url):
                     last_char_is_whitespace = False
                 new_title += title_char
         return new_title
-    except:
-        return ''
+    else:
+        return None

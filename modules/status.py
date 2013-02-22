@@ -11,16 +11,16 @@ from gbot.modules import Module
 
 
 class status(Module):
-    name = 'status'
 
     def __init__(self):
+        Module.__init__(self)
         self.events = {
             'commands' : {
                 'status' : [self.status, "--- see how imouto's going", 0],
             },
         }
 
-    def status(self, event, command):
+    def status(self, event, command, usercommand):
         server_count = 0
         server_info = ''
 

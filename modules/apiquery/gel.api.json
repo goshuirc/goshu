@@ -1,6 +1,6 @@
 {
-    "name": "Gelbooru", 
-    "description": "<query> --- stupid pictures and all that fun stuff", 
+    "display_name": "Gelbooru", 
+    "desc": "<query> --- stupid pictures and all that fun stuff", 
     "url": "http://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&limit=1&tags=@{escaped_query}", 
     "format": "json", 
     "response": [

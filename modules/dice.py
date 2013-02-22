@@ -12,9 +12,9 @@ import random
 
 
 class dice(Module):
-    name = 'dice'
 
     def __init__(self):
+        Module.__init__(self)
         self.events = {
             'commands' : {
                 'd' : [self.dice, '<dice> --- rolls dice!', 0],
@@ -23,9 +23,9 @@ class dice(Module):
 
         random.seed()
 
-    def dice(self, event, command):
+    def dice(self, event, command, usercommand):
         try:
-            iline = command.arguments
+            iline = usercommand.arguments
 
             if iline == '':
                 raise Exception

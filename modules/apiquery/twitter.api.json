@@ -1,6 +1,6 @@
 {
-    "name": "Twitter", 
-    "description": "<query> --- tweets galore!", 
+    "display_name": "Twitter", 
+    "desc": "<query> --- tweets galore!", 
     "url": "https://search.twitter.com/search.json?q=@{escaped_query}", 
     "format": "json", 
     "response": [

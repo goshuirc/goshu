@@ -12,9 +12,9 @@ import random
 
 
 class random_module(Module):  # so named to prevent random lib issues
-    name = 'random_module'
 
     def __init__(self):
+        Module.__init__(self)
         self.events = {
             'commands' : {
                 'random' : [self.random_command, '--- random selection from phrases seperated by a |', 0],
@@ -22,10 +22,10 @@ class random_module(Module):  # so named to prevent random lib issues
         }
         random.seed()
 
-    def random_command(self, event, command):
+    def random_command(self, event, command, usercommand):
         response = event.source.split('!')[0] + ': '
 
-        random_list = command.arguments.split('|')
+        random_list = usercommand.arguments.split('|')
         random_num = random.randint(1, len(random_list)) - 1
 
         response += random_list[random_num].strip()
