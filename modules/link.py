@@ -16,7 +16,7 @@ import datetime
 
 from gbot.modules import Module
 from gbot.libs.girclib import escape, unescape
-from gbot.libs.helper import html_unescape, metric
+from gbot.libs.helper import html_unescape, time_metric, metric
 
 
 class link(Module):
@@ -123,7 +123,7 @@ links = [
             ["text", "@r by @c3@b"],
             ["json", ["data", "uploader"]],
             ["text", "@r ["],
-            ["json.time.metric", ["data", "duration"]],
+            ["json.seconds.metric", ["data", "duration"]],
             ["text", "] ["],
             ["json", ["data", "category"]],
             ["text", "] [@c3+"],
@@ -154,7 +154,7 @@ def json_data_exctact(input_json, response_format):
         elif term[0] == 'yt.json.num.metric':  # youtube
             response += metric(abs(int(get_element(input_json, term[1])) - int(get_element(input_json, term[2]))))
         elif term[0] == 'json.seconds.metric':
-            response += get_element(input_json, term[1]) + 's'  # todo: actual metric
+            response += time_metric(secs=get_element(input_json, term[1]))
         elif term[0] == 'json.datetime.fromtimestamp':
             response += datetime.datetime.fromtimestamp(get_element(input_json, term[1])).strftime(term[2])
         elif term[0] == 'json.dict.returntrue':

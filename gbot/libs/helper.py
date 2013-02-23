@@ -121,6 +121,18 @@ def bytes_to_str(bytes, base=2, precision=0):
     return output
 
 
+def time_metric(secs=60):
+    """Returns user-readable string representing given number of seconds."""
+    time = ''
+    for metric_secs, metric_char in [[60*60, 'h'], [60, 'm']]:
+        if secs > metric_secs:
+            time += '{}{}'.format(int(secs / metric_secs), metric_char)
+            secs -= int(secs / metric_secs) * metric_secs
+    if secs > 0:
+        time += '{}s'.format(secs)
+    return time
+
+
 def metric(num):
     """Returns user-readable string representing given number."""
     for metric_raise, metric_char in [[9, 'B'], [6, 'M'], [3, 'k']]:
