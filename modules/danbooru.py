@@ -27,12 +27,12 @@ class danbooru(Module):
         except IOError:
             booruaccounts = {}
 
-        response = '*** '
-
         if 'display_name' in command.json:
-            response += command.json['display_name']
+            display_name = command.json['display_name']
         else:
-            response += usercommand.command
+            display_name = usercommand.command
+
+        response = '*** {name}: '.format(name=display_name)
 
         if 'url' not in command.json:
             return

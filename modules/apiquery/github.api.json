@@ -1,5 +1,5 @@
 {
-    "name": "github", 
+    "display_name": "GitHub", 
     "desc": "<query> --- github repo search", 
     "url": "https://github.com/api/v2/json/repos/search/@{escaped_query}", 
     "format": "json", 
