@@ -16,20 +16,20 @@ from gbot.modules import Module
 from gbot.libs.girclib import unescape
 from gbot.libs.helper import get_url, json_format_extract
 
-import threading
-from watchdog.observers import Observer
+# import threading
+# from watchdog.observers import Observer
 
 
-class JsonWatcher(threading.Thread):
-    def __init__(self, base, attr, folder, ext=None):
-        threading.Thread.__init__(self)
-        self.base= base
-        self.attr = attr
-        self.folder = folder
-        self.ext = ext
+# class JsonWatcher(threading.Thread):
+#     def __init__(self, base, attr, folder, ext=None):
+#         threading.Thread.__init__(self)
+#         self.base= base
+#         self.attr = attr
+#         self.folder = folder
+#         self.ext = ext
 
-    def run(self):
-        pass
+#     def run(self):
+#         pass
 
 
 class link(Module):
@@ -42,7 +42,7 @@ class link(Module):
                 'privmsg' : [(0, self.link)],
             },
         }
-        JsonWatcher(self, 'links', self.dynamic_folder, ext='.lnk').start()
+        # JsonWatcher(self, 'links', self.dynamic_folder, ext='.lnk').start()
 
     def link(self, event):
         url_list = urls(unescape(event.arguments[0]))
