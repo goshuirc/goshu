@@ -121,6 +121,14 @@ def bytes_to_str(bytes, base=2, precision=0):
     return output
 
 
+def metric(num):
+    """Returns user-readable string representing given number."""
+    for metric_raise, metric_char in [[6, 'M'], [3, 'k']]:
+        if num > (10 ** metric_raise):
+            return '{:.1f}{}'.format((num / (10 ** metric_raise)), metric_char)
+    return str(num)
+
+
 def filename_escape(unsafe, replace_char='_', valid_chars=string.ascii_letters+string.digits+'#._- '):
     """Escapes a string to provide a safe local filename
 
