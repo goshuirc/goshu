@@ -26,6 +26,10 @@ utf8_bom() -- removes the utf8 bom, because open() decides to leave it in
 """
 
 import string
+import datetime
+import requests
+
+from gbot.libs.girclib import escape
 
 
 def split_num(line, chars=' ', maxsplits=1, empty=''):
@@ -139,6 +143,71 @@ def metric(num):
         if num > (10 ** metric_raise):
             return '{:.1f}{}'.format((num / (10 ** metric_raise)), metric_char)
     return str(num)
+
+
+def get_url(url, **kwargs):
+    """Gets a url, handles all the icky requests stuff."""
+    try:
+        if 'timeout' not in kwargs:
+            kwargs['timeout'] = 20
+        r = requests.get(url, **kwargs)
+
+        if not r.ok:
+            return 'HTTP Error - {code} {name}'.format(code=r.status.code, name=r.status.name)
+
+    except requests.exceptions.Timeout:
+        return 'Connection timed out'
+
+    except requests.exceptions.RequestException as x:
+        return '{}'.format(x.__class__.__name__)
+
+    return r
+
+
+def json_format_extract(format_json, input_json):
+    # format string - dict for kwargs
+    format_dict = {}
+
+    if 'responses_dict' in format_json:
+        for name in format_json['responses_dict']:
+            format_dict[name] = json_return(input_json, format_json['responses_dict'][name])
+
+    response = format_json['response'].format(**format_dict)
+
+    return response.replace('\n', ' ')
+
+
+def json_return(input_json, selector):
+    if selector[0] == 'text':
+        return selector[1]
+    elif selector[0] == 'text.escape':
+        return escape(selector[1])
+    elif selector[0] == 'json.num.metric':
+        return metric(int(json_element(input_json, selector[1])))
+    elif selector[0] == 'json.seconds.metric':
+        return time_metric(secs=json_element(input_json, selector[1]))
+    elif selector[0] == 'json.datetime.fromtimestamp':
+        return datetime.datetime.fromtimestamp(json_element(input_json, selector[1])).strftime(selector[2])
+    elif selector[0] == 'json.dict.returntrue':
+        keys = []
+        json_dict = json_element(input_json, selector[1])
+        for key in json_dict:
+            if json_dict[key]:
+                keys.append(key)
+        return selector[2].join(keys)
+    # and site-specific ones
+    elif selector[0] == 'yt.dislikes.metric':  # youtube
+        return metric(abs(int(json_element(input_json, selector[1])) - int(json_element(input_json, selector[2]))))
+    # before general json
+    else:
+        return escape(str(json_element(input_json, selector[1])))
+
+
+def json_element(input_dict, query):
+    """Runs through a data structure and returns the selected element."""
+    for element in query:
+        input_dict = input_dict[element]
+    return input_dict
 
 
 def filename_escape(unsafe, replace_char='_', valid_chars=string.ascii_letters+string.digits+'#._- '):
