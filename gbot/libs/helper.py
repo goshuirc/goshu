@@ -254,3 +254,87 @@ def utf8_bom(input):
     """Strips BOM from a utf8 string, because open() leaves it in for some reason."""
     output = input.replace('\ufeff', '')
     return output
+
+
+import os
+import json
+from watchdog.observers import Observer
+from watchdog.events import PatternMatchingEventHandler
+
+
+class JsonHandler(PatternMatchingEventHandler):
+    def __init__(self, base, attr, folder, ext=None, commands=False):
+        if ext:
+            pattern = '*.{}.json'.format(ext)
+        else:
+            pattern = '*.json'
+        PatternMatchingEventHandler.__init__(self, patterns=[pattern])
+        self.base = base
+        self.attr = attr
+        self.folder = folder
+        self.ext = ext
+        self.commands = commands
+
+    def on_any_event(self, event):
+        new_json = {}
+
+        # json
+        for (dirpath, dirs, files) in os.walk(self.folder):
+            for file in files:
+                try:
+                    (extname, json_ext) = os.path.splitext(file)
+                    if json_ext == os.extsep + 'json':
+                        (name, ext) = os.path.splitext(extname)
+                        if ext == os.extsep + self.ext:
+                            info = json.loads(open(dirpath+os.sep+file).read())
+                            if 'name' not in info:
+                                info['name'] = [name]
+
+                            if self.commands:
+                                new_json.update(self.base.bot.modules.return_command_dict(self.base, info))
+                            else:
+                                new_json[info['name'][0]] = info
+
+                                if len(info['name']) > 1:
+                                    info['alias'] = info['name'][0]
+                                    for alias_name in info['name'][1:]:
+                                        new_json[alias_name] = info
+                        else:
+                            continue
+                    else:
+                        continue
+                except ValueError:
+                    continue
+
+        setattr(self.base, self.attr, new_json)
+
+        if self.commands:
+            commands = getattr(self.base, 'static_commands', {}).copy()
+            commands.update(new_json)
+            setattr(self.base, 'commands', commands)
+
+
+class JsonWatcher:
+    def __init__(self, base, attr, folder, ext=None, commands=False):
+        self.base = base
+        self.attr = attr
+        self.folder = folder
+        self.ext = ext
+        self.commands = commands
+
+        self.event_handler = JsonHandler(base, attr, folder, ext=ext, commands=commands)
+
+        self.observer = Observer()
+        self.observer.schedule(self.event_handler, path=self.folder, recursive=True)
+
+        watchers = getattr(self.base, 'json_watchers', None)
+        if isinstance(watchers, list):
+            watchers.append(self)
+
+    def start(self):
+        self.observer.start()
+        self.event_handler.on_any_event(None)  # generate everything
+
+    def stop(self):
+        self.observer.stop()
+        self.observer.join()

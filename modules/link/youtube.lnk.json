@@ -1,0 +1,17 @@
+{
+    "display_name": "You@5Tube@c",
+    "match": "^(?:www\\.)?(?:(?:youtube\\.com/(?:watch)?(?:[?&][a-z]+=[a-z_]+)?(?:[?&]v=))|(?:youtu\\.be\\/))([a-zA-Z0-9-_]+)",
+    "url": "http://gdata.youtube.com/feeds/api/videos/@{regex_1}?v=2&alt=jsonc",
+    "format":"json",
+    "response": "@c2@b{title}@r by @c3@b{author}@r [{length}] [{category}] [@c3+{likes}@r,@c4-{dislikes}@r,{comments}c,{views}v]",
+    "responses_dict": {
+        "title": ["json", ["data", "title"]],
+        "author": ["json", ["data", "uploader"]],
+        "length": ["json.seconds.metric", ["data", "duration"]],
+        "category": ["json", ["data", "category"]],
+        "likes": ["json.num.metric", ["data", "likeCount"]],
+        "dislikes": ["yt.dislikes.metric", ["data", "ratingCount"], ["data", "likeCount"]],
+        "comments": ["json.num.metric", ["data", "commentCount"]],
+        "views": ["json.num.metric", ["data", "viewCount"]]
+    }
+}

@@ -33,7 +33,7 @@ class list(Module):
         bot_commands = {}
 
         for module in self.bot.modules.modules:
-            module_commands = self.bot.modules.modules[module].commands()
+            module_commands = self.bot.modules.modules[module].commands
             for name in module_commands:
                 if name == '*':
                     continue

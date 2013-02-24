@@ -9,91 +9,46 @@
 
 import os
 import sys
-import inspect
 import imp
+import json
+import inspect
 import importlib
 import threading
-import json
+from .libs.helper import get_url, json_format_extract, JsonWatcher
 
 
 class Module:
     """Module to add commands/functionality to the bot."""
 
     def __init__(self):
-        if not getattr(self, 'name', ''):
+        if not getattr(self, 'name', None):
             self.name = self.__class__.__name__
 
-        if not getattr(self, 'ext', ''):
+        if not getattr(self, 'ext', None):
             if len(self.name) >= 3:
                 self.ext = self.name[:3]
             else:
                 self.ext = self.name
 
-        self.dynamic_path = 'modules'+os.sep+self.name
+        self.dynamic_path = '.' + os.sep + 'modules' + os.sep + self.name
 
-    def commands(self):
-        # static commands
-        commands = self.module_commands
-
-        # dynamic commands
-        for (dirpath, dirs, files) in os.walk(self.dynamic_path):
-            for file in files:
-                try:
-                    (name, ext) = os.path.splitext(file)
-                    if ext == os.extsep + 'json':
-                        if os.path.splitext(name)[1] == os.extsep + self.ext:
-                            info = json.loads(open(dirpath+os.sep+file).read())
-                        else:
-                            continue
-                    else:
-                        continue
-                except ValueError:
-                    continue
-
-                if 'name' in info:
-                    name = info['name']
-                else:
-                    name = os.path.splitext(os.path.splitext(file)[0])[0]
-
-                if 'call' in info:
-                    call = getattr(self, info['call'])
-                else:
-                    call = self.combined
-
-                if 'desc' in info:
-                    if isinstance(info['desc'], str):
-                        desc = [info['desc']]
-                    elif isinstance(info['desc'], list):
-                        desc = info['desc']
-                else:
-                    desc = ''
-
-                if 'call_level' in info:
-                    call_level = info['call_level']
-                else:
-                    call_level = 0
-
-                if 'view_level' in info:
-                    view_level = info['view_level']
-                else:
-                    view_level = call_level
-
-                if isinstance(name, list):  # aliases
-                    commands[name[0]] = Command(call=call, desc=desc, call_level=call_level, view_level=view_level, json=info)
-
-                    for command in name[1:]:
-                        commands[command] = Command(call=call, desc=desc, call_level=call_level, view_level=view_level, json=info, alias=name[0])
-
-                elif isinstance(name, str):
-                    commands[name] = Command(call=call, desc=desc, call_level=call_level, view_level=view_level, json=info)
-
-        return commands
+        self.commands = {}
+        self.json_watchers = []
+        if os.path.exists(self.dynamic_path):
+            JsonWatcher(self, 'dynamic_commands', self.dynamic_path, ext=self.ext, commands=True)
 
     def combined(self, event, command, usercommand):
         ...
 
+    def load(self):
+        if not self.commands:
+            self.commands = self.static_commands
+        for watcher in self.json_watchers:
+            watcher.start()
+
     def unload(self):
-        ...
+        for watcher in self.json_watchers:
+            watcher.stop()
 
 
 class Modules:
@@ -164,11 +119,13 @@ class Modules:
                 if direction not in module.events:
                     module.events[direction] = {}
 
-            module.module_commands = {}
+            module.static_commands = {}
             for command in module.events['commands']:
                 self.add_command_info(module.name, command)
             module.folder_path = 'modules' + os.sep + name
             module.bot = self.bot
+
+            module.load()
 
         return True
 
@@ -224,7 +181,7 @@ class Modules:
             for module in sorted(self.modules):
                 if 'commands' in self.modules[module].events:
                     for search_command in ['*', command_name]:
-                        module_commands = self.modules[module].commands()
+                        module_commands = self.modules[module].commands
                         if search_command in module_commands:
                             command_info = module_commands[search_command]
 
@@ -232,7 +189,8 @@ class Modules:
                                 if command_info.call not in called:
                                     called.append(command_info.call)
                                     threading.Thread(target=command_info.call,
-                                                     args=(event, command_info, UserCommand(command_name, command_args))).start()
+                                                     args=(event, command_info,
+                                                           UserCommand(command_name, command_args))).start()
                             else:
                                 self.bot.curses.pad_addline('        No Privs')
 
@@ -240,13 +198,48 @@ class Modules:
         info = self.modules[module].events['commands'][name]
 
         if isinstance(name, tuple):
-            self.modules[module].module_commands[name[0]] = Command(info)
+            self.modules[module].static_commands[name[0]] = Command(info)
 
             for alias in name[1:]:
-                self.modules[module].module_commands[alias] = Command(info, alias=name[0])
+                self.modules[module].static_commands[alias] = Command(info, alias=name[0])
 
         elif isinstance(name, str):
-            self.modules[module].module_commands[name] = Command(info)
+            self.modules[module].static_commands[name] = Command(info)
+
+    def return_command_dict(self, base, info):
+        commands = {}
+
+        if 'call' in info:
+            call = getattr(self, info['call'])
+        else:
+            call = base.combined
+
+        if 'desc' in info:
+            if isinstance(info['desc'], str):
+                desc = [info['desc']]
+            elif isinstance(info['desc'], list):
+                desc = info['desc']
+        else:
+            desc = ''
+
+        if 'call_level' in info:
+            call_level = info['call_level']
+        else:
+            call_level = 0
+
+        if 'view_level' in info:
+            view_level = info['view_level']
+        else:
+            view_level = call_level
+
+        commands[info['name'][0]] = Command(call=call, desc=desc, call_level=call_level,
+                                            view_level=view_level, json=info)
+
+        for command in info['name'][1:]:
+            commands[command] = Command(call=call, desc=desc, call_level=call_level,
+                                        view_level=view_level, json=info, alias=info['name'][0])
+
+        return commands
 
 
 class Command:

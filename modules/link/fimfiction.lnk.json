@@ -1,0 +1,20 @@
+{
+    "display_name": "FimFiction",
+    "match": "^(?:[^.]+\\.)?fimfiction\\.net\\/story\\/(\\d+)",
+    "url": "http://fimfiction.net/api/story.php?story=@{regex_1}",
+    "format": "json",
+    "response": "@c2@b{title}@r by @c3@b{author}@r [@c6{rating};{status};{chapters}c;{words}w;{views}v@r] [@c6@b{time}@r] [@c3+{likes}@c4-{dislikes}@r] [{categories}]",
+    "responses_dict": {
+        "title": ["json", ["story", "title"]],
+        "author": ["json", ["story", "author", "name"]],
+        "rating": ["json", ["story", "content_rating_text"]],
+        "status": ["json", ["story", "status"]],
+        "chapters": ["json.num.metric", ["story", "chapter_count"]],
+        "words": ["json.num.metric", ["story", "words"]],
+        "views": ["json.num.metric", ["story", "views"]],
+        "time": ["json.datetime.fromtimestamp", ["story", "date_modified"], "%H%MGMT %d%b%y"],
+        "likes": ["json.num.metric", ["story", "likes"]],
+        "dislikes": ["json.num.metric", ["story", "dislikes"]],
+        "categories": ["json.dict.returntrue", ["story", "categories"], ";"]
+    }
+}

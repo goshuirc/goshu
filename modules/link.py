@@ -14,22 +14,7 @@ import re
 
 from gbot.modules import Module
 from gbot.libs.girclib import unescape
-from gbot.libs.helper import get_url, json_format_extract
-
-# import threading
-# from watchdog.observers import Observer
-
-
-# class JsonWatcher(threading.Thread):
-#     def __init__(self, base, attr, folder, ext=None):
-#         threading.Thread.__init__(self)
-#         self.base= base
-#         self.attr = attr
-#         self.folder = folder
-#         self.ext = ext
-
-#     def run(self):
-#         pass
+from gbot.libs.helper import get_url, json_format_extract, JsonWatcher
 
 
 class link(Module):
@@ -42,17 +27,19 @@ class link(Module):
                 'privmsg' : [(0, self.link)],
             },
         }
-        # JsonWatcher(self, 'links', self.dynamic_folder, ext='.lnk').start()
+        JsonWatcher(self, 'links', self.dynamic_path, ext='lnk')
 
     def link(self, event):
-        url_list = self.urls(unescape(event.arguments[0]))
+        url_matches = re.search('(?:https?://)(\\S+)', unescape(event.arguments[0]))
+        if not url_matches:
+            return
 
-        for url in url_list:
+        for url in url_matches.groups():
             response = ''
-            for provider in links:
-                matches = re.match(provider['match'], url)
+            for provider in self.links:
+                matches = re.match(self.links[provider]['match'], url)
                 if matches:
-                    #response = '*** {}: '.format(provider['display_name'])
+                    #response = '*** {}: '.format(self.links[provider]['display_name'])
                     response = ''
 
                     match_index = 1
@@ -68,65 +55,22 @@ class link(Module):
                             complete_dict['regex_{}'.format(match)] = match_dict[match]
 
                     # getting the actual file itself
-                    url = unescape(provider['url'], unescape=complete_dict)
+                    url = unescape(self.links[provider]['url'], unescape=complete_dict)
                     r = get_url(url)
 
                     if isinstance(r, str):
-                        self.bot.irc.msg(event, '*** {}: {}'.format(provider['display_name'], r), 'public')
+                        self.bot.irc.msg(event, '*** {}: {}'.format(self.links[provider]['display_name'], r), 'public')
                         return
 
                     # parsing
-                    if provider['format'] == 'json':
-                        response += json_format_extract(provider, r.json())
+                    try:
+                        if self.links[provider]['format'] == 'json':
+                            response += json_format_extract(self.links[provider], r.json())
+                    except KeyError:
+                        response = '*** {}: {}'.format(self.links[provider]['display_name'], 'Failed')
+                    except IndexError:
+                        response = '*** {}: {}'.format(self.links[provider]['display_name'], 'Failed')
 
             if response:
                 self.bot.irc.msg(event, response, 'public')
             return  # don't spam us tryna return every title
-
-    def urls(self, input_str):
-        matches = re.search('(?:https?://)(\\S+)', input_str)
-        # only returns a single URL. If we want multiple later, fix that
-        if matches:
-            return [matches.groups()[0]]
-        else:
-            return []
-
-links = [
-    {
-        "display_name": "FimFiction",
-        "match": "^(?:[^.]+\\.)?fimfiction\\.net\\/story\\/(\\d+)",
-        "url": "http://fimfiction.net/api/story.php?story=@{regex_1}",
-        "format": "json",
-        "response": "@c2@b{title}@r by @c3@b{author}@r [@c6{rating};{status};{chapters}c;{words}w;{views}v@r] [@c6@b{time}@r] [@c3+{likes}@c4-{dislikes}@r] [{categories}]",
-        "responses_dict": {
-            'title': ["json", ["story", "title"]],
-            'author': ["json", ["story", "author", "name"]],
-            'rating': ["json", ["story", "content_rating_text"]],
-            'status': ["json", ["story", "status"]],
-            'chapters': ["json.num.metric", ["story", "chapter_count"]],
-            'words': ["json.num.metric", ["story", "words"]],
-            'views': ["json.num.metric", ["story", "views"]],
-            'time': ["json.datetime.fromtimestamp", ["story", "date_modified"], "%H%MGMT %d%b%y"],
-            'likes': ["json.num.metric", ["story", "likes"]],
-            'dislikes': ["json.num.metric", ["story", "dislikes"]],
-            'categories': ["json.dict.returntrue", ["story", "categories"], ";"]
-        }
-    },
-    {
-        "display_name": "You@5Tube@c",
-        "match": "^(?:www\\.)?(?:(?:youtube\\.com/(?:watch)?(?:[?&]v=))|(?:youtu\\.be\\/))([a-zA-Z0-9-_]+)",
-        "url": "http://gdata.youtube.com/feeds/api/videos/@{regex_1}?v=2&alt=jsonc",
-        "format":"json",
-        "response": "@c2@b{title}@r by @c3@b{author}@r [{length}] [{category}] [@c3+{likes}@r,@c4-{dislikes}@r,{comments}c,{views}v]",
-        "responses_dict": {
-            'title': ["json", ["data", "title"]],
-            'author': ["json", ["data", "uploader"]],
-            'length': ["json.seconds.metric", ["data", "duration"]],
-            'category': ["json", ["data", "category"]],
-            'likes': ["json.num.metric", ["data", "likeCount"]],
-            'dislikes': ["yt.dislikes.metric", ["data", "ratingCount"], ["data", "likeCount"]],
-            'comments': ["json.num.metric", ["data", "commentCount"]],
-            'views': ["json.num.metric", ["data", "viewCount"]]
-        }
-    }
-]
