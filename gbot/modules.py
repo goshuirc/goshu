@@ -14,7 +14,7 @@ import json
 import inspect
 import importlib
 import threading
-from .libs.helper import get_url, json_format_extract, JsonWatcher
+from .libs.helper import JsonWatcher
 
 
 class Module:
@@ -41,8 +41,7 @@ class Module:
         ...
 
     def load(self):
-        if not self.commands:
-            self.commands = self.static_commands
+        self.commands = self.static_commands
         for watcher in self.json_watchers:
             watcher.start()
 
@@ -179,20 +178,18 @@ class Modules:
 
             called = []
             for module in sorted(self.modules):
-                if 'commands' in self.modules[module].events:
-                    for search_command in ['*', command_name]:
-                        module_commands = self.modules[module].commands
-                        if search_command in module_commands:
-                            command_info = module_commands[search_command]
-
-                            if userlevel >= command_info.call_level:
-                                if command_info.call not in called:
-                                    called.append(command_info.call)
-                                    threading.Thread(target=command_info.call,
-                                                     args=(event, command_info,
-                                                           UserCommand(command_name, command_args))).start()
-                            else:
-                                self.bot.curses.pad_addline('        No Privs')
+                module_commands = self.modules[module].commands
+                for search_command in ['*', command_name]:
+                    if search_command in module_commands:
+                        command_info = module_commands[search_command]
+                        if userlevel >= command_info.call_level:
+                            if command_info.call not in called:
+                                called.append(command_info.call)
+                                threading.Thread(target=command_info.call,
+                                                 args=(event, command_info,
+                                                       UserCommand(command_name, command_args))).start()
+                        else:
+                            self.bot.curses.pad_addline('        No Privs')
 
     def add_command_info(self, module, name):
         info = self.modules[module].events['commands'][name]

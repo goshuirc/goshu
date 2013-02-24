@@ -1,11 +1,11 @@
 {
     "display_name": "TokyoTosho", 
     "desc": "<query> --- torrent search", 
-    "url": "http://tokyotosho.info/search.php?terms=@{escaped_query}", 
+    "url": "http://tokyotosho.info/search.php?terms={escaped_query}", 
     "format": "xml", 
-    "response": [
-        ["jquery", "#main .listing tr:nth-child(2) .desc-top"], 
-        ["escaped_text", " - http://tokyotosho.info/"], 
-        ["jquery_attr", "#main .listing tr:nth-child(2) .web a:last-child", "href"]
-    ]
+    "response": "@c2@b{title}@r   http://tokyotosho.info/{id}",
+    "response_dict": {
+        "title": ["jquery", "#main .listing tr:nth-child(2) .desc-top"], 
+        "id":    ["jquery.attr", "#main .listing tr:nth-child(2) .web a:last-child", "href"]
+    }
 }

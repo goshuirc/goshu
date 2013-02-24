@@ -14,7 +14,7 @@ import re
 
 from gbot.modules import Module
 from gbot.libs.girclib import unescape
-from gbot.libs.helper import get_url, json_format_extract, JsonWatcher
+from gbot.libs.helper import get_url, format_extract, JsonWatcher
 
 
 class link(Module):
@@ -55,21 +55,15 @@ class link(Module):
                             complete_dict['regex_{}'.format(match)] = match_dict[match]
 
                     # getting the actual file itself
-                    url = unescape(self.links[provider]['url'], unescape=complete_dict)
+                    url = self.links[provider]['url'].format(**complete_dict)
                     r = get_url(url)
 
                     if isinstance(r, str):
-                        self.bot.irc.msg(event, '*** {}: {}'.format(self.links[provider]['display_name'], r), 'public')
+                        self.bot.irc.msg(event, unescape('*** {}: {}'.format(self.links[provider]['display_name'], r)), 'public')
                         return
 
                     # parsing
-                    try:
-                        if self.links[provider]['format'] == 'json':
-                            response += json_format_extract(self.links[provider], r.json())
-                    except KeyError:
-                        response = '*** {}: {}'.format(self.links[provider]['display_name'], 'Failed')
-                    except IndexError:
-                        response = '*** {}: {}'.format(self.links[provider]['display_name'], 'Failed')
+                    response += format_extract(self.links[provider], r.text, fail='*** {}: Failed'.format(self.links[provider]['display_name']))
 
             if response:
                 self.bot.irc.msg(event, response, 'public')

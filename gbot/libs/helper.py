@@ -153,7 +153,9 @@ def get_url(url, **kwargs):
         r = requests.get(url, **kwargs)
 
         if not r.ok:
-            return 'HTTP Error - {code} {name}'.format(code=r.status.code, name=r.status.name)
+            return 'HTTP Error - {code} {name} - {description}'.format(code=r.status.code,
+                                                                       name=r.status.name,
+                                                                       description=r.status.description)
 
     except requests.exceptions.Timeout:
         return 'Connection timed out'
@@ -163,18 +165,75 @@ def get_url(url, **kwargs):
 
     return r
 
+from pyquery import PyQuery as pq
+import urllib.parse
 
-def json_format_extract(format_json, input_json):
-    # format string - dict for kwargs
+
+def format_extract(format_json, input_element, format=None, debug=False, fail='Failure'):
+    if not format:
+        if 'format' in format_json:
+            format = format_json['format']
+        else:
+            return 'No format for format_extract()'
+
+    if 'debug' in format_json:
+        debug = format_json['debug']
+
+    # format-specific settings
+    if format == 'json':
+        input_element = json.loads(input_element)
+        retrieve = json_return
+    elif format == 'xml':
+        input_element = input_element.replace(' xmlns:', ' xmlnamespace:').replace(' xmlns=', ' xmlnamespace=')
+        retrieve = xml_return
+
+    # format extraction - format kwargs
     format_dict = {}
 
-    if 'responses_dict' in format_json:
-        for name in format_json['responses_dict']:
-            format_dict[name] = json_return(input_json, format_json['responses_dict'][name])
+    if 'response_dict' in format_json:
+        for name in format_json['response_dict']:
+            try:
+                format_dict[name] = retrieve(input_element, format_json['response_dict'][name])
 
-    response = format_json['response'].format(**format_dict)
+                if format_dict[name] == None:
+                    return fail
+            except KeyError:
+                if debug:
+                    return 'Fail on {}'.format(name)
+                else:
+                    return fail
+            except IndexError:
+                if debug:
+                    return 'Fail on {}'.format(name)
+                else:
+                    return fail
 
-    return response.replace('\n', ' ')
+    # return
+    try:
+        return format_json['response'].format(**format_dict)
+    except KeyError:
+        if debug:
+            return 'Fail on format() key'
+        else:
+            return fail
+    except IndexError:
+        if debug:
+            return 'Fail on format() index'
+        else:
+            return fail
+
+
+def xml_return(input_xml, selector):
+    pq_xml = pq(input_xml)
+
+    if selector[0] == 'text':
+        return selector[1]
+    elif selector[0] == 'text.escape':
+        return escape(selector[1])
+    elif selector[0] == 'jquery':
+        return pq_xml(selector[1]).text()
+    elif selector[0] == 'jquery.attr':
+        return pq_xml(selector[1]).attr(selector[2])
 
 
 def json_return(input_json, selector):
@@ -182,6 +241,8 @@ def json_return(input_json, selector):
         return selector[1]
     elif selector[0] == 'text.escape':
         return escape(selector[1])
+    elif selector[0] == 'json.quote_plus':
+        return urllib.parse.quote_plus(str(json_element(input_json, selector[1])))
     elif selector[0] == 'json.num.metric':
         return metric(int(json_element(input_json, selector[1])))
     elif selector[0] == 'json.seconds.metric':

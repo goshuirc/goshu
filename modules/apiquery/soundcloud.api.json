@@ -1,13 +1,12 @@
 {
     "display_name": "SoundCloud", 
     "desc": "<query> --- music search!", 
-    "url": "https://api.soundcloud.com/tracks.json?client_id=e3dfa9998292005f9e73329b1dd9dfb7&q=@{escaped_query}", 
+    "url": "https://api.soundcloud.com/tracks.json?client_id=e3dfa9998292005f9e73329b1dd9dfb7&q={escaped_query}", 
     "format": "json", 
-    "response": [
-        ["json", "[0]['title']"], 
-        ["text", " by "], 
-        ["json", "[0]['user']['username']"], 
-        ["text", " --- "], 
-        ["json", "[0]['permalink_url']"]
-    ]
+    "response": "@c2@b{title}@r by @c3@b{artist}@r  {url}",
+    "response_dict": {
+        "title":  ["json", [0, "title"]], 
+        "artist": ["json", [0, "user", "username"]], 
+        "url":    ["json", [0, "permalink_url"]]
+    }
 }

@@ -5,9 +5,9 @@ Python3 IRC Bot, using the [irc](http://bitbucket.org/jaraco/irc) library
 
 Installing/Configuring
 ----------------------
-Simply download Python 3.x, and run goshu.py with it.
+Install Python 3.x, install the dependencies below, and run goshu.py
 
-Deps: irc
+Deps: [irc](http://bitbucket.org/jaraco/irc), [pyQuery](https://pypi.python.org/pypi/pyquery), [my watchdog fork](https://github.com/DanielOaks/watchdog)
 
 Modules
 -------
