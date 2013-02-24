@@ -87,7 +87,7 @@ class link(Module):
         matches = re.search('(?:https?://)(\\S+)', input_str)
         # only returns a single URL. If we want multiple later, fix that
         if matches:
-            return [matches[0]]
+            return [matches.groups()[0]]
         else:
             return []
 
