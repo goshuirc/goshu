@@ -45,7 +45,7 @@ class link(Module):
         # JsonWatcher(self, 'links', self.dynamic_folder, ext='.lnk').start()
 
     def link(self, event):
-        url_list = urls(unescape(event.arguments[0]))
+        url_list = self.urls(unescape(event.arguments[0]))
 
         for url in url_list:
             response = ''
@@ -82,6 +82,14 @@ class link(Module):
             if response:
                 self.bot.irc.msg(event, response, 'public')
             return  # don't spam us tryna return every title
+
+    def urls(self, input_str):
+        matches = re.search('(?:https?://)(\\S+)', input_str)
+        # only returns a single URL. If we want multiple later, fix that
+        if matches:
+            return [matches[0]]
+        else:
+            return []
 
 links = [
     {
@@ -122,27 +130,3 @@ links = [
         }
     }
 ]
-
-
-def urls(input_str):
-    url_list = []
-    url_list += urls_protocol(input_str, 'http')
-    url_list += urls_protocol(input_str, 'https')
-    return url_list
-
-
-def urls_protocol(input_str, protocol):
-    url_list = []
-    while 1:
-        if protocol+'://' in input_str:
-            start_num = input_str.find(protocol+'://')
-            input_str = input_str[start_num:]
-            url_list.append(input_str.split()[0][len(protocol+'://'):])
-            if len(input_str.split(' ')) > 1:
-                input_str = input_str.split(' ', 1)[1]
-            else:
-                break
-        else:
-            break
-
-    return url_list
