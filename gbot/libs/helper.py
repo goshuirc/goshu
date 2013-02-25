@@ -144,6 +144,8 @@ def metric(num):
             return '{:.1f}{}'.format((num / (10 ** metric_raise)), metric_char)
     return str(num)
 
+from .requests_status import Status
+
 
 def get_url(url, **kwargs):
     """Gets a url, handles all the icky requests stuff."""
@@ -151,6 +153,7 @@ def get_url(url, **kwargs):
         if 'timeout' not in kwargs:
             kwargs['timeout'] = 20
         r = requests.get(url, **kwargs)
+        r.status = Status(r.status_code)
 
         if not r.ok:
             return 'HTTP Error - {code} {name} - {description}'.format(code=r.status.code,
