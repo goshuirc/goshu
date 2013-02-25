@@ -27,7 +27,7 @@ class link(Module):
                 'privmsg' : [(0, self.link)],
             },
         }
-        JsonWatcher(self, 'links', self.dynamic_path, ext='lnk')
+        JsonWatcher(self, 'links', self.dynamic_path, ext='lnk', yaml=True)
 
     def link(self, event):
         url_matches = re.search('(?:https?://)(\\S+)', unescape(event.arguments[0]))

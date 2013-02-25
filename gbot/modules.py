@@ -35,7 +35,7 @@ class Module:
         self.commands = {}
         self.json_watchers = []
         if os.path.exists(self.dynamic_path):
-            JsonWatcher(self, 'dynamic_commands', self.dynamic_path, ext=self.ext, commands=True)
+            JsonWatcher(self, 'dynamic_commands', self.dynamic_path, ext=self.ext, commands=True, yaml=True)
 
     def combined(self, event, command, usercommand):
         ...
@@ -48,6 +48,12 @@ class Module:
     def unload(self):
         for watcher in self.json_watchers:
             watcher.stop()
+
+
+def isModule(member):
+    if member in Module.__subclasses__():
+        return True
+    return False
 
 
 class Modules:
@@ -66,11 +72,13 @@ class Modules:
 
     def modules_from_path(self, path):
         modules = []
-        for(dirpath, dirs, files) in os.walk(path):
-            for file in files:
-                (name, ext) = os.path.splitext(file)
-                if ext == os.extsep + 'py':
+        for entry in os.listdir(path):
+            if os.path.isfile(os.path.join(path, entry)):
+                (name, ext) = os.path.splitext(entry)
+                if ext == os.extsep + 'py' and name != '__init__':
                     modules.append(name)
+            elif os.path.isfile((os.path.join(path, entry, os.extsep.join(['__init__', 'py'])))):
+                modules.append(entry)
         return modules
 
     def load_init(self, path):
@@ -79,7 +87,7 @@ class Modules:
         output = 'modules '
         for module in modules:
             loaded_module = self.load(module)
-            if loaded_module is not None:
+            if loaded_module:
                 output += ', '.join(self.whole_modules[module]) + ', '
             else:
                 output += module + '[FAILED], '
@@ -93,10 +101,9 @@ class Modules:
 
         # find the actual goshu Module(s) we wanna load from the whole module
         modules = []
-        for item in inspect.getmembers(whole_module):
-            if item[1] in Module.__subclasses__():
-                modules.append(item[1]())
-                break
+        for item in inspect.getmembers(whole_module, isModule):
+            modules.append(item[1]())
+            break
         if not modules:
             return False
 

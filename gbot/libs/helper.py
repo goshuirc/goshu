@@ -128,7 +128,7 @@ def bytes_to_str(bytes, base=2, precision=0):
 def time_metric(secs=60):
     """Returns user-readable string representing given number of seconds."""
     time = ''
-    for metric_secs, metric_char in [[60*60, 'h'], [60, 'm']]:
+    for metric_secs, metric_char in [[7*24*60*60, 'w'], [24*60*60, 'd'], [60*60, 'h'], [60, 'm']]:
         if secs > metric_secs:
             time += '{}{}'.format(int(secs / metric_secs), metric_char)
             secs -= int(secs / metric_secs) * metric_secs
@@ -167,6 +167,7 @@ def get_url(url, **kwargs):
 
 from pyquery import PyQuery as pq
 import urllib.parse
+import collections.abc
 
 
 def format_extract(format_json, input_element, format=None, debug=False, fail='Failure'):
@@ -193,7 +194,16 @@ def format_extract(format_json, input_element, format=None, debug=False, fail='F
     if 'response_dict' in format_json:
         for name in format_json['response_dict']:
             try:
-                format_dict[name] = retrieve(input_element, format_json['response_dict'][name])
+                if isinstance(format_json['response_dict'][name], collections.abc.Callable):
+                    # try:
+                    format_dict[name] = format_json['response_dict'][name](format_json, input_element)
+                    # except BaseException as x:
+                    #     if debug:
+                    #         return 'Unknown failure: {}'.format(x)
+                    #     else:
+                    #         return 'Code error'
+                else:
+                    format_dict[name] = retrieve(input_element, format_json['response_dict'][name])
 
                 if format_dict[name] == None:
                     return fail
@@ -208,7 +218,6 @@ def format_extract(format_json, input_element, format=None, debug=False, fail='F
                 else:
                     return fail
 
-    # return
     try:
         return format_json['response'].format(**format_dict)
     except KeyError:
@@ -245,8 +254,6 @@ def json_return(input_json, selector):
         return urllib.parse.quote_plus(str(json_element(input_json, selector[1])))
     elif selector[0] == 'json.num.metric':
         return metric(int(json_element(input_json, selector[1])))
-    elif selector[0] == 'json.seconds.metric':
-        return time_metric(secs=json_element(input_json, selector[1]))
     elif selector[0] == 'json.datetime.fromtimestamp':
         return datetime.datetime.fromtimestamp(json_element(input_json, selector[1])).strftime(selector[2])
     elif selector[0] == 'json.dict.returntrue':
@@ -256,9 +263,6 @@ def json_return(input_json, selector):
             if json_dict[key]:
                 keys.append(key)
         return selector[2].join(keys)
-    # and site-specific ones
-    elif selector[0] == 'yt.dislikes.metric':  # youtube
-        return metric(abs(int(json_element(input_json, selector[1])) - int(json_element(input_json, selector[2]))))
     # before general json
     else:
         return escape(str(json_element(input_json, selector[1])))
@@ -318,36 +322,64 @@ def utf8_bom(input):
 
 
 import os
+import imp
 import json
+import yaml
+import importlib
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
 
 class JsonHandler(PatternMatchingEventHandler):
-    def __init__(self, base, attr, folder, ext=None, commands=False):
+    def __init__(self, base, attr, folder, ext=None, commands=False, yaml=False):
         if ext:
-            pattern = '*.{}.json'.format(ext)
+            pattern = ['*.{}.json'.format(ext), '*_{}.py'.format(ext)]
         else:
-            pattern = '*.json'
-        PatternMatchingEventHandler.__init__(self, patterns=[pattern])
+            pattern = ['*.json', '*.py']
+        PatternMatchingEventHandler.__init__(self, patterns=pattern)
         self.base = base
         self.attr = attr
         self.folder = folder
         self.ext = ext
         self.commands = commands
+        self.yaml = yaml
 
     def on_any_event(self, event):
         new_json = {}
 
         # json
-        for (dirpath, dirs, files) in os.walk(self.folder):
-            for file in files:
+        for file in os.listdir(self.folder):
+            if os.path.isfile(os.path.join(self.folder, file)):
                 try:
                     (extname, json_ext) = os.path.splitext(file)
-                    if json_ext == os.extsep + 'json':
-                        (name, ext) = os.path.splitext(extname)
-                        if ext == os.extsep + self.ext:
-                            info = json.loads(open(dirpath+os.sep+file).read())
+                    if (json_ext == os.extsep + 'json') or (self.yaml and (json_ext == os.extsep + 'yaml')):
+                        if self.ext:
+                            (name, ext) = os.path.splitext(extname)
+                            pyfile = self.folder.split(os.sep)[-1] + '.' + name + '_' + self.ext
+                            cont = (ext == os.extsep + self.ext)
+                        else:
+                            name, ext = extname, ''
+                            pyfile = self.folder.split(os.sep)[-1] + '.' + name
+                            cont = True
+                        if cont:
+                            ## py
+                            if self.yaml:
+                                try:
+                                    module = importlib.import_module(pyfile)
+                                    imp.reload(module)  # so reloading works
+                                except ImportError:
+                                    pass
+                                except:
+                                    continue
+                            ## yaml
+                            with open(os.path.join(self.folder, file)) as f:
+                                if self.yaml:
+                                    try:
+                                        info = yaml.load(f.read())
+                                    except:
+                                        continue
+                                else:
+                                    info = json.loads(f.read())
                             if 'name' not in info:
                                 info['name'] = [name]
 
@@ -376,14 +408,15 @@ class JsonHandler(PatternMatchingEventHandler):
 
 
 class JsonWatcher:
-    def __init__(self, base, attr, folder, ext=None, commands=False):
+    def __init__(self, base, attr, folder, ext=None, commands=False, yaml=False):
         self.base = base
         self.attr = attr
         self.folder = folder
         self.ext = ext
         self.commands = commands
+        self.yaml = yaml
 
-        self.event_handler = JsonHandler(base, attr, folder, ext=ext, commands=commands)
+        self.event_handler = JsonHandler(base, attr, folder, ext=ext, commands=commands, yaml=yaml)
 
         self.observer = Observer()
         self.observer.schedule(self.event_handler, path=self.folder, recursive=True)

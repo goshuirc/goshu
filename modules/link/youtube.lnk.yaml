@@ -7,10 +7,10 @@
     "response_dict": {
         "title": ["json", ["data", "title"]],
         "author": ["json", ["data", "uploader"]],
-        "length": ["json.seconds.metric", ["data", "duration"]],
+        "length": !!python/name:link.youtube_lnk.length ,
         "category": ["json", ["data", "category"]],
         "likes": ["json.num.metric", ["data", "likeCount"]],
-        "dislikes": ["yt.dislikes.metric", ["data", "ratingCount"], ["data", "likeCount"]],
+        "dislikes": !!python/name:link.youtube_lnk.dislikes ,
         "comments": ["json.num.metric", ["data", "commentCount"]],
         "views": ["json.num.metric", ["data", "viewCount"]]
     }

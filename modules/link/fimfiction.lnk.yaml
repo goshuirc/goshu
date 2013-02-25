@@ -15,6 +15,6 @@
         "time": ["json.datetime.fromtimestamp", ["story", "date_modified"], "%H%MGMT %d%b%y"],
         "likes": ["json.num.metric", ["story", "likes"]],
         "dislikes": ["json.num.metric", ["story", "dislikes"]],
-        "categories": ["json.dict.returntrue", ["story", "categories"], ";"]
+        "categories": !!python/name:link.fimfiction_lnk.categories
     }
 }
