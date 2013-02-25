@@ -80,11 +80,11 @@ class IRC:
                 event_arguments.append(escape(arg))
         else:
             event_arguments = event.arguments
-            #event_arguments = []
-            #for arg in event.arguments():
-            #    event_arguments.append(escape(arg))
-        #if 'raw' not in event.eventtype():
-        #    print("    ", event.eventtype(), ' ', str(event_arguments))
+        #     event_arguments = []
+        #     for arg in event.arguments():
+        #         event_arguments.append(escape(arg))
+        # if 'raw' not in event.eventtype():
+        #     print("    ", event.eventtype(), ' ', str(event_arguments))
         new_event = Event(self, self.name(connection), 'in', event.type, event.source, event.target, event_arguments)
         self._handle_event(new_event)
 

@@ -144,7 +144,7 @@ def metric(num):
             return '{:.1f}{}'.format((num / (10 ** metric_raise)), metric_char)
     return str(num)
 
-from .requests_status import Status
+from http_status import Status
 
 
 def get_url(url, **kwargs):

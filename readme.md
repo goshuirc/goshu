@@ -7,7 +7,7 @@ Installing/Configuring
 ----------------------
 Install Python 3.x, install the dependencies below, and run goshu.py
 
-Deps: [irc](http://bitbucket.org/jaraco/irc), [pyQuery](https://pypi.python.org/pypi/pyquery), [pyYAML](https://bitbucket.org/xi/pyyaml), [Requests](http://python-requests.org), and [my Watchdog fork](https://github.com/DanielOaks/watchdog) (as the official Watchdog repo looks to be abandoned)
+Deps: [irc](http://bitbucket.org/jaraco/irc), [pyQuery](https://pypi.python.org/pypi/pyquery), [pyYAML](https://bitbucket.org/xi/pyyaml), [Requests](http://python-requests.org), [http_status](https://github.com/DanielOaks/http_status), and [my Watchdog fork](https://github.com/DanielOaks/watchdog) (as the official Watchdog repo looks to be abandoned)
 
 Modules
 -------
