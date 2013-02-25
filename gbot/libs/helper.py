@@ -195,13 +195,13 @@ def format_extract(format_json, input_element, format=None, debug=False, fail='F
         for name in format_json['response_dict']:
             try:
                 if isinstance(format_json['response_dict'][name], collections.abc.Callable):
-                    # try:
-                    format_dict[name] = format_json['response_dict'][name](format_json, input_element)
-                    # except BaseException as x:
-                    #     if debug:
-                    #         return 'Unknown failure: {}'.format(x)
-                    #     else:
-                    #         return 'Code error'
+                    try:
+                        format_dict[name] = format_json['response_dict'][name](format_json, input_element)
+                    except BaseException as x:
+                        if debug:
+                            return 'Unknown failure: {}'.format(x)
+                        else:
+                            return 'Code error'
                 else:
                     format_dict[name] = retrieve(input_element, format_json['response_dict'][name])
 
