@@ -20,7 +20,7 @@ class suggest(Module):
         Module.__init__(self)
         self.events = {
             'commands' : {
-                'suggest' : [self.suggest, '[-section] <suggestion> --- suggest something, anything at all', 0],
+                'suggest' : [self.suggest, '[-section] <suggestion> --- suggest something, anything at all'],
             },
         }
 
@@ -30,7 +30,7 @@ class suggest(Module):
         if usercommand.arguments[0] == '-':
             if len(usercommand.arguments[1:].split()) < 2:
                 return
-            section = filename_escape(usercommand.arguments[1:].split()[0]) # first word excluding leading -
+            section = filename_escape(usercommand.arguments[1:].split()[0])  # first word excluding leading -
             suggestion = usercommand.arguments[1:].split(' ', 1)[1]
         else:
             section = 'global'

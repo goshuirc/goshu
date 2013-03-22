@@ -25,8 +25,8 @@ class google(Module):
         Module.__init__(self)
         self.events = {
             'commands' : {
-                ('google', 'g'): [self.google_search, '<query> --- google something, get results', 0],
-                ('calc', 'c'): [self.google_calc, '<expression> --- calculate something', 0],
+                ('google', 'g'): [self.google_search, '<query> --- google something, get results'],
+                ('calc', 'c'): [self.google_calc, '<expression> --- calculate something'],
             },
         }
 

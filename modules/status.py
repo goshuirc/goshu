@@ -16,7 +16,7 @@ class status(Module):
         Module.__init__(self)
         self.events = {
             'commands' : {
-                'status' : [self.status, "--- see how imouto's going", 0],
+                'status' : [self.status, "--- see how imouto's going"],
             },
         }
 

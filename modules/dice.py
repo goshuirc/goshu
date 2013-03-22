@@ -17,7 +17,7 @@ class dice(Module):
         Module.__init__(self)
         self.events = {
             'commands' : {
-                'd' : [self.dice, '<dice> --- rolls dice!', 0],
+                'd' : [self.dice, '<dice> --- rolls dice!'],
             },
         }
 

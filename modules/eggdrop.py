@@ -21,7 +21,7 @@ class eggdrop(Module):
         Module.__init__(self)
         self.events = {
             'commands' : {
-                'egg' : [self.cmd_handler, '[-section] <suggestion> --- eggdrop', 0],
+                'egg' : [self.cmd_handler, '[-section] <suggestion> --- eggdrop'],
             },
             'in' : {
                 'pubmsg' : [(0, self.msg_handler)],

@@ -252,7 +252,10 @@ class Command:
         if base_info:
             self.call = base_info[0]
             self.desc = base_info[1]
-            self.call_level = base_info[2]
+            if len(base_info) > 2:
+                self.call_level = base_info[2]
+            else:
+                self.call_level = 0
 
             if len(base_info) > 3:
                 self.view_level = base_info[3]

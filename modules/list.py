@@ -16,8 +16,8 @@ class list(Module):
         Module.__init__(self)
         self.events = {
             'commands' : {
-                'list' : [self.list, "[command] --- list all commands; if command is present, display info on that command instead~", 0],
-                'help' : [self.list, "[command] --- list all commands; if command is present, display info on that command instead~", 0],
+                'list' : [self.list, "[command] --- list all commands; if command is present, display info on that command instead~"],
+                'help' : [self.list, "[command] --- list all commands; if command is present, display info on that command instead~"],
             },
             'in' : {
                 'privmsg' : [(0, self.privmsg)]

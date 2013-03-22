@@ -18,12 +18,12 @@ class accounts(Module):
         Module.__init__(self)
         self.events = {
             'commands' : {
-                'register' : [self.register, '<username> <password> [email] --- register a goshu account', 0],
-                'login' : [self.login, '[[username] [password]] --- login to a goshu account, if no user/pass use nickserv integration', 0],
-                'loggedin' : [self.loggedin, '--- see if you are logged in', 0],
+                'register' : [self.register, '<username> <password> [email] --- register a goshu account'],
+                'login' : [self.login, '[[username] [password]] --- login to a goshu account, if no user/pass use nickserv integration'],
+                'loggedin' : [self.loggedin, '--- see if you are logged in'],
                 'owner' : [self.owner, '<password> --- make yourself a bot owner', 0, 10],
                 'setaccess' : [self.setaccess, "<username> <level> --- set user's access level", 1],
-                'nickserv' : [self.nickserv, "<link/list/del> --- link, list, or delete nickserv-goshu accounts", 0]
+                'nickserv' : [self.nickserv, "<link/list/del> --- link, list, or delete nickserv-goshu accounts"],
             },
             'in' : {
                 'privnotice' : [(-30, self.nickserv_listener)],

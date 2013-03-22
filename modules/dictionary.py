@@ -22,7 +22,7 @@ class dictionary(Module):
         Module.__init__(self)
         self.events = {
             'commands' : {
-                'def' : [self.dictionary_definition, '<word> --- returns word definition', 0],
+                'def' : [self.dictionary_definition, '<word> --- returns word definition'],
             },
         }
 

@@ -20,9 +20,9 @@ class pokemon(Module):
         Module.__init__(self)
         self.events = {
             'commands' : {
-                'pokemon' : [self.get_pokemon, '--- get a random pokemon', 0],
-                'poketeam' : [self.get_pokemon, '--- get a random pokemon team', 0],
-                'pokerst' : [self.reset_pokemon, '--- reset corrupted pokemon save', 0],
+                'pokemon' : [self.get_pokemon, '--- get a random pokemon'],
+                'poketeam' : [self.get_pokemon, '--- get a random pokemon team'],
+                'pokerst' : [self.reset_pokemon, '--- reset corrupted pokemon save'],
             },
         }
 

@@ -17,7 +17,7 @@ class random_module(Module):  # so named to prevent random lib issues
         Module.__init__(self)
         self.events = {
             'commands' : {
-                'random' : [self.random_command, '--- random selection from phrases seperated by a |', 0],
+                'random' : [self.random_command, '--- random selection from phrases seperated by a |'],
             },
         }
         random.seed()

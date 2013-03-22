@@ -19,7 +19,7 @@ class urbandictionary(Module):
         Module.__init__(self)
         self.events = {
             'commands' : {
-                'ud' : [self.ud_search, '<query> --- see UrbanDictionary definition', 0],
+                'ud' : [self.ud_search, '<query> --- see UrbanDictionary definition'],
             },
         }
 

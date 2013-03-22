@@ -87,7 +87,7 @@ irclib, while brilliant, lacks a number of features including: outgoing event tr
 
 I've written this girclib wrapper to address these. girclib works similarly to irclib, in terms of commands and operations. However, if you plan on using it for your own projects you may need some guidance
 
-First off: Look at the source code. I know it may be obvious, but if you want to find out if you can do something, or how something's done, looking at either the girclib or gbot/irc.py source code will help quite a bit. If I haven't done it somewhere in there, chances are I haven't implimented it
+First off: Look at the source code. I know it may be obvious, but if you want to find out if you can do something, or how something's done, looking at either the girclib or gbot/irc.py source code will help quite a bit. If I haven't done it somewhere in there, chances are I haven't implemented it
 
 <docs here>
 
