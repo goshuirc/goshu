@@ -96,17 +96,32 @@ class IRC(girclib.IRC):
         target = get_target(event, zone)
         self.servers[event.server].action(target, message)
 
-    def msg(self, event, message, zone='private'):
-        """Automagically message someone. Zone can be public or private, for preferring channel or user."""
-        target = get_target(event, zone)
+    def msg(self, event, message, zone='private', strict=False):
+        """Automagically message someone. Zone can be public, private, or dcc, for preferring channel or user."""
+        target = get_target(event, zone, strict)
+
+        if target is None:
+            return False
+
         self.servers[event.server].privmsg(target, message)
+        return True
 
 
-def get_target(event, zone):
-    """Return the target to msg/action given the event and zone."""
+def get_target(event, zone, strict=False):
+    """Return the target to msg/action given the event and zone.
+
+    If dcc is requested but not avaliable and not strict, simply go to private instead.
+    If dcc is not avaliable and strict, do not send and feturn False."""
     if zone is 'public':
         target = event.from_to
-    else:
+    elif zone is 'dcc':
+        # skip to below for now, will handle actual dcc later
+        if strict:
+            zone = 'private'
+        else:
+            return None
+
+    if zone is 'private':
         if girclib.is_channel(event.source):
             target = event.source
         else:

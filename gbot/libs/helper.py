@@ -371,7 +371,7 @@ class JsonHandler(PatternMatchingEventHandler):
                                     module = importlib.import_module(pyfile)
                                     imp.reload(module)  # so reloading works
                                 except ImportError:
-                                    pass
+                                    continue
                                 except:
                                     continue
                             ## yaml
