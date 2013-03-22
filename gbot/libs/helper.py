@@ -21,9 +21,7 @@ is_ok() -- prompt the user for yes/no and returns True/False
 bytes_to_str() -- convert number of bytes to a human-readable format
 filename_escape() -- escapes a filename (slashes removed, etc)
 html_unescape() -- turns any html-escaped characters back to their normal equivalents
-utf8_bom() -- removes the utf8 bom, because open() decides to leave it in
-
-"""
+utf8_bom() -- removes the utf8 bom, because open() decides to leave it in"""
 
 import string
 import datetime
@@ -33,7 +31,7 @@ from gbot.libs.girclib import escape
 
 
 def split_num(line, chars=' ', maxsplits=1, empty=''):
-    """/lazy/ wrapper, to stop us having to bounds-check when splitting
+    """/lazy/ wrapper, to stop us having to bounds-check when splitting.
 
     Arguments:
     line -- line to split
@@ -42,10 +40,7 @@ def split_num(line, chars=' ', maxsplits=1, empty=''):
     empty -- character to put in place of nothing
 
     Returns:
-    line.split(chars, items); return value is padded until `maxsplits + 1`
-    number of values are present
-
-    """
+    line.split(chars, items); return value is padded until `maxsplits + 1` number of values are present"""
     line = line.split(chars, maxsplits)
     while len(line) <= maxsplits:
         line.append(empty)
@@ -58,27 +53,24 @@ def is_ok(func, prompt, blank='', clearline=False):
 
     Arguments:
     prompt -- Prompt for the user
-    blank -- If True, a blank response will return True, ditto for False,
-             the default '' will not accept blank responses and ask until
-             the user gives an appropriate response
+    blank -- If True, a blank response will return True, ditto for False, the default '' will not accept
+             blank responses and ask until the user gives an appropriate response
 
     Returns:
-    True if user accepts, False if user does not
-
-    """
+    True if user accepts, False if user does not"""
     while True:
         ok = func(prompt).lower().strip()
 
-        try:
+        if len(ok) > 0:
             if ok[0] == 'y' or ok[0] == 't' or ok[0] == '1':  # yes, true, 1
                 return True
             elif ok[0] == 'n' or ok[0] == 'f' or ok[0] == '0':  # no, false, 0
                 return False
 
-        except IndexError:
-            if blank == True:
+        else:
+            if blank is True:
                 return True
-            elif blank == False:
+            elif blank is False:
                 return False
 
 
@@ -102,6 +94,7 @@ def bytes_to_str(bytes, base=2, precision=0):
         return None  # raise error
 
     precision_string = '%.' + str(precision) + 'f'
+    mebi_convert = True
 
     if bytes >= (multiplexer ** 4):
         terabytes = float(bytes / (multiplexer ** 4))
@@ -112,7 +105,7 @@ def bytes_to_str(bytes, base=2, precision=0):
         output = (precision_string % gigabytes) + 'G'
 
     elif bytes >= (multiplexer ** 2):
-        megabytes = float(bytes / (multiplexer ** 3))
+        megabytes = float(bytes / (multiplexer ** 2))
         output = (precision_string % megabytes) + 'M'
 
     elif bytes >= (multiplexer ** 1):
@@ -120,7 +113,13 @@ def bytes_to_str(bytes, base=2, precision=0):
         output = (precision_string % kilobytes) + 'K'
 
     else:
-        output = (precision_string % float(bytes)) + 'b'
+        output = (precision_string % float(bytes)) + 'B'
+        mebi_convert = False
+
+    # mebibytes and gibibytes all those weird HDD manufacturer terms
+    if base == 10 and mebi_convert:
+        num, base = output[:-1], output[-1]
+        output = num + base.lower() + 'B'
 
     return output
 
