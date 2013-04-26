@@ -356,6 +356,9 @@ class ServerConnection:
                 channel = event.arguments[0]
                 mode_list = ' '.join(event.arguments[1:])
 
+            if channel not in self.info['channels']:
+                return
+
             for mode in irc.modes._parse_modes(mode_list, unary_modes):
 
                 # User prefix modes - voice, op, etc
