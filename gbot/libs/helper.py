@@ -136,12 +136,34 @@ def time_metric(secs=60):
     return time
 
 
-def metric(num):
-    """Returns user-readable string representing given number."""
-    for metric_raise, metric_char in [[9, 'B'], [6, 'M'], [3, 'k']]:
-        if num > (10 ** metric_raise):
-            return '{:.1f}{}'.format((num / (10 ** metric_raise)), metric_char)
-    return str(num)
+def metric(num, metric_list=[[10**9, 'B'], [10**6, 'M'], [18**3, 'k']], additive=False):
+    """Returns user-readable string representing given value.
+
+    Arguments:
+    num is the base value we're converting.
+    metric_list is the list of data we're working off.
+    additive is whether we add the various values together, or separate them.
+
+    Return:
+    a string such as 345K or 23w6d2h53s"""
+    output = ''
+    for metric_count, metric_char in metric_list:
+        if num > metric_count:
+            if additive:
+                format_str = '{}{}'
+            else:
+                format_str = '{:.1f}{}'
+
+            num = (num / metric_count)
+            if not additive:
+                num = int(num)
+
+            output += format_str.format(num, metric_char)
+
+            if not additive:
+                break
+
+    return output
 
 from http_status import Status
 
