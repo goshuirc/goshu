@@ -6,7 +6,6 @@
 import os
 
 from gbot.modules import Module
-from gbot.libs.girclib import escape
 from gbot.libs.helper import filename_escape
 
 
@@ -15,8 +14,8 @@ class suggest(Module):
     def __init__(self):
         Module.__init__(self)
         self.events = {
-            'commands' : {
-                'suggest' : [self.suggest, '[-section] <suggestion> --- suggest something, anything at all'],
+            'commands': {
+                'suggest': [self.suggest, '[-section] <suggestion> --- suggest something, anything at all'],
             },
         }
 

@@ -3,7 +3,7 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the BSD 2-clause license
 
-from time import strftime, localtime, gmtime
+from time import strftime, localtime
 from gbot.modules import Module
 from gbot.libs.girclib import NickMask
 
@@ -13,8 +13,8 @@ class ctcp_reply(Module):
     def __init__(self):
         Module.__init__(self)
         self.events = {
-            'in' : {
-                'ctcp' : [(-30, self.ctcp_reply)],
+            'in': {
+                'ctcp': [(-30, self.ctcp_reply)],
             },
         }
 
@@ -28,19 +28,19 @@ class ctcp_reply(Module):
 
         elif event.arguments[0] == 'USERINFO':
             userinfostring = None
-            #userinfostring = "Please don't kline me, I'll play nice!"
+            # userinfostring = "Please don't kline me, I'll play nice!"
             if userinfostring:
-                self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, "USERINFO :%s" % userinfostring)
+                self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, "USERINFO :{}".format(userinfostring))
 
         elif event.arguments[0] == 'CLIENTINFO':
             self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'CLIENTINFO :Understood CTCP Pairs: CLIENTINFO, ERRMSG, PING, SOURCE, TIME, USERINFO, VERSION')
 
         elif event.arguments[0] == 'ERRMSG':
-            #self.bot.irc.servers[event.server].ctcp_reply(nm_to_n(event.source, 'ERRMSG '+event.arguments()[1]+':ERRMSG echo, no error has occured') #could be bad, errmsg-storm, anyone?
+            # self.bot.irc.servers[event.server].ctcp_reply(nm_to_n(event.source, 'ERRMSG '+event.arguments()[1]+':ERRMSG echo, no error has occured') #could be bad, errmsg-storm, anyone?
             pass
 
         elif event.arguments[0] == 'TIME':
-            self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'TIME '+strftime("%a %b %d, %H:%M:%S %Y", localtime()))
+            self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'TIME {}'.format(strftime("%a %b %d, %H:%M:%S %Y", localtime())))
 
         elif event.arguments[0] == 'PING':
             if len(event.arguments) > 1:

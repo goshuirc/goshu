@@ -12,11 +12,11 @@ class commands(Module):
     def __init__(self):
         Module.__init__(self)
         self.events = {
-            'commands' : {
-                'msg' : [self.msg, '<target> <message> --- send a /msg', 5],
-                'me' : [self.me, '<target> <message> --- send a /me', 5],
-                'join' : [self.join, '<channel> --- join channel', 5],
-                'part' : [self.part, '<channel> [reason] --- leave channel', 5],
+            'commands': {
+                'msg': [self.msg, '<target> <message> --- send a /msg', 5],
+                'me': [self.me, '<target> <message> --- send a /me', 5],
+                'join': [self.join, '<channel> --- join channel', 5],
+                'part': [self.part, '<channel> [reason] --- leave channel', 5],
             },
         }
 

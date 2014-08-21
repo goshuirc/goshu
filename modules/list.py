@@ -11,12 +11,12 @@ class list(Module):
     def __init__(self):
         Module.__init__(self)
         self.events = {
-            'commands' : {
-                'list' : [self.list, "[command] --- list all commands; if command is present, display info on that command instead~"],
-                'help' : [self.list, "[command] --- list all commands; if command is present, display info on that command instead~"],
+            'commands': {
+                'list': [self.list, "[command] --- list all commands; if command is present, display info on that command instead~"],
+                'help': [self.list, "[command] --- list all commands; if command is present, display info on that command instead~"],
             },
-            'in' : {
-                'privmsg' : [(0, self.privmsg)]
+            'in': {
+                'privmsg': [(0, self.privmsg)]
             }
         }
 

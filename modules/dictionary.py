@@ -17,8 +17,8 @@ class dictionary(Module):
     def __init__(self):
         Module.__init__(self)
         self.events = {
-            'commands' : {
-                'def' : [self.dictionary_definition, '<word> --- returns word definition'],
+            'commands': {
+                'def': [self.dictionary_definition, '<word> --- returns word definition'],
             },
         }
 
@@ -33,12 +33,12 @@ class dictionary(Module):
             return
 
         url = 'http://api.wordnik.com/v4/word.json/'
-        url += urllib.parse.urlencode({b'' : unescape(usercommand.arguments.strip())})[1:]
+        url += urllib.parse.urlencode({b'': unescape(usercommand.arguments.strip())})[1:]
         url += '/definitions?'
         url += urllib.parse.urlencode({
-            b'limit' : b'1',
-            b'useCanonical' : b'true',
-            b'api_key' : dictionary_info['api_key'],
+            b'limit': b'1',
+            b'useCanonical': b'true',
+            b'api_key': dictionary_info['api_key'],
         })
 
         response = '*** Wordnik: '

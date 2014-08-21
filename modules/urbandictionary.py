@@ -14,13 +14,13 @@ class urbandictionary(Module):
     def __init__(self):
         Module.__init__(self)
         self.events = {
-            'commands' : {
-                'ud' : [self.ud_search, '<query> --- see UrbanDictionary definition'],
+            'commands': {
+                'ud': [self.ud_search, '<query> --- see UrbanDictionary definition'],
             },
         }
 
     def ud_search(self, event, command, usercommand):
-        encoded_query = urllib.parse.urlencode({b'term' : unescape(usercommand.arguments)})
+        encoded_query = urllib.parse.urlencode({b'term': unescape(usercommand.arguments)})
         url = 'http://www.urbandictionary.com/iphone/search/define?%s' % (encoded_query)
         try:
             search_results = urllib.request.urlopen(url)

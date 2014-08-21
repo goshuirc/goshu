@@ -13,8 +13,8 @@ class info(Module):
     def __init__(self):
         Module.__init__(self)
         self.events = {
-            'commands' : {
-                'info' : [self.info, 'output bot debug info', 10],
+            'commands': {
+                'info': [self.info, 'output bot debug info', 10],
             },
         }
 

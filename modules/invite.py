@@ -11,8 +11,8 @@ class invite(Module):
     def __init__(self):
         Module.__init__(self)
         self.events = {
-            'in' : {
-                'invite' : [(0, self.invite)],
+            'in': {
+                'invite': [(0, self.invite)],
             },
         }
 

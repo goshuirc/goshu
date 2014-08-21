@@ -3,7 +3,7 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the BSD 2-clause license
 
-from time import strftime, localtime, gmtime
+from time import strftime, localtime
 import random
 import os
 
@@ -17,8 +17,8 @@ class a_log_display(Module):  # a_ at the beginning so goshu calls this module f
     def __init__(self):
         Module.__init__(self)
         self.events = {
-            '*' : {
-                '*' : [(-20, self.handler, True)],  # sync
+            '*': {
+                '*': [(-20, self.handler, True)],  # sync
             }
         }
         self.nick_colors = {}
@@ -29,11 +29,11 @@ class a_log_display(Module):  # a_ at the beginning so goshu calls this module f
         if event.type == 'all_raw_messages':
             return
 
-        #> 15:26:43
+        # > 15:26:43
         output = '@c14'
         output += strftime("%H:%M:%S", localtime())
 
-        #> -rizon-
+        # > -rizon-
         output += ' @c2-@c'
         output += event.server
         output += '@c2-@c '
@@ -48,8 +48,8 @@ class a_log_display(Module):  # a_ at the beginning so goshu calls this module f
                             'luserchannels', 'luserme', 'n_local',
                             'n_global', 'luserconns', 'luserunknown',
                             'motdstart', 'motd', 'endofmotd', '042', ]:
-            #for message in event.arguments:
-            #    output += message + ' '
+            # for message in event.arguments:
+            #     output += message + ' '
             output += ' '.join(event.arguments)
 
         elif event.type in ['privnotice', '439', ]:
@@ -200,9 +200,9 @@ class a_log_display(Module):  # a_ at the beginning so goshu calls this module f
         for target in targets_escape:
             if not os.path.exists('logs'):
                 os.makedirs('logs')
-            if not os.path.exists('logs/'+server):
-                os.makedirs('logs/'+server)
-            path = 'logs/'+server_escape+'/'+target+'.log'
+            if not os.path.exists('logs/{}'.format(server)):
+                os.makedirs('logs/{}'.format(server))
+            path = 'logs/{}.{}.log'.format(server_escape, target)
 
             if target not in self.logfiles_open or not os.path.exists(path):
                 output = '@c14 Logfile Opened - ' + strftime("%A %B %d, %H:%M:%S %Y", localtime()) + '\n' + output

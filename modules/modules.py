@@ -11,8 +11,8 @@ class modules(Module):
     def __init__(self):
         Module.__init__(self)
         self.events = {
-            'commands' : {
-                'module' : [self.handle, ['<load/unload/reload> [name] --- load/unload/reload module specified by <name>', 'list --- list loaded modules'], 5],
+            'commands': {
+                'module': [self.handle, ['<load/unload/reload> [name] --- load/unload/reload module specified by <name>', 'list --- list loaded modules'], 5],
             },
         }
 

@@ -4,7 +4,6 @@
 # licensed under the BSD 2-clause license
 
 from gbot.modules import Module
-from gbot.libs.girclib import escape
 import random
 import json
 import os
@@ -15,10 +14,10 @@ class pokemon(Module):
     def __init__(self):
         Module.__init__(self)
         self.events = {
-            'commands' : {
-                'pokemon' : [self.get_pokemon, '--- get a random pokemon'],
-                'poketeam' : [self.get_pokemon, '--- get a random pokemon team'],
-                'pokerst' : [self.reset_pokemon, '--- reset corrupted pokemon save'],
+            'commands': {
+                'pokemon': [self.get_pokemon, '--- get a random pokemon'],
+                'poketeam': [self.get_pokemon, '--- get a random pokemon team'],
+                'pokerst': [self.reset_pokemon, '--- reset corrupted pokemon save'],
             },
         }
 
@@ -71,14 +70,14 @@ class Monster:
 
     def generate(self, corrupted=False, path='', files=['', '']):
         if corrupted:
-            poke_list = json.loads(open(path+files[1]).read())
-            self.number = random.randint(0, len(poke_list)-1)
+            poke_list = json.loads(open(path + files[1]).read())
+            self.number = random.randint(0, len(poke_list) - 1)
             self.name = poke_list[self.number]
             self.level = str(random.randint(1, 100000))
 
         else:
-            poke_list = json.loads(open(path+files[0]).read())
-            self.number = random.randint(0, len(poke_list)-1)
+            poke_list = json.loads(open(path + files[0]).read())
+            self.number = random.randint(0, len(poke_list) - 1)
             self.name = poke_list[self.number]
             self.level = str(random.randint(1, 100))
 

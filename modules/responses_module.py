@@ -5,11 +5,7 @@
 
 from gbot.modules import Module
 from gbot.libs.girclib import unescape
-from gbot.libs.helper import filename_escape, utf8_bom
 import random
-import os
-import sys
-import json
 
 
 class responses_module(Module):

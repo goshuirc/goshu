@@ -12,8 +12,8 @@ class dice(Module):
     def __init__(self):
         Module.__init__(self)
         self.events = {
-            'commands' : {
-                'd' : [self.dice, '<dice> --- rolls dice!'],
+            'commands': {
+                'd': [self.dice, '<dice> --- rolls dice!'],
             },
         }
 
@@ -52,7 +52,7 @@ class dice(Module):
             i = 1
             for char in iline:
                 if char == '+':
-                    i+= 1
+                    i += 1
                 if char == '-':
                     if(len(idice[i]) == 2):
                         idice[i][1] = str(-int(idice[i][1]))
@@ -70,11 +70,11 @@ class dice(Module):
                         if(int(split[1]) > 0):
                             result = random.randint(1, int(split[1]))
                             dice.append(result)
-                            out_dice_line += str(result)+', '
+                            out_dice_line += str(result) + ', '
                         else:
                             result = random.randint(int(split[1]), -1)
                             dice.append(result)
-                            out_dice_line += str(result)+', '
+                            out_dice_line += str(result) + ', '
                         i += 1
                         if i > 10000:
                             raise Exception
@@ -90,14 +90,14 @@ class dice(Module):
                     result += int(li2)
 
             output = event.source.split('!')[0] + ': '
-            output += iline+'    =    '+str(result)
+            output += iline + '    =    ' + str(result)
             if len(out_dice_line.split(',')) < 13:
-                output += '    =    '+out_dice_line[:-2]
+                output += '    =    ' + out_dice_line[:-2]
 
             self.bot.irc.msg(event, output, 'public')
 
         except:
-            output_lines = ['DICE SYNTAX: '+self.bot.settings.store['prefix']+'d <dice>',
+            output_lines = ['DICE SYNTAX: {}d <dice>'.format(self.bot.settings.store['prefix']),
                             '        <dice> is a string like d12+4d8-13',
                             '        or any other permutation of rpg dice and numbers', ]
 

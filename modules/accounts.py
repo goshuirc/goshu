@@ -12,16 +12,16 @@ class accounts(Module):
     def __init__(self):
         Module.__init__(self)
         self.events = {
-            'commands' : {
-                'register' : [self.register, '<username> <password> [email] --- register a goshu account'],
-                'login' : [self.login, '[[username] [password]] --- login to a goshu account, if no user/pass use nickserv integration'],
-                'loggedin' : [self.loggedin, '--- see if you are logged in'],
-                'owner' : [self.owner, '<password> --- make yourself a bot owner', 0, 10],
-                'setaccess' : [self.setaccess, "<username> <level> --- set user's access level", 1],
-                'nickserv' : [self.nickserv, "<link/list/del> --- link, list, or delete nickserv-goshu accounts"],
+            'commands': {
+                'register': [self.register, '<username> <password> [email] --- register a goshu account'],
+                'login': [self.login, '[[username] [password]] --- login to a goshu account, if no user/pass use nickserv integration'],
+                'loggedin': [self.loggedin, '--- see if you are logged in'],
+                'owner': [self.owner, '<password> --- make yourself a bot owner', 0, 10],
+                'setaccess': [self.setaccess, "<username> <level> --- set user's access level", 1],
+                'nickserv': [self.nickserv, "<link/list/del> --- link, list, or delete nickserv-goshu accounts"],
             },
-            'in' : {
-                'privnotice' : [(-30, self.nickserv_listener)],
+            'in': {
+                'privnotice': [(-30, self.nickserv_listener)],
             },
         }
 
@@ -50,8 +50,8 @@ class accounts(Module):
 
         self.bot.accounts.add_account(user_args[0].lower(), user_args[1])
 
-        #if len(user_args) > 2:
-        #    self.bot.accounts.store[user_args[0].lower()]['email'] = user_args[2]
+        # if len(user_args) > 2:
+        #     self.bot.accounts.store[user_args[0].lower()]['email'] = user_args[2]
 
         self.bot.irc.msg(event, 'Account registered!')
 
