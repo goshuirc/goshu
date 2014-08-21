@@ -415,6 +415,38 @@ class ServerConnection:
             for mode in self.info['server']['isupport']['CHANMODES'][0]:
                 self.info['channels'][channel]['modes'][mode] = []
 
+    # privs
+    def is_prived(self, user_privs, required_level):
+        """Check if the given user privs meet the required level or above.
+
+        Args:
+            user_privs: String like '&@+', '&', etc
+            required_level: String like 'o', 'h', 'v'
+        """
+        privs_we_support = self.info['server']['isupport']['PREFIX']
+
+        # changing h, q, a to something we can use if necessary
+        if required_level not in privs_we_support[0]:
+            conversion_dict = {
+                'h': 'o',
+                'a': 'o',
+                'q': 'o',
+            }
+            required_level = conversion_dict.get(required_level, None)
+            if required_level is None:
+                print('We do not have required_level:', required_level)
+                return False
+
+        # get list of levels we can use
+        index = privs_we_support[0].index(required_level)
+        acceptable_prefixes = privs_we_support[1][:index + 1]
+
+        for prefix in user_privs:
+            if prefix in acceptable_prefixes:
+                return True
+
+        return False
+
 
 class Event:
     """IRC Event."""
