@@ -11,8 +11,8 @@ from gbot.libs.helper import filename_escape
 
 class suggest(Module):
 
-    def __init__(self):
-        Module.__init__(self)
+    def __init__(self, bot):
+        Module.__init__(self, bot)
         self.events = {
             'commands': {
                 'suggest': [self.suggest, '[-section] <suggestion> --- suggest something, anything at all'],

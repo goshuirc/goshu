@@ -13,8 +13,8 @@ import socket
 
 class google(Module):
 
-    def __init__(self):
-        Module.__init__(self)
+    def __init__(self, bot):
+        Module.__init__(self, bot)
         self.events = {
             'commands': {
                 ('google', 'g'): [self.google_search, '<query> --- google something, get results'],

@@ -10,8 +10,8 @@ import random
 
 class responses_module(Module):
 
-    def __init__(self):
-        Module.__init__(self)
+    def __init__(self, bot):
+        Module.__init__(self, bot)
         random.seed()
 
         # /s means source, the nick of whoever did the command

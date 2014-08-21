@@ -13,8 +13,8 @@ import base64
 
 class eggdrop(Module):
 
-    def __init__(self):
-        Module.__init__(self)
+    def __init__(self, bot):
+        Module.__init__(self, bot)
         self.events = {
             'commands': {
                 'egg': [self.cmd_handler, '[-section] <suggestion> --- eggdrop'],

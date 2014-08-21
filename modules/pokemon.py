@@ -11,8 +11,8 @@ import os
 
 class pokemon(Module):
 
-    def __init__(self):
-        Module.__init__(self)
+    def __init__(self, bot):
+        Module.__init__(self, bot)
         self.events = {
             'commands': {
                 'pokemon': [self.get_pokemon, '--- get a random pokemon'],

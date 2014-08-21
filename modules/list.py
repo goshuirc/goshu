@@ -8,8 +8,8 @@ from gbot.modules import Module
 
 class list(Module):
 
-    def __init__(self):
-        Module.__init__(self)
+    def __init__(self, bot):
+        Module.__init__(self, bot)
         self.events = {
             'commands': {
                 'list': [self.list, "[command] --- list all commands; if command is present, display info on that command instead~"],

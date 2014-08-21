@@ -11,8 +11,8 @@ import json
 
 class urbandictionary(Module):
 
-    def __init__(self):
-        Module.__init__(self)
+    def __init__(self, bot):
+        Module.__init__(self, bot)
         self.events = {
             'commands': {
                 'ud': [self.ud_search, '<query> --- see UrbanDictionary definition'],

@@ -9,8 +9,8 @@ from gbot.modules import Module
 class accounts(Module):
     name = 'accounts'
 
-    def __init__(self):
-        Module.__init__(self)
+    def __init__(self, bot):
+        Module.__init__(self, bot)
         self.events = {
             'commands': {
                 'register': [self.register, '<username> <password> [email] --- register a goshu account'],

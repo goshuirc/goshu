@@ -9,8 +9,8 @@ from gbot.libs.helper import split_num
 
 class commands(Module):
 
-    def __init__(self):
-        Module.__init__(self)
+    def __init__(self, bot):
+        Module.__init__(self, bot)
         self.events = {
             'commands': {
                 'msg': [self.msg, '<target> <message> --- send a /msg', 5],

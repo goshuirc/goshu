@@ -14,8 +14,8 @@ from gbot.libs.helper import filename_escape
 
 class a_log_display(Module):  # a_ at the beginning so goshu calls this module first… apparently priority's broken, too
 
-    def __init__(self):
-        Module.__init__(self)
+    def __init__(self, bot):
+        Module.__init__(self, bot)
         self.events = {
             '*': {
                 '*': [(-20, self.handler, True)],  # sync

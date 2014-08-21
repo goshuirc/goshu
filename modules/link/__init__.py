@@ -15,8 +15,8 @@ from gbot.libs.helper import get_url, format_extract, JsonHandler
 
 class link(Module):
 
-    def __init__(self):
-        Module.__init__(self)
+    def __init__(self, bot):
+        Module.__init__(self, bot)
         self.events = {
             'in': {
                 'pubmsg': [(0, self.link)],

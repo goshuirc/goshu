@@ -10,8 +10,8 @@ import json
 
 class info(Module):
 
-    def __init__(self):
-        Module.__init__(self)
+    def __init__(self, bot):
+        Module.__init__(self, bot)
         self.events = {
             'commands': {
                 'info': [self.info, 'output bot debug info', 10],

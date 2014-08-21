@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+, bot#!/usr/bin/env python3
 # Goshubot IRC Bot
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the BSD 2-clause license
@@ -14,8 +14,8 @@ import os
 
 class dictionary(Module):
 
-    def __init__(self):
-        Module.__init__(self)
+    def __init__(self, bot):
+        Module.__init__(self, bot)
         self.events = {
             'commands': {
                 'def': [self.dictionary_definition, '<word> --- returns word definition'],

@@ -9,8 +9,8 @@ import random
 
 class random_module(Module):  # so named to prevent random lib issues
 
-    def __init__(self):
-        Module.__init__(self)
+    def __init__(self, bot):
+        Module.__init__(self, bot)
         self.events = {
             'commands': {
                 'random': [self.random_command, '--- random selection from phrases seperated by a |'],

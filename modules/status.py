@@ -8,8 +8,8 @@ from gbot.modules import Module
 
 class status(Module):
 
-    def __init__(self):
-        Module.__init__(self)
+    def __init__(self, bot):
+        Module.__init__(self, bot)
         self.events = {
             'commands': {
                 'status': [self.status, "--- see how imouto's going"],

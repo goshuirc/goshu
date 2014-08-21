@@ -15,7 +15,9 @@ from .libs.helper import JsonHandler
 class Module:
     """Module to add commands/functionality to the bot."""
 
-    def __init__(self):
+    def __init__(self, bot):
+        self.bot = bot
+
         if not getattr(self, 'name', None):
             self.name = self.__class__.__name__
 
@@ -101,7 +103,7 @@ class Modules:
         # find the actual goshu Module(s) we wanna load from the whole module
         modules = []
         for item in inspect.getmembers(whole_module, isModule):
-            modules.append(item[1]())
+            modules.append(item[1](self.bot))
             break
         if not modules:
             return False
