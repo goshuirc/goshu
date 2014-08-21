@@ -7,7 +7,7 @@ Installing/Configuring
 ----------------------
 Install Python 3.x, install the dependencies below, and run goshu.py
 
-Deps: [irc](http://bitbucket.org/jaraco/irc), [pyQuery](https://pypi.python.org/pypi/pyquery), [pyYAML](https://bitbucket.org/xi/pyyaml), [Requests](http://python-requests.org), [http_status](https://github.com/DanielOaks/http_status), and [my Watchdog fork](https://github.com/DanielOaks/watchdog) (as the official Watchdog repo looks to be abandoned)
+Deps: [irc](http://bitbucket.org/jaraco/irc), [pyQuery](https://pypi.python.org/pypi/pyquery), [pyYAML](https://bitbucket.org/xi/pyyaml), [Requests](http://python-requests.org), [http_status](https://github.com/DanielOaks/http_status)
 
 Modules
 -------
@@ -93,19 +93,23 @@ First off: Look at the source code. I know it may be obvious, but if you want to
 
 License
 -------
-Released under the Beer-Ware License
+Released under the BSD 2-clause License
 
-```python
-# ----------------------------------------------------------------------------
-# "THE BEER-WARE LICENSE" (Revision 42):
-# <danneh@danneh.net> wrote this file. As long as you retain this notice you
-# can do whatever you want with this stuff. If we meet some day, and you think
-# this stuff is worth it, you can buy me a beer in return Daniel Oakley
-# ----------------------------------------------------------------------------
+```
+Copyright (c) 2014, Daniel Oaks
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
 Contact
 -------
-If you do something cool with my code, please feel free to [contact me](danneh@danneh.net)
+If you do something cool with my code, please feel free to [contact me](daniel@danieloaks.net)
 
 For feature requests or contributions, feel free to make an issue, or send a pull request
