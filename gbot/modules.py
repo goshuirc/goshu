@@ -31,6 +31,7 @@ class Module:
 
         self.commands = {}
         self.json_handlers = []
+        self.dynamic_commands = {}
         if os.path.exists(self.dynamic_path):
             self.json_handlers.append(JsonHandler(self, 'dynamic_commands', self.dynamic_path, ext=self.ext, commands=True, yaml=True))
 
@@ -39,6 +40,7 @@ class Module:
 
     def load(self):
         self.commands = self.static_commands
+        self.commands.update(self.dynamic_commands)
 
     def unload(self):
         pass
@@ -49,6 +51,7 @@ class Module:
             json_h.reload()
 
         self.commands = self.static_commands
+        self.commands.update(self.dynamic_commands)
 
 
 def isModule(member):
