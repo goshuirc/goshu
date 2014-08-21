@@ -356,9 +356,9 @@ import importlib
 class JsonHandler:
     def __init__(self, base, attr, folder, ext=None, commands=False, yaml=False):
         if ext:
-            self.pattern = ['*.{}.json'.format(ext), '*_{}.py'.format(ext)]
+            self.pattern = ['*.{}.yaml'.format(ext), '*.{}.json'.format(ext), '*_{}.py'.format(ext)]
         else:
-            self.pattern = ['*.json', '*.py']
+            self.pattern = ['*.yaml', '*.json', '*.py']
         self.base = base
         self.attr = attr
         self.folder = folder
@@ -392,9 +392,9 @@ class JsonHandler:
                                     module = importlib.import_module(pyfile)
                                     imp.reload(module)  # so reloading works
                                 except ImportError:
-                                    continue
+                                    pass
                                 except:
-                                    continue
+                                    pass
                             # yaml
                             with open(os.path.join(self.folder, file)) as f:
                                 if self.yaml:
@@ -404,6 +404,7 @@ class JsonHandler:
                                         continue
                                 else:
                                     info = json.loads(f.read())
+
                             if 'name' not in info:
                                 info['name'] = [name]
 
