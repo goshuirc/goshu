@@ -193,7 +193,7 @@ class a_log_display(Module):  # a_ at the beginning so goshu calls this module f
             targets.append('tofix')
             output += str(event.direction) + ' ' + str(event.type) + ' ' + str(event.source) + ' ' + str(event.target) + ' ' + escape(str(event.arguments))
 
-        self.bot.curses.pad_addline(output)
+        self.bot.gui.put_line(output)
         self.log(output, event.server, targets)
 
     def log(self, output, server='global', targets=['global']):

@@ -68,7 +68,7 @@ class Manager():
         else:
             self.store = {}
             if self.bot.DEBUG:
-                self.bot.curses.pad_addline(self.name+'.load : no path to load from')
+                self.bot.gui.put_line(self.name+'.load : no path to load from')
 
     def save(self, path=None):
         """Save `self.store` in file at `path`, or `self.path`."""
@@ -78,7 +78,7 @@ class Manager():
             save_path = self.path
         else:
             if self.bot.DEBUG:
-                self.bot.curses.pad_addline(self.name+'.save : no path to save to')
+                self.bot.gui.put_line(self.name+'.save : no path to save to')
             return
 
         save_dir = save_path.rsplit(os.sep, 1)[0]
@@ -123,7 +123,7 @@ class Info(Manager):
             if 'ipv6' in old_store[server]['connection'] and old_store[server]['connection']['ipv6'] == True:
                 prompt += 'ipv6 '
             prompt += '- ok? [y]: '
-            if helper.is_ok(self.bot.curses.get_input, prompt, True, True):
+            if helper.is_ok(self.bot.gui.get_input, prompt, True, True):
                 new_store[server] = old_store[server]
             else:
                 if self._update_server(old_store, server):
@@ -135,7 +135,7 @@ class Info(Manager):
         if server:
             old_server = store[server]
             del store[server]
-            if helper.is_ok(self.bot.curses.get_input, ' delete server? [n]: ', False, True):
+            if helper.is_ok(self.bot.gui.get_input, ' delete server? [n]: ', False, True):
                 return False
         else:
             old_server = {}
@@ -145,14 +145,14 @@ class Info(Manager):
             new_server_name = ''
             while new_server_name == '':
                 try:
-                    new_server_name = self.bot.curses.get_input(' server nickname [%s]: ' % server).split()[0].strip()
+                    new_server_name = self.bot.gui.get_input(' server nickname [%s]: ' % server).split()[0].strip()
                 except IndexError:
                     new_server_name = server
         else:
             new_server_name = ''
             while new_server_name == '':
                 try:
-                    new_server_name = self.bot.curses.get_input(' server nickname: ').split()[0].strip()
+                    new_server_name = self.bot.gui.get_input(' server nickname: ').split()[0].strip()
                 except IndexError:
                     new_server_name = ''
 
@@ -192,9 +192,9 @@ class Info(Manager):
 
         if old_value != None:
             if truefalse:
-                new_value = helper.is_ok(self.bot.curses.get_input, '    %s [%s]: ' % (display_name, str(old_value)), old_value, True)
+                new_value = helper.is_ok(self.bot.gui.get_input, '    %s [%s]: ' % (display_name, str(old_value)), old_value, True)
             else:
-                new_value = self.bot.curses.get_input('  %s [%s]: ' % (display_name, str(old_value))).strip()
+                new_value = self.bot.gui.get_input('  %s [%s]: ' % (display_name, str(old_value))).strip()
             if new_value == '':
                 new_value = old_value
         else:
@@ -202,9 +202,9 @@ class Info(Manager):
             while new_value == '':
                 try:
                     if truefalse:
-                        new_value = helper.is_ok(self.bot.curses.get_input, '    %s: ' % display_name, '', True)
+                        new_value = helper.is_ok(self.bot.gui.get_input, '    %s: ' % display_name, '', True)
                     else:
-                        new_value = self.bot.curses.get_input('  %s: ' % display_name).strip()
+                        new_value = self.bot.gui.get_input('  %s: ' % display_name).strip()
                 except IndexError:
                     if can_ignore:
                         new_value = None
@@ -236,13 +236,13 @@ class Settings(Manager):
 
     def _update_attribute(self, name, store, password=False, display_name=None):
         """Return updated single piece of data."""
-        if not display_name:
+        if display_name is None:
             display_name = name
         if password:
             try:
                 old_data = store[name]
                 if password:
-                    new_data = self.bot.curses.get_input(' %s [*****]: ' % display_name, password=True).strip()
+                    new_data = self.bot.gui.get_input(' %s [*****]: ' % display_name, password=True).strip()
                     if new_data != '':
                         return self._encrypt(new_data.encode('utf8'))
                     else:
@@ -250,13 +250,13 @@ class Settings(Manager):
             except KeyError:
                 data = ''
                 while data == '':
-                    data = self.bot.curses.get_input(' %s: ' % display_name, password=password).strip()
+                    data = self.bot.gui.get_input(' %s: ' % display_name, password=password).strip()
                 return self._encrypt(data.split()[0].encode('utf8'))
 
         else:
             try:
                 old_data = store[name]
-                new_data = self.bot.curses.get_input(' %s [%s]: ' % (display_name, old_data)).strip()
+                new_data = self.bot.gui.get_input(' %s [%s]: ' % (display_name, old_data)).strip()
                 if new_data != '':
                     return new_data
                 else:
@@ -264,7 +264,7 @@ class Settings(Manager):
             except KeyError:
                 data = ''
                 while data == '':
-                    data = self.bot.curses.get_input(' %s: ' % display_name).strip()
+                    data = self.bot.gui.get_input(' %s: ' % display_name).strip()
                 return data.split()[0]
 
 

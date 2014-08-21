@@ -33,7 +33,7 @@ class dictionary(Module):
         try:
             dictionary_info = json.loads(open('config'+os.sep+'modules'+os.sep+filename_escape(self.name)+os.extsep+'json').read())
         except:
-            self.bot.curses.pad_addline('no api key file')
+            self.bot.gui.put_line('no api key file')
             return
 
         url = 'http://api.wordnik.com/v4/word.json/'

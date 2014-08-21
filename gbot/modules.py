@@ -10,11 +10,10 @@
 import os
 import sys
 import imp
-import json
 import inspect
 import importlib
 import threading
-from .libs.helper import JsonWatcher
+from .libs.helper import JsonHandler
 
 
 class Module:
@@ -33,21 +32,25 @@ class Module:
         self.dynamic_path = '.' + os.sep + 'modules' + os.sep + self.name
 
         self.commands = {}
-        self.json_watchers = []
+        self.json_handlers = []
         if os.path.exists(self.dynamic_path):
-            JsonWatcher(self, 'dynamic_commands', self.dynamic_path, ext=self.ext, commands=True, yaml=True)
+            self.json_handlers.append(JsonHandler(self, 'dynamic_commands', self.dynamic_path, ext=self.ext, commands=True, yaml=True))
 
     def combined(self, event, command, usercommand):
         ...
 
     def load(self):
         self.commands = self.static_commands
-        for watcher in self.json_watchers:
-            watcher.start()
 
     def unload(self):
-        for watcher in self.json_watchers:
-            watcher.stop()
+        pass
+
+    def reload_json(self):
+        """Reload any json handlers we have."""
+        for json_h in self.json_handlers:
+            json_h.reload()
+
+        self.commands = self.static_commands
 
 
 def isModule(member):
@@ -66,7 +69,7 @@ class Modules:
         self.paths = []
 
     def add_path(self, path):
-        if not path in sys.path:
+        if path not in sys.path:
             self.paths.append(path)
             sys.path.insert(0, path)
 
@@ -93,7 +96,7 @@ class Modules:
                 output += module + '[FAILED], '
         output = output[:-2]
         output += ' loaded'
-        self.bot.curses.pad_addline(output)
+        self.bot.gui.put_line(output)
 
     def load(self, name):
         whole_module = importlib.import_module(name)
@@ -137,7 +140,7 @@ class Modules:
 
     def unload(self, name):
         if name not in self.whole_modules:
-            self.bot.curses.pad_addline('module', name, 'not in', self.whole_modules)
+            self.bot.gui.put_line('module', name, 'not in', self.whole_modules)
             return False
 
         for modname in self.whole_modules[name]:
@@ -196,7 +199,7 @@ class Modules:
                                                  args=(event, command_info,
                                                        UserCommand(command_name, command_args))).start()
                         else:
-                            self.bot.curses.pad_addline('        No Privs')
+                            self.bot.gui.put_line('        No Privs')
 
     def add_command_info(self, module, name):
         info = self.modules[module].events['commands'][name]

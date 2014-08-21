@@ -11,7 +11,7 @@
 import sys
 if sys.stdout.encoding.lower() != 'utf-8':
     import warnings
-    warnings.warn('unicode may be mangled due to non utf-8 stdout encoding: '+sys.stdout.encoding, UnicodeWarning)
+    warnings.warn('unicode may be mangled due to non utf-8 stdout encoding: ' + sys.stdout.encoding, UnicodeWarning)
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding=sys.stdout.encoding, errors='replace', line_buffering=True)
 

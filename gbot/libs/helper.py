@@ -136,7 +136,7 @@ def time_metric(secs=60):
     return time
 
 
-def metric(num, metric_list=[[10**9, 'B'], [10**6, 'M'], [18**3, 'k']], additive=False):
+def metric(num, metric_list=[[10**9, 'B'], [10**6, 'M'], [10**3, 'k']], additive=False):
     """Returns user-readable string representing given value.
 
     Arguments:
@@ -162,6 +162,10 @@ def metric(num, metric_list=[[10**9, 'B'], [10**6, 'M'], [18**3, 'k']], additive
 
             if not additive:
                 break
+
+    # just in case no output
+    if output == '':
+        output = str(num)
 
     return output
 
@@ -350,17 +354,14 @@ import imp
 import json
 import yaml
 import importlib
-from watchdog.observers import Observer
-from watchdog.events import PatternMatchingEventHandler
 
 
-class JsonHandler(PatternMatchingEventHandler):
+class JsonHandler:
     def __init__(self, base, attr, folder, ext=None, commands=False, yaml=False):
         if ext:
-            pattern = ['*.{}.json'.format(ext), '*_{}.py'.format(ext)]
+            self.pattern = ['*.{}.json'.format(ext), '*_{}.py'.format(ext)]
         else:
-            pattern = ['*.json', '*.py']
-        PatternMatchingEventHandler.__init__(self, patterns=pattern)
+            self.pattern = ['*.json', '*.py']
         self.base = base
         self.attr = attr
         self.folder = folder
@@ -368,7 +369,9 @@ class JsonHandler(PatternMatchingEventHandler):
         self.commands = commands
         self.yaml = yaml
 
-    def on_any_event(self, event):
+        self.reload()
+
+    def reload(self):
         new_json = {}
 
         # json
@@ -386,7 +389,7 @@ class JsonHandler(PatternMatchingEventHandler):
                             pyfile = self.folder.split(os.sep)[-1] + '.' + name
                             cont = True
                         if cont:
-                            ## py
+                            # py
                             if self.yaml:
                                 try:
                                     module = importlib.import_module(pyfile)
@@ -395,7 +398,7 @@ class JsonHandler(PatternMatchingEventHandler):
                                     continue
                                 except:
                                     continue
-                            ## yaml
+                            # yaml
                             with open(os.path.join(self.folder, file)) as f:
                                 if self.yaml:
                                     try:
@@ -429,30 +432,3 @@ class JsonHandler(PatternMatchingEventHandler):
             commands = getattr(self.base, 'static_commands', {}).copy()
             commands.update(new_json)
             setattr(self.base, 'commands', commands)
-
-
-class JsonWatcher:
-    def __init__(self, base, attr, folder, ext=None, commands=False, yaml=False):
-        self.base = base
-        self.attr = attr
-        self.folder = folder
-        self.ext = ext
-        self.commands = commands
-        self.yaml = yaml
-
-        self.event_handler = JsonHandler(base, attr, folder, ext=ext, commands=commands, yaml=yaml)
-
-        self.observer = Observer()
-        self.observer.schedule(self.event_handler, path=self.folder, recursive=True)
-
-        watchers = getattr(self.base, 'json_watchers', None)
-        if isinstance(watchers, list):
-            watchers.append(self)
-
-    def start(self):
-        self.observer.start()
-        self.event_handler.on_any_event(None)  # generate everything
-
-    def stop(self):
-        self.observer.stop()
-        self.observer.join()

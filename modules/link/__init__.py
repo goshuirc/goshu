@@ -14,7 +14,7 @@ import re
 
 from gbot.modules import Module
 from gbot.libs.girclib import unescape
-from gbot.libs.helper import get_url, format_extract, JsonWatcher
+from gbot.libs.helper import get_url, format_extract, JsonHandler
 
 
 class link(Module):
@@ -22,12 +22,13 @@ class link(Module):
     def __init__(self):
         Module.__init__(self)
         self.events = {
-            'in' : {
-                'pubmsg' : [(0, self.link)],
-                'privmsg' : [(0, self.link)],
+            'in': {
+                'pubmsg': [(0, self.link)],
+                'privmsg': [(0, self.link)],
             },
         }
-        JsonWatcher(self, 'links', self.dynamic_path, ext='lnk', yaml=True)
+        self.links = []
+        self.json_handlers.append(JsonHandler(self, 'links', self.dynamic_path, ext='lnk', yaml=True))
 
     def link(self, event):
         url_matches = re.search('(?:https?://)(\\S+)', unescape(event.arguments[0]))
@@ -39,19 +40,19 @@ class link(Module):
             for provider in self.links:
                 matches = re.match(self.links[provider]['match'], url)
                 if matches:
-                    #response = '*** {}: '.format(self.links[provider]['display_name'])
+                    # response = '*** {}: '.format(self.links[provider]['display_name'])
                     response = ''
 
                     match_index = 1
                     complete_dict = {}
                     for match in matches.groups():
-                        if match != None:
+                        if match is not None:
                             complete_dict['regex_{}'.format(match_index)] = match
                             match_index += 1
 
                     match_dict = matches.groupdict()
                     for match in match_dict:
-                        if match_dict[match] != None:
+                        if match_dict[match] is not None:
                             complete_dict['regex_{}'.format(match)] = match_dict[match]
 
                     # getting the actual file itself

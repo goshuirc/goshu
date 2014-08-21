@@ -8,7 +8,6 @@
 # Goshubot IRC Bot    -    http://danneh.net/goshu
 
 from gbot.modules import Module
-from gbot.libs.girclib import escape
 
 
 class accounts(Module):
@@ -39,9 +38,9 @@ class accounts(Module):
             response = event.arguments[0].lower()
             sresponse = response.split()
             if len(sresponse) == 3 and sresponse[1] == 'is':
-                self.bot.curses.pad_addline('Nickserv success response: {nick} is {acct}'.format(nick=sresponse[0], acct=sresponse[2]))
+                self.bot.gui.put_line('Nickserv success response: {nick} is {acct}'.format(nick=sresponse[0], acct=sresponse[2]))
             elif "isn't registered" in response:
-                self.bot.curses.pad_addline('Nickserv fail response: {nick} is not registered'.format(nick=sresponse[1]))
+                self.bot.gui.put_line('Nickserv fail response: {nick} is not registered'.format(nick=sresponse[1]))
 
     def register(self, event, command, usercommand):
         user_args = usercommand.arguments.split()
