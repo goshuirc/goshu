@@ -21,6 +21,21 @@ class google(Module):
             },
         }
 
+    def combined(self, event, command, usercommand):
+        query = ''
+        if 'url' in command.json:
+            query += 'site:' + command.json['url'] + ' '
+        query += usercommand.arguments
+
+        if 'display_name' in command.json:
+            name = command.json['display_name']
+        else:
+            name = usercommand.command
+        response = '*** ' + name + ': '
+        response += self.google_result_search(query)
+
+        self.bot.irc.msg(event, response, 'public')
+
     def google_search(self, event, command, usercommand):
         response = '*** @c12G@c4o@c8o@c12g@c3l@c4e@c: {}'.format(self.google_result_search(usercommand.arguments))
 

@@ -16,7 +16,7 @@ class apiquery(Module):
         if usercommand.arguments == '':
             usercommand.arguments = ' '
 
-        url = command.json['url'].format(escaped_query=urllib.parse.quote_plus(unescape(usercommand.arguments))[2:])
+        url = command.json['url'].format(escaped_query=urllib.parse.quote_plus(unescape(usercommand.arguments)))
         r = get_url(url)
 
         if isinstance(r, str):
@@ -24,5 +24,6 @@ class apiquery(Module):
             return
 
         # parsing
-        response = format_extract(command.json, r.text, fail='No results')
+        tex = r.text
+        response = format_extract(command.json, tex, fail='No results')
         self.bot.irc.msg(event, response, 'public')
