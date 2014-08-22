@@ -31,7 +31,7 @@ Once on IRC, privmsg the bot, create an account, and give yourself access as suc
 
 Modules
 -------
-goshu3 is very modular, and allows you to simply drop goshu3 modules into the modules/ folder, where they're automatically loaded at runtime.
+goshu3 is very modular, and allows you to simply drop goshu3 modules into the modules/ folder, where they're automatically loaded at bot start.
 
 To disable any modules, simply delete them, or move them to a different folder (something like modules/disabled/ perhaps?)
 
@@ -57,13 +57,13 @@ goshu3 comes with a number of modules to help you get started:
 * **responses**: various commands, simple random responses
 
 ### Backend  (only modify/remove these if you know what you're doing)
+* **a_log_display**: prints/logs everything
 * **accounts**: handles goshu's accounts
 * **commands**: basic irc commands, things like _msg_, _me_, _join_
 * **ctcp_reply**: handles the basic CTCP requests - stuff like PING, VER, TIME
 * **info**: adds _info_, outputs testing info
 * **invite**: makes the bot auto-join any channel it's /invited to
 * **list**: adds _list_, lists current commands and help for commands
-* **log_display**: prints/logs everything
 
 Dynamic Command Modules
 -----------------------
@@ -83,6 +83,7 @@ This module loads commands from the _modules/danbooru_ directory, keys:
 * **description**: sentence-long string describing the command
 * **permission**: number representing the lowest permission level requirement required to access the command
 * **url**: base url of the danbooru installation
+* **version**: if set to `"2"`, uses Danbooru v2 API
 
 ### Google Module
 This module loads commands from the _modules/google_ directory, keys:
@@ -103,9 +104,11 @@ This module loads commands from the _modules/responses_ directory, keys:
 
 girclib
 -------------------
-irclib, while brilliant, lacks a number of features including: outgoing event trapping, info tracking, etc
+irclib, while brilliant, lacks a number of features including: outgoing event trapping, info tracking, control codes, etc
 
-I've written this girclib wrapper to address these. girclib works similarly to irclib, in terms of commands and operations. However, if you plan on using it for your own projects you may need some guidance
+I've written this girclib wrapper to address these. girclib works similarly to irclib in terms of commands and operations, but there are a few extensions to handle the above.
+
+However, if you plan on using it for your own projects you may need some guidance
 
 First off: Look at the source code. I know it may be obvious, but if you want to find out if you can do something, or how something's done, looking at either the girclib or gbot/irc.py source code will help quite a bit. If I haven't done it somewhere in there, chances are I haven't implemented it
 
