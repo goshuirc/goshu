@@ -50,10 +50,11 @@ class a_log_display(Module):  # a_ at the beginning so goshu calls this module f
                             'featurelist', 'luserclient', 'luserop',
                             'luserchannels', 'luserme', 'n_local',
                             'n_global', 'luserconns', 'luserunknown',
-                            'motdstart', 'motd', 'endofmotd', '042', 'nomotd']:
-            # for message in event.arguments:
-            #     output += message + ' '
+                            'motdstart', 'endofmotd', '042', 'nomotd']:
             output += escape(' '.join(event.arguments))
+
+        elif event.type in ['motd', ]:
+            output += ' '.join(event.arguments)
 
         elif event.type in ['privnotice', '439', ]:
             targets.append(event.source.split('!')[0])
