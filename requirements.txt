@@ -3,3 +3,4 @@ irc
 http-status
 pyquery
 PyYAML
+colorama

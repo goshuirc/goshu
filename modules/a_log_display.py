@@ -7,6 +7,9 @@ from time import strftime, localtime
 import random
 import os
 
+import colorama
+colorama.init()
+
 from gbot.modules import Module
 from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import filename_escape
@@ -34,9 +37,9 @@ class a_log_display(Module):  # a_ at the beginning so goshu calls this module f
         output += strftime("%H:%M:%S", localtime())
 
         # > -rizon-
-        output += ' @c2-@c'
+        output += ' @c12-@c'
         output += event.server
-        output += '@c2-@c '
+        output += '@c12-@c '
 
         targets = ['all']
 
@@ -47,10 +50,10 @@ class a_log_display(Module):  # a_ at the beginning so goshu calls this module f
                             'featurelist', 'luserclient', 'luserop',
                             'luserchannels', 'luserme', 'n_local',
                             'n_global', 'luserconns', 'luserunknown',
-                            'motdstart', 'motd', 'endofmotd', '042', ]:
+                            'motdstart', 'motd', 'endofmotd', '042', 'nomotd']:
             # for message in event.arguments:
             #     output += message + ' '
-            output += ' '.join(event.arguments)
+            output += escape(' '.join(event.arguments))
 
         elif event.type in ['privnotice', '439', ]:
             targets.append(event.source.split('!')[0])
@@ -126,7 +129,7 @@ class a_log_display(Module):  # a_ at the beginning so goshu calls this module f
             targets.append(event.target)
             output += '@c6-@c!@c6-@c '
             output += 'mode/'
-            output += '@c10' + event.target + '@c '
+            output += '@c10' + event.target + ' '
             output += '@c14[@c'
             for arg in event.arguments:
                 output += arg + ' '
@@ -134,6 +137,30 @@ class a_log_display(Module):  # a_ at the beginning so goshu calls this module f
             output += '@c14]@c'
             output += ' by @b'
             output += event.source.split('!')[0]
+
+        elif event.type in ['channelmodeis', ]:
+            chan = escape(event.arguments[0])
+            modes = escape(' '.join(event.arguments[1:]))
+
+            targets.append(chan)
+            output += '@c6-@c!@c6-@c '
+            output += 'modes:'
+            output += '@c10' + chan + ' '
+            output += '@c14[@c'
+            output += modes
+            output += '@c14]@c'
+
+        elif event.type in ['namreply', ]:
+            chan = escape(event.arguments[1])
+            nicks = escape(event.arguments[2])
+
+            targets.append(chan)
+            output += '@c6-@c!@c6-@c '
+            output += 'nicks:'
+            output += '@c10' + chan + ' '
+            output += '@c14[@c'
+            output += nicks
+            output += '@c14]@c'
 
         elif event.type in ['kick', ]:
             targets.append(escape(event.target))
@@ -147,7 +174,10 @@ class a_log_display(Module):  # a_ at the beginning so goshu calls this module f
             output += event.arguments[1]
             output += '@c14]@c'
 
-        elif event.type in ['join', ] and event.direction == 'in':
+        elif event.type in ['join', ]:
+            # we get an in event for joining chans, so ignore out
+            if event.direction == 'out':
+                return
             targets.append(event.target)
             output += '@c6-@c!@c6-@b@c10 '
             output += event.source.split('!')[0]
@@ -182,14 +212,21 @@ class a_log_display(Module):  # a_ at the beginning so goshu calls this module f
         elif event.type in ['ctcp', ] and event.arguments[0] == 'ACTION':
             return
 
-        elif event.type in ['ping', 'pong', ]:
+        elif event.type in ['ping', 'pong', 'endofnames', ]:
             return
+
+        elif event.type in ['cap', ]:
+            if event.direction == 'out':
+                return
+
+            if event.arguments[0].upper() == 'ACK':
+                output += 'IRCv3 CAP Enabled: {}'.format(' '.join(event.arguments[1:]))
 
         else:
             targets.append('tofix')
             output += str(event.direction) + ' ' + str(event.type) + ' ' + str(event.source) + ' ' + str(event.target) + ' ' + escape(str(event.arguments))
 
-        self.bot.gui.put_line(output)
+        self.bot.gui.put_line(display_unescape(output + '@r'))  # +@r because that means reset
         self.log(output, event.server, targets)
 
     def log(self, output, server='global', targets=['global']):
@@ -220,3 +257,136 @@ class a_log_display(Module):  # a_ at the beginning so goshu calls this module f
         if nick not in self.nick_colors:
             self.nick_colors[nick] = random.randint(2, 13)
         return '@c' + str(self.nick_colors[nick]) + nick
+
+
+def display_unescape(in_str):
+    output = ''
+    while in_str != '':
+        if in_str[0] == '@':
+            if len(in_str) > 1 and in_str[1] == '@':
+                in_str = in_str[2:]
+                output += '@'
+            elif len(in_str) > 1 and in_str[1] == 'c':
+                fore = ''
+                back = ''
+                in_str = in_str[2:]
+                in_fore = True
+
+                while True:
+                    if len(in_str) > 0 and in_str[0].isdigit():
+                        digit = in_str[0]
+                        in_str = in_str[1:]
+
+                        if in_fore:
+                            if len(fore) < 2:
+                                fore += digit
+                            else:
+                                in_str = digit + in_str
+                                break
+                        else:
+                            if len(back) < 2:
+                                back += digit
+                            else:
+                                in_str = digit + in_str
+                                break
+
+                    elif len(in_str) > 0 and in_str[0] == ',':
+                        if in_fore:
+                            in_str = in_str[1:]
+                            in_fore = False
+                        else:
+                            break
+
+                    else:
+                        break
+
+                if fore != '':
+                    if int(fore) > 15:
+                        while int(fore) > 15:
+                            fore = str(int(fore) - 14)
+                    output += fore_colors[str(int(fore))]
+                    if back != '':
+                        if int(back) > 15:
+                            while int(back) > 15:
+                                back = str(int(back) - 14)
+                        output += back_colors[str(int(back))]
+
+                else:
+                    output += colorama.Fore.RESET + colorama.Back.RESET + colorama.Style.NORMAL
+
+            elif len(in_str) > 1 and in_str[1] == 'r':
+                output += colorama.Fore.RESET + colorama.Back.RESET + colorama.Style.NORMAL
+                in_str = in_str[2:]
+
+            elif len(in_str) > 1 and in_str[1] in ['b', 'i', 'u']:
+                in_str = in_str[2:]
+
+            elif len(in_str) >= 2:
+                in_str = in_str[2:]
+
+        elif len(in_str) > 0:
+            output += in_str[0]
+            if len(in_str) > 0:
+                in_str = in_str[1:]
+
+        else:
+            break
+
+    return output
+
+fore_colors = {
+    '0': colorama.Fore.WHITE + colorama.Style.NORMAL,
+    '1': colorama.Fore.BLACK + colorama.Style.NORMAL,
+    '2': colorama.Fore.BLUE + colorama.Style.NORMAL,
+    '3': colorama.Fore.GREEN + colorama.Style.NORMAL,
+    '4': colorama.Fore.RED + colorama.Style.BRIGHT,
+    '5': colorama.Fore.RED + colorama.Style.NORMAL,
+    '6': colorama.Fore.MAGENTA + colorama.Style.NORMAL,
+    '7': colorama.Fore.YELLOW + colorama.Style.NORMAL,
+    '8': colorama.Fore.YELLOW + colorama.Style.BRIGHT,
+    '9': colorama.Fore.GREEN + colorama.Style.BRIGHT,
+    '10': colorama.Fore.CYAN + colorama.Style.NORMAL,
+    '11': colorama.Fore.CYAN + colorama.Style.BRIGHT,
+    '12': colorama.Fore.BLUE + colorama.Style.BRIGHT,
+    '13': colorama.Fore.MAGENTA + colorama.Style.BRIGHT,
+    '14': colorama.Fore.BLACK + colorama.Style.BRIGHT,
+    '15': colorama.Fore.WHITE + colorama.Style.NORMAL,
+}
+
+bold_fore_colors = {
+    '0': colorama.Fore.WHITE + colorama.Style.BRIGHT,
+    '1': colorama.Fore.BLACK + colorama.Style.DIM,
+    '2': colorama.Fore.BLUE + colorama.Style.NORMAL,
+    '3': colorama.Fore.GREEN + colorama.Style.NORMAL,
+    '4': colorama.Fore.RED + colorama.Style.BRIGHT,
+    '5': colorama.Fore.RED + colorama.Style.NORMAL,
+    '6': colorama.Fore.MAGENTA + colorama.Style.NORMAL,
+    '7': colorama.Fore.YELLOW + colorama.Style.NORMAL,
+    '8': colorama.Fore.YELLOW + colorama.Style.BRIGHT,
+    '9': colorama.Fore.GREEN + colorama.Style.BRIGHT,
+    '10': colorama.Fore.CYAN + colorama.Style.NORMAL,
+    '11': colorama.Fore.CYAN + colorama.Style.BRIGHT,
+    '12': colorama.Fore.BLUE + colorama.Style.BRIGHT,
+    '13': colorama.Fore.MAGENTA + colorama.Style.BRIGHT,
+    '14': colorama.Fore.BLACK + colorama.Style.BRIGHT,
+    '15': colorama.Fore.WHITE + colorama.Style.BRIGHT,
+}
+
+back_colors = {
+    '0': '',
+    '1': '',
+    '2': '',
+    '3': '',
+    '4': '',
+    '5': '',
+    '6': '',
+    '7': '',
+    '8': '',
+    '9': '',
+    '10': '',
+    '11': '',
+    '12': '',
+    '13': '',
+    '14': '',
+    '15': '',
+}
