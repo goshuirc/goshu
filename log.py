@@ -13,7 +13,7 @@ if len(sys.argv) < 2:
     exit()
 
 oldlog = open(sys.argv[1], 'r', encoding='utf8')
-newlog = open(sys.argv[1]+'.new', 'w', encoding='utf8')
+newlog = open(sys.argv[1] + '.new', 'w', encoding='utf8')
 
 line = escape(oldlog.readline())
 

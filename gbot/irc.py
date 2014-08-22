@@ -12,7 +12,7 @@ class ChannelJoiner(threading.Thread):
     """Thread to async join the server's channels, to not pause the server for ages."""
 
     def __init__(self, server, name, channels, wait_time):
-        threading.Thread.__init__(self, name='ChannelJoiner-'+name)
+        threading.Thread.__init__(self, name='ChannelJoiner-' + name)
 
         self.server = server
         self.channels = channels
@@ -78,7 +78,7 @@ class IRC(girclib.IRC):
             s.connect(srv_address, srv_port, srv_nick, srv_password, srv_username, srv_ircname, srv_localaddress, srv_localport, srv_ssl, srv_ipv6)
 
             if 'nickserv_password' in info.store[name]['connection']:
-                s.privmsg('nickserv', 'identify '+info.store[name]['connection']['nickserv_password'])
+                s.privmsg('nickserv', 'identify ' + info.store[name]['connection']['nickserv_password'])
 
             if 'autojoin_channels' in info.store[name]['connection']:
                 wait_time = 0

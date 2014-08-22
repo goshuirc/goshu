@@ -124,7 +124,7 @@ def bytes_to_str(bytes, base=2, precision=0):
 def time_metric(secs=60):
     """Returns user-readable string representing given number of seconds."""
     time = ''
-    for metric_secs, metric_char in [[7*24*60*60, 'w'], [24*60*60, 'd'], [60*60, 'h'], [60, 'm']]:
+    for metric_secs, metric_char in [[7 * 24 * 60 * 60, 'w'], [24 * 60 * 60, 'd'], [60 * 60, 'h'], [60, 'm']]:
         if secs > metric_secs:
             time += '{}{}'.format(int(secs / metric_secs), metric_char)
             secs -= int(secs / metric_secs) * metric_secs
@@ -133,7 +133,7 @@ def time_metric(secs=60):
     return time
 
 
-def metric(num, metric_list=[[10**9, 'B'], [10**6, 'M'], [10**3, 'k']], additive=False):
+def metric(num, metric_list=[[10 ** 9, 'B'], [10 ** 6, 'M'], [10 ** 3, 'k']], additive=False):
     """Returns user-readable string representing given value.
 
     Arguments:
@@ -230,7 +230,7 @@ def format_extract(format_json, input_element, format=None, debug=False, fail='F
                 else:
                     format_dict[name] = retrieve(input_element, format_json['response_dict'][name])
 
-                if format_dict[name] == None:
+                if format_dict[name] is None:
                     return fail
             except KeyError:
                 if debug:
@@ -300,7 +300,7 @@ def json_element(input_dict, query):
     return input_dict
 
 
-def filename_escape(unsafe, replace_char='_', valid_chars=string.ascii_letters+string.digits+'#._- '):
+def filename_escape(unsafe, replace_char='_', valid_chars=string.ascii_letters + string.digits + '#._- '):
     """Escapes a string to provide a safe local filename
 
 Arguments:
@@ -326,9 +326,9 @@ Safe local filename string
 import xml.sax.saxutils as saxutils
 
 _unescape_map = {
-    '&#39;' : "'",
-    '&#039;' : "'",
-    '&quot;' : "'",
+    '&#39;': "'",
+    '&#039;': "'",
+    '&quot;': "'",
 }
 
 

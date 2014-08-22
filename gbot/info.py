@@ -64,7 +64,7 @@ class Manager():
         else:
             self.store = {}
             if self.bot.DEBUG:
-                self.bot.gui.put_line(self.name+'.load : no path to load from')
+                self.bot.gui.put_line(self.name + '.load : no path to load from')
 
     def save(self, path=None):
         """Save `self.store` in file at `path`, or `self.path`."""
@@ -74,7 +74,7 @@ class Manager():
             save_path = self.path
         else:
             if self.bot.DEBUG:
-                self.bot.gui.put_line(self.name+'.save : no path to save to')
+                self.bot.gui.put_line(self.name + '.save : no path to save to')
             return
 
         save_dir = save_path.rsplit(os.sep, 1)[0]
@@ -114,9 +114,9 @@ class Info(Manager):
             prompt += server + ' '
             prompt += old_store[server]['connection']['address'] + ':'
             prompt += str(old_store[server]['connection']['port']) + ' '
-            if 'ssl' in old_store[server]['connection'] and old_store[server]['connection']['ssl'] == True:
+            if 'ssl' in old_store[server]['connection'] and old_store[server]['connection']['ssl'] is True:
                 prompt += 'ssl '
-            if 'ipv6' in old_store[server]['connection'] and old_store[server]['connection']['ipv6'] == True:
+            if 'ipv6' in old_store[server]['connection'] and old_store[server]['connection']['ipv6'] is True:
                 prompt += 'ipv6 '
             prompt += '- ok? [y]: '
             if helper.is_ok(self.bot.gui.get_input, prompt, True, True):
@@ -180,13 +180,13 @@ class Info(Manager):
             except KeyError:
                 old_value = None
 
-        if old_value == None:
+        if old_value is None:
             if no_old_value:
                 old_value = True
-            elif no_old_value == False:
+            elif no_old_value is False:
                 old_value = False
 
-        if old_value != None:
+        if old_value is not None:
             if truefalse:
                 new_value = helper.is_ok(self.bot.gui.get_input, '    %s [%s]: ' % (display_name, str(old_value)), old_value, True)
             else:
@@ -210,7 +210,7 @@ class Info(Manager):
         new_path = new_server
         for path in paths:
             new_path = new_path[path]
-        if new_value != None:
+        if new_value is not None:
             new_path[attribute_name] = new_value
 
 

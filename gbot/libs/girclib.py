@@ -20,9 +20,9 @@ class IRC:
         self.servers = {}  # server connections
         self.connections = []  # dcc connections
         self.handlers = {
-            'in' : {},
-            'out' : {},
-            'all' : {},
+            'in': {},
+            'out': {},
+            'all': {},
         }
 
         self.irc.add_global_handler('all_events', self._handle_irclib)
@@ -56,12 +56,12 @@ class IRC:
 
     # Handling
     def add_handler(self, direction, event, handler, priority=0):
-        if not event in self.handlers[direction]:
+        if event not in self.handlers[direction]:
             self.handlers[direction][event] = []
         bisect.insort(self.handlers[direction][event], ((priority, handler)))
 
     def remove_handler(self, direction, event, handler):
-        if not event in self.handlers[direction]:
+        if event not in self.handlers[direction]:
             return 0
         for h in self.handlers[direction][event]:
             if handler == h[1]:
@@ -69,8 +69,8 @@ class IRC:
 
     def _handle_irclib(self, connection, event):
         if event.type in ['privmsg', 'pubmsg', 'privnotice', 'pubnotice', 'action', 'currenttopic',
-                                 'motd', 'endofmotd', 'yourhost', 'endofnames', 'ctcp', 'topic', 'quit',
-                                 'part', 'kick', 'kick', 'join', ]:
+                          'motd', 'endofmotd', 'yourhost', 'endofnames', 'ctcp', 'topic', 'quit',
+                          'part', 'kick', 'kick', 'join', ]:
             event_arguments = []
             for arg in event.arguments:
                 event_arguments.append(escape(arg))
@@ -118,34 +118,34 @@ class ServerConnection:
         self.name = name
         self.irc = irc
         self.info = {
-            'name' : name,
-            'connection' : {},
-            'channels' : {},
-            'users' : {},
-            'server' : {}
+            'name': name,
+            'connection': {},
+            'channels': {},
+            'users': {},
+            'server': {}
         }
 
     # Connection
     def connect(self, address, port, nick, password=None, username=None, ircname=None, localaddress="", localport=0, sslsock=False, ipv6=False):
         self.connection = self.irc.irc.server()
         self.info['connection'] = {
-            'address' : address,
-            'port' : port,
-            'nick' : nick,
+            'address': address,
+            'port': port,
+            'nick': nick,
         }
-        if password != None:
+        if password is not None:
             self.info['connection']['password'] = password
-        if username != None:
+        if username is not None:
             self.info['connection']['username'] = username
-        if ircname != None:
+        if ircname is not None:
             self.info['connection']['ircname'] = ircname
         if localaddress != "":
             self.info['connection']['localaddress'] = localaddress
         if localport != 0 or localaddress != "":
             self.info['connection']['localport'] = localport
-        if sslsock != False:
+        if sslsock is not False:
             self.info['connection']['sslsock'] = sslsock
-        if ipv6 != False:
+        if ipv6 is not False:
             self.info['connection']['ipv6'] = ipv6
 
         if sslsock:
@@ -161,9 +161,9 @@ class ServerConnection:
 
     def disconnect(self, message):
         self.info = {
-            'connection' : {},
-            'channels' : {},
-            'users' : {},
+            'connection': {},
+            'channels': {},
+            'users': {},
         }
         self.connection.disconnect(message)
         del self.connection
@@ -400,8 +400,6 @@ class ServerConnection:
 
     def create_user(self, user):
         user_nick = NickMask(user).nick
-        #user_host = user.split('@')[1]
-        #user_uname = user.split('!')[1].split('@')[0]
         if user_nick not in self.info['users']:
             self.info['users'][user_nick] = {}
 
@@ -470,14 +468,14 @@ class Event:
             self.from_to = str(target).split('!')[0]
 
 
-## String escaping/unescaping
+# String escaping/unescaping
 _unescape_dict = {
-    '@' : '@',
-    'b' : '\x02',  # bold
-    'c' : '\x03',  # color
-    'i' : '\x1d',  # italic
-    'u' : '\x1f',  # underline
-    'r' : '\x0f',  # reset
+    '@': '@',
+    'b': '\x02',  # bold
+    'c': '\x03',  # color
+    'i': '\x1d',  # italic
+    'u': '\x1f',  # underline
+    'r': '\x0f',  # reset
 }
 
 
@@ -603,7 +601,7 @@ def remove_control_codes(line):
     return new_line
 
 
-## Wrappers to default irc classes/functions
+# Wrappers to default irc classes/functions
 class NickMask(irc.client.NickMask):
     ...
 
