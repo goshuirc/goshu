@@ -7,6 +7,10 @@ import collections
 import bisect
 import ssl
 import irc, irc.client, irc.modes
+import datetime
+import calendar
+import time
+import threading
 
 
 class IRC:
@@ -98,6 +102,7 @@ class IRC:
 
     def _handle_ping(self, event):
         self.servers[event.server].pong(event.arguments[0])
+        self.servers[event.server].last_ping = ping_timestamp()
 
     def _handle_cap(self, event):
         if event.arguments[0] == 'ACK':
@@ -110,11 +115,31 @@ class IRC:
             self.servers[name].connection.disconnect(message)
             del self.servers[name]
 
+# ping timeouts
+timeout_check_interval = {
+    'minutes': 2.5,
+}
+timeout_length = {
+    'minutes': 5,
+}
+
+
+def timestamp(**length_of_time_dict):
+    """Returns timestamp for given length of time."""
+    time_diff = datetime.timedelta(**length_of_time_dict)
+    return time_diff.total_seconds()
+
+
+def ping_timestamp():
+    """Returns a ping timestamp for right now."""
+    time_now = datetime.datetime.utcnow()
+    return calendar.timegm(time_now.timetuple())
+
 
 class ServerConnection:
     """IRC Server Connection."""
 
-    def __init__(self, name, irc):
+    def __init__(self, name, irc, timeout_check_interval=timeout_check_interval, timeout_length=timeout_length):
         self.name = name
         self.irc = irc
         self.info = {
@@ -124,6 +149,12 @@ class ServerConnection:
             'users': {},
             'server': {}
         }
+        self.connected = False
+
+        # check if timed out every interval, defaults to 2 minutes
+        self.timeout_check_interval = timeout_check_interval
+        # if this long has passed without server ping, we consider ourselves timed out. defaults to 5 minutes
+        self.timeout_length = timeout_length
 
     # Connection
     def connect(self, address, port, nick, password=None, username=None, ircname=None, localaddress="", localport=0, sslsock=False, ipv6=False):
@@ -156,17 +187,44 @@ class ServerConnection:
         self.connection.connect(address, port, nick, password, username, ircname, Factory)
         self.connection.buffer.errors = 'replace'
 
+        self._send_startup()
+
+        self.irc.irc.execute_every(timestamp(**self.timeout_check_interval), self._timeout_check)
+
+    def _timeout_check(self):
+        """Checks if we've timed out. Reconnects if so."""
+        if self.connection.connected:
+            timeout_seconds = self.last_ping + timestamp(**self.timeout_length)
+            now_seconds = ping_timestamp()
+            print('timeout debugging message:', now_seconds, timeout_seconds)
+            if now_seconds > timeout_seconds:
+                self.disconnect('Ping timeout.')
+                # we disconnect now, wait another `timeout_check_interval`, and then reconnect
+                return
+
+        else:
+            self.reconnect()
+
+    def reconnect(self):
+        self.connection.reconnect()
+
+        self._send_startup()
+
+    def disconnect(self, message):
+        # don't wipe info['connection'] in case we reconnect
+        self.info['channels'] = {}
+        self.info['users'] = {}
+
+        self.connected = False
+        self.connection.disconnect(message)
+
+    def _send_startup(self):
+        """Send the stuff we need to at startup."""
         self._first_cap = True
         self.cap('REQ', 'multi-prefix')
 
-    def disconnect(self, message):
-        self.info = {
-            'connection': {},
-            'channels': {},
-            'users': {},
-        }
-        self.connection.disconnect(message)
-        del self.connection
+        self.connected = True
+        self.last_ping = ping_timestamp()
 
     # IRC Commands
     def action(self, target, action):
