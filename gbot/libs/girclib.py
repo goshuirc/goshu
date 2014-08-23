@@ -539,7 +539,7 @@ _unescape_dict = {
 
 def escape(string):
     """Change IRC codes into goshu codes."""
-    string = string.replace('@', '@@')
+    string = string.replace('@', '@{@}')
     string = string.replace('\x02', '@b')  # bold
     string = string.replace('\x03', '@c')  # color
     string = string.replace('\x1d', '@i')  # italic
