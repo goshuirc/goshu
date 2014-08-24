@@ -196,7 +196,6 @@ class ServerConnection:
         if self.connection.connected:
             timeout_seconds = self.last_ping + timestamp(**self.timeout_length)
             now_seconds = ping_timestamp()
-            print('timeout debugging message:', now_seconds, timeout_seconds)
             if now_seconds > timeout_seconds:
                 self.disconnect('Ping timeout.')
                 # we disconnect now, wait another `timeout_check_interval`, and then reconnect
