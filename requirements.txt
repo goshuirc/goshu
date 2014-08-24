@@ -4,3 +4,4 @@ http-status
 pyquery
 PyYAML
 colorama
+pyparsing
