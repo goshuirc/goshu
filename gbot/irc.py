@@ -65,7 +65,19 @@ class IRC(girclib.IRC):
             if 'autojoin_channels' in info.store[name]['connection']:
                 autojoin_channels = info.store[name]['connection']['autojoin_channels']
 
-            s = self.server(name)
+            # timeout
+            try:
+                timeout_check_interval = info.store[name]['connection']['timeout_check_interval']
+            except:
+                timeout_check_interval = girclib.timeout_check_interval
+
+            try:
+                timeout_length = info.store[name]['connection']['timeout_length']
+            except:
+                timeout_length = girclib.timeout_length
+
+            # server creation
+            s = self.server(name, timeout_check_interval=timeout_check_interval, timeout_length=timeout_length)
             s.connect(srv_address, srv_port, srv_nick, srv_password, srv_username, srv_ircname, srv_localaddress, srv_localport, srv_ssl, srv_ipv6, autojoin_channels=autojoin_channels, wait_time=wait_time)
 
             if 'nickserv_password' in info.store[name]['connection']:

@@ -53,8 +53,8 @@ class IRC:
         self.add_handler('in', 'cap', self._handle_cap)
 
     # Servers
-    def server(self, name):
-        connection = ServerConnection(name, self)
+    def server(self, name, **kwargs):
+        connection = ServerConnection(name, self, **kwargs)
         self.servers[name] = connection
         return connection
 
