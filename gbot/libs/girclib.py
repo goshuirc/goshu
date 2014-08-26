@@ -13,6 +13,24 @@ import time
 import threading
 
 
+class ChannelJoiner(threading.Thread):
+    """Thread to async join the server's channels, to not pause the server for ages."""
+
+    def __init__(self, server, name, channels, wait_time):
+        threading.Thread.__init__(self, name='ChannelJoiner-' + name)
+
+        self.server = server
+        self.channels = channels
+        self.wait_time = wait_time
+
+    def run(self):
+        time.sleep(self.wait_time)
+
+        if self.server.connected:
+            for channel in self.channels:
+                self.server.join(channel)
+
+
 class IRC:
     """Wrapper for irclib's IRC class."""
 
@@ -112,15 +130,15 @@ class IRC:
     # Disconnect
     def disconnect_all(self, message):
         for name in self.servers.copy():
-            self.servers[name].connection.disconnect(message)
+            self.servers[name].disconnect(message)
             del self.servers[name]
 
 # ping timeouts
 timeout_check_interval = {
-    'minutes': 2.5,
+    'minutes': 3,
 }
 timeout_length = {
-    'minutes': 5,
+    'minutes': 6,
 }
 
 
@@ -157,7 +175,7 @@ class ServerConnection:
         self.timeout_length = timeout_length
 
     # Connection
-    def connect(self, address, port, nick, password=None, username=None, ircname=None, localaddress="", localport=0, sslsock=False, ipv6=False):
+    def connect(self, address, port, nick, password=None, username=None, ircname=None, localaddress="", localport=0, sslsock=False, ipv6=False, autojoin_channels=[], wait_time=5):
         self.connection = self.irc.irc.server()
         self.info['connection'] = {
             'address': address,
@@ -183,6 +201,9 @@ class ServerConnection:
             Factory = irc.connection.Factory(wrapper=ssl.wrap_socket, ipv6=ipv6)
         else:
             Factory = irc.connection.Factory(ipv6=ipv6)
+
+        self.autojoin_channels = autojoin_channels
+        self.autojoin_wait_time = wait_time
 
         self.connection.connect(address, port, nick, password, username, ircname, Factory)
         self.connection.buffer.errors = 'replace'
@@ -224,6 +245,10 @@ class ServerConnection:
 
         self.connected = True
         self.last_ping = ping_timestamp()
+
+        # autojoining channels
+        if self.autojoin_channels:
+            ChannelJoiner(self, self.name, self.autojoin_channels, self.autojoin_wait_time).start()
 
     # IRC Commands
     def action(self, target, action):

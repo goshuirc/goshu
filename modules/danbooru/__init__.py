@@ -16,11 +16,14 @@ import hashlib
 class danbooru(Module):
 
     def combined(self, event, command, usercommand):
+        boorufilename = os.sep.join('config', 'modules', '{}.json'.format(filename_escape(self.name)))
         try:
-            booruaccounts = json.loads(open('config'+os.sep+'modules'+os.sep+filename_escape(self.name)+os.extsep+'json').read())
+            booruaccounts = json.loads(open(boorufilename).read())
         except ValueError:
+            self.bot.gui.put_line('danbooru: Danbooru Account info file error: {}'.format(boorufilename))
             return
         except IOError:
+            self.bot.gui.put_line('danbooru: Danbooru Account info file not found, ignoring: {}'.format(boorufilename))
             booruaccounts = {}
 
         if 'display_name' in command.json:

@@ -4,25 +4,6 @@
 # licensed under the BSD 2-clause license
 
 from .libs import girclib
-import time
-import threading
-
-
-class ChannelJoiner(threading.Thread):
-    """Thread to async join the server's channels, to not pause the server for ages."""
-
-    def __init__(self, server, name, channels, wait_time):
-        threading.Thread.__init__(self, name='ChannelJoiner-' + name)
-
-        self.server = server
-        self.channels = channels
-        self.wait_time = wait_time
-
-    def run(self):
-        time.sleep(self.wait_time)
-
-        for channel in self.channels:
-            self.server.join(channel)
 
 
 class IRC(girclib.IRC):
@@ -74,18 +55,21 @@ class IRC(girclib.IRC):
             except:
                 srv_ipv6 = False
 
+            # autojoin channels
+            wait_time = 5
+            if 'vhost_wait' in info.store[name]['connection']:
+                wait_time = int(info.store[name]['connection']['vhost_wait'])
+            self.bot.gui.put_line('Waiting {} seconds to join channels. To change this, set the connection:vhost_wait setting for this server.'.format(wait_time))
+
+            autojoin_channels = []
+            if 'autojoin_channels' in info.store[name]['connection']:
+                autojoin_channels = info.store[name]['connection']['autojoin_channels']
+
             s = self.server(name)
-            s.connect(srv_address, srv_port, srv_nick, srv_password, srv_username, srv_ircname, srv_localaddress, srv_localport, srv_ssl, srv_ipv6)
+            s.connect(srv_address, srv_port, srv_nick, srv_password, srv_username, srv_ircname, srv_localaddress, srv_localport, srv_ssl, srv_ipv6, autojoin_channels=autojoin_channels, wait_time=wait_time)
 
             if 'nickserv_password' in info.store[name]['connection']:
                 s.privmsg('nickserv', 'identify ' + info.store[name]['connection']['nickserv_password'])
-
-            if 'autojoin_channels' in info.store[name]['connection']:
-                wait_time = 0
-                if 'vhost_wait' in info.store[name]['connection']:
-                    wait_time = info.store[name]['connection']['vhost_wait']
-
-                ChannelJoiner(s, name, info.store[name]['connection']['autojoin_channels'], wait_time).start()
 
     def action(self, event, message, zone='private'):
         """Automagically message someone. Zone can be public or private, for preferring channel or user."""

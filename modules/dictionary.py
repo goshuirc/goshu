@@ -26,10 +26,11 @@ class dictionary(Module):
         if usercommand.arguments.strip() == '':
             return
 
+        dict_info_filename = os.sep.join('config', 'modules', '{}.json'.format(filename_escape(self.name)))
         try:
-            dictionary_info = json.loads(open('config'+os.sep+'modules'+os.sep+filename_escape(self.name)+os.extsep+'json').read())
+            dictionary_info = json.loads(open(dict_info_filename).read())
         except:
-            self.bot.gui.put_line('no api key file')
+            self.bot.gui.put_line('dictionary: No Wordnik API key file: {}'.format(dict_info_filename))
             return
 
         url = 'http://api.wordnik.com/v4/word.json/'
