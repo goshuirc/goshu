@@ -16,7 +16,7 @@ import hashlib
 class danbooru(Module):
 
     def combined(self, event, command, usercommand):
-        boorufilename = os.sep.join('config', 'modules', '{}.json'.format(filename_escape(self.name)))
+        boorufilename = os.sep.join(['config', 'modules', '{}.json'.format(filename_escape(self.name))])
         try:
             booruaccounts = json.loads(open(boorufilename).read())
         except ValueError:

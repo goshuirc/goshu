@@ -26,7 +26,7 @@ class dictionary(Module):
         if usercommand.arguments.strip() == '':
             return
 
-        dict_info_filename = os.sep.join('config', 'modules', '{}.json'.format(filename_escape(self.name)))
+        dict_info_filename = os.sep.join(['config', 'modules', '{}.json'.format(filename_escape(self.name))])
         try:
             dictionary_info = json.loads(open(dict_info_filename).read())
         except:

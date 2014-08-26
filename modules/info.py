@@ -21,7 +21,7 @@ class info(Module):
     def info(self, event, command, usercommand):
         pretty_json = json.dumps(self.bot.irc.servers[event.server].info, sort_keys=True, indent=4)
 
-        info_filename = os.sep.join('config', 'modules', 'info.json')
+        info_filename = os.sep.join(['config', 'modules', 'info.json'])
         info_file = open(info_filename, 'w', encoding='utf-8')
         self.bot.gui.put_line('info: debugging info written to: {}'.format(info_filename))
         info_file.write(pretty_json)
