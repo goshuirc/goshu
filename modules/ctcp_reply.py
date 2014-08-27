@@ -21,10 +21,7 @@ class ctcp_reply(Module):
     def ctcp_reply(self, event):
 
         if event.arguments[0] == 'VERSION':
-            self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'VERSION Goshubot:3:None')
-
-        elif event.arguments[0] == 'SOURCE':
-            self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'SOURCE github.com/Danneh/Goshubot')
+            self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'VERSION Goshu:3:https://github.com/DanielOaks/goshu')
 
         elif event.arguments[0] == 'USERINFO':
             userinfostring = None
@@ -33,7 +30,7 @@ class ctcp_reply(Module):
                 self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, "USERINFO :{}".format(userinfostring))
 
         elif event.arguments[0] == 'CLIENTINFO':
-            self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'CLIENTINFO :Understood CTCP Pairs: CLIENTINFO, ERRMSG, PING, SOURCE, TIME, USERINFO, VERSION')
+            self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'CLIENTINFO :Understood CTCP Pairs: CLIENTINFO, ERRMSG, PING, TIME, USERINFO, VERSION')
 
         elif event.arguments[0] == 'ERRMSG':
             # self.bot.irc.servers[event.server].ctcp_reply(nm_to_n(event.source, 'ERRMSG '+event.arguments()[1]+':ERRMSG echo, no error has occured') #could be bad, errmsg-storm, anyone?
