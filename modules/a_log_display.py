@@ -183,7 +183,7 @@ class a_log_display(Module):  # a_ at the beginning so goshu calls this module f
             output += '@c6-@c!@c6-@b@c10 '
             output += event.source.split('!')[0]
             output += '@b @c14[@c10'
-            output += event.source.split('!')[1]
+            output += escape(event.source.split('!')[1])
             output += '@c14]@c '
             output += 'has joined @b'
             output += escape(event.target)
@@ -205,7 +205,7 @@ class a_log_display(Module):  # a_ at the beginning so goshu calls this module f
             output += '@c6-@c!@c6-@c10 '
             output += event.source.split('!')[0]
             output += ' @c14[@c'
-            output += event.source.split('!')[1]
+            output += escape(event.source.split('!')[1])
             output += '@c14]@c has quit @c14[@c'
             output += event.arguments[0]
             output += '@c14]@c'
@@ -225,7 +225,7 @@ class a_log_display(Module):  # a_ at the beginning so goshu calls this module f
 
         else:
             targets.append('tofix')
-            output += str(event.direction) + ' ' + str(event.type) + ' ' + str(event.source) + ' ' + str(event.target) + ' ' + escape(str(event.arguments))
+            output += str(event.direction) + ' ' + str(event.type) + ' ' + escape(str(event.source)) + ' ' + escape(str(event.target)) + ' ' + escape(str(event.arguments))
 
         # # TODO: make this a bool debug option
         # debugmsg = [event.direction, event.type, event.source, event.target, event.arguments]

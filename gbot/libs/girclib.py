@@ -11,6 +11,116 @@ import datetime
 import calendar
 import time
 import threading
+from functools import partial
+
+
+# lots of this taken from PyPsd's istring:
+# http://gitlab.com/rizon/pypsd
+class IString(str):
+    """String wrapper for IRC chans/nicks, based on casemapping standards."""
+    # setting info
+    def set_std(self, std):
+        """Set the standard we'll be using (isupport CASEMAPPING)."""
+        # translation based on std
+        self._lower_chars = None
+        self._upper_chars = None
+
+        self._lower_trans = None
+        self._upper_trans = None
+
+        self._std = std.lower()
+
+        if self._std == 'ascii':
+            pass
+        elif self._std == 'rfc1459':
+            self._lower_chars = ''.join(chr(i) for i in range(91, 95))
+            self._upper_chars = ''.join(chr(i) for i in range(123, 127))
+
+        elif self._std == 'rfc1459-strict':
+            self._lower_chars = ''.join(chr(i) for i in range(91, 94))
+            self._upper_chars = ''.join(chr(i) for i in range(123, 126))
+
+        if self._lower_chars:
+            self.lower_trans = str.maketrans(self._lower_chars, self._upper_chars)
+        if self._upper_chars:
+            self.upper_trans = str.maketrans(self._upper_chars, self._lower_chars)
+
+    # upperlower
+    def lower(self):
+        new_string = IString(self._irc_lower(self))
+        new_string.set_std(self._std)
+        return new_string
+
+    def upper(self):
+        new_string = IString(self._irc_upper(self))
+        new_string.set_std(self._std)
+        return new_string
+
+    def _irc_lower(self, in_string):
+        """Convert us to our lower-case equivalent, given our std."""
+        conv_string = in_string
+        if self._lower_trans is not None:
+            conv_string = conv_string.translate(self._lower_trans)
+        return str.lower(conv_string)
+
+    def _irc_upper(self, in_string):
+        """Convert us to our upper-case equivalent, given our std."""
+        if self._upper_trans is not None:
+            conv_string = in_string.translate(self._upper_trans)
+        return str.upper(conv_string)
+
+    # magic
+    def __eq__(self, other):
+        if not other or len(self) != len(other):
+            return False
+        for i in range(0, len(self)):
+            if ord(self[i]) != ord(other[i]):
+                return False
+        return True
+
+    def __lt__(self, other):
+        for i in range(0, min(len(self), len(other))):
+            if ord(self[i]) < ord(self[i]):
+                return True
+        return len(self) < len(other)
+
+    def __le__(self, other):
+        return self.__lt__(other) or len(self) < len(other)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __gt__(self, other):
+        return not self.__le__(other)
+
+    def __ge__(self, other):
+        return not self.__lt__(other)
+
+    def __hash__(self):
+        return hash(str(self._irc_lower(self)))
+
+    # str methods
+    # this is so we can just do normal .title() / .split / .etc calls as though IString were a str class
+    def __getattribute__(self, name):
+        f = str.__getattribute__(self, name)
+
+        if not callable(f):
+            return f
+
+        this_dict = object.__getattribute__(self, '__dict__')
+        if '_std' in this_dict:
+            this_std = object.__getattribute__(self, '_std')
+
+        def callback(*args, **kwargs):
+            r = f(*args, **kwargs)
+            if isinstance(r, str):
+                new_string = IString(r)
+                if '_std' in this_dict:
+                    new_string.set_std(this_std)
+                return new_string
+            return r
+
+        return partial(callback)
 
 
 class ChannelJoiner(threading.Thread):
@@ -98,11 +208,13 @@ class IRC:
                 event_arguments.append(escape(arg))
         else:
             event_arguments = event.arguments
+
         #     event_arguments = []
         #     for arg in event.arguments():
         #         event_arguments.append(escape(arg))
         # if 'raw' not in event.eventtype():
         #     print("    ", event.eventtype(), ' ', str(event_arguments))
+
         new_event = Event(self, self.name(connection), 'in', event.type, event.source, event.target, event_arguments)
         self._handle_event(new_event)
 
@@ -310,6 +422,13 @@ class ServerConnection:
         self.connection.privmsg(target, unescape(message))
         self.irc._handle_event(Event(self.irc, self.name, 'out', command, self.info['connection']['nick'], target, [message]))
 
+    # string handling
+    def istring(self, in_string):
+        """Returns an IString without servers' casemapping."""
+        new_string = IString(in_string)
+        new_string.set_std(self._istring_casemapping)
+        return new_string
+
     # Internal book-keeping
     def update_info(self, event):
         changed = False
@@ -349,89 +468,118 @@ class ServerConnection:
 
                     else:
                         self.info['server']['isupport'][feature_name] = feature_value
+
+                    # sets up our istring casemapping
+                    if feature_name == 'CASEMAPPING':
+                        self._istring_casemapping = feature_value
                 else:
                     if feature[-1] == '=':
                         feature = feature[:-1]
                     self.info['server']['isupport'][feature] = True
 
         elif event.type == 'join' and event.direction == 'in':
-            self.create_user(event.source)
-            self.create_channel(event.target)
-            self.info['channels'][event.target]['users'][NickMask(event.source).nick] = ''
+            user = self.istring(event.source).lower()
+            user_nick = NickMask(user).nick
+            channel = self.istring(event.target).lower()
+
+            self.create_user(user)
+            self.create_channel(channel)
+            self.get_channel_info(channel)['users'][user_nick] = ''
 
             # request channel modes on join
-            if NickMask(event.source).nick == self.info['connection']['nick']:
-                self.mode(event.target)
+            if user_nick == self.info['connection']['nick']:
+                self.mode(channel)
             changed = True
 
         elif event.type == 'namreply':
+            channel = self.istring(event.arguments[1]).lower()
+            names_list = self.istring(event.arguments[2]).lower().split()
+
             # merge user list if it already exists, used for heaps of nicks
-            if 'users' not in self.info['channels'][event.arguments[1]]:
-                self.info['channels'][event.arguments[1]]['users'] = {}
-            for user in event.arguments[2].split():
+            if 'users' not in self.get_channel_info(channel):
+                self.get_channel_info(channel)['users'] = {}
+            for user in names_list:
                 # supports multi-prefix
-                user_priv = ''
+                user_privs = ''
                 while user[0] in self.info['server']['isupport']['PREFIX'][1]:
-                    user_priv += user[0]
+                    user_privs += user[0]
                     user = user[1:]
                 user_nick = user
 
                 self.create_user(user_nick)
-                self.info['channels'][event.arguments[1]]['users'][user_nick] = user_priv
+                self.get_channel_info(channel)['users'][user_nick] = user_privs
                 changed = True
 
         elif event.type == 'currenttopic':
-            self.create_channel(event.arguments[0])
-            self.info['channels'][event.arguments[0]]['topic']['topic'] = event.arguments[1]
+            channel = self.istring(event.arguments[0]).lower()
+
+            self.get_channel_info(channel)['topic']['topic'] = event.arguments[1]
             changed = True
 
         elif event.type == 'topicinfo':
-            self.create_channel(event.arguments[0])
-            self.info['channels'][event.arguments[0]]['topic']['user'] = event.arguments[1]
-            self.info['channels'][event.arguments[0]]['topic']['time'] = event.arguments[2]
+            channel = self.istring(event.arguments[0]).lower()
+
+            self.get_channel_info(channel)['topic']['user'] = event.arguments[1]
+            self.get_channel_info(channel)['topic']['time'] = event.arguments[2]
             changed = True
 
         elif event.type == 'nick':
+            user_old = self.istring(event.source).lower()
+            user_old_nick = NickMask(user_old).nick
+            user_new_nick = self.istring(event.target).lower()
+
             for channel in self.info['channels'].copy():
-                if NickMask(event.source).nick in self.info['channels'][channel]['users']:
-                    self.info['channels'][channel]['users'][event.target] = self.info['channels'][channel]['users'][NickMask(event.source).nick]
-                    del self.info['channels'][channel]['users'][NickMask(event.source).nick]
-            self.info['users'][event.target] = self.info['users'][NickMask(event.source).nick]
-            del self.info['users'][NickMask(event.source).nick]
+                if user_old_nick in self.get_channel_info(channel)['users']:
+                    self.get_channel_info(channel)['users'][user_new_nick] = self.get_channel_info(channel)['users'][user_old_nick]
+                    del self.get_channel_info(channel)['users'][user_old_nick]
+            self.info['users'][user_new_nick] = self.info['users'][user_old_nick]
+            del self.info['users'][user_old_nick]
             changed = True
 
         elif event.type == 'part':
-            if NickMask(event.source).nick == self.info['connection']['nick']:
-                del self.info['channels'][event.target]
+            user = self.istring(event.source).lower()
+            user_nick = NickMask(user).nick
+            channel = self.istring(event.target).lower()
+
+            if user_nick == self.info['connection']['nick']:
+                self.del_channel_info(channel)
             else:
-                del self.info['channels'][event.target]['users'][NickMask(event.source).nick]
+                del self.get_channel_info(channel)['users'][user_nick]
             changed = True
 
         elif event.type == 'kick':
+            user_nick = self.istring(event.arguments[0]).lower()
+            channel = self.istring(event.target).lower()
+
             if event.arguments[0] == self.info['connection']['nick']:
-                del self.info['channels'][event.target]
+                self.del_channel_info(channel)
             else:
-                del self.info['channels'][event.target]['users'][event.arguments[0]]
+                del self.get_channel_info(channel)['users'][user_nick]
             changed = True
 
         elif event.type == 'quit':
+            user = self.istring(event.source).lower()
+            user_nick = NickMask(user).nick
+
             for channel in self.info['channels']:
-                if NickMask(event.source).nick in self.info['channels'][channel]['users']:
-                    del self.info['channels'][channel]['users'][NickMask(event.source).nick]
-            del self.info['users'][NickMask(event.source).nick]
+                if user_nick in self.get_channel_info(channel)['users']:
+                    del self.get_channel_info(channel)['users'][user_nick]
+            del self.info['users'][user_nick]
             changed = True
 
         elif event.type == 'channelcreate':
-            self.info['channels'][event.arguments[0]]['created'] = event.arguments[1]
+            channel = self.istring(event.arguments[0]).lower()
+
+            self.get_channel_info(channel)['created'] = event.arguments[1]
 
         elif event.type in ['mode', 'channelmodeis']:
             unary_modes = self.info['server']['isupport']['PREFIX'][0] + self.info['server']['isupport']['CHANMODES'][0] + self.info['server']['isupport']['CHANMODES'][1] + self.info['server']['isupport']['CHANMODES'][2]
 
             if event.type == 'mode':
-                channel = event.target
+                channel = self.istring(event.target).lower()
                 mode_list = ' '.join(event.arguments)
             elif event.type == 'channelmodeis':
-                channel = event.arguments[0]
+                channel = self.istring(event.arguments[0]).lower()
                 mode_list = ' '.join(event.arguments[1:])
 
             if channel not in self.info['channels']:
@@ -444,35 +592,35 @@ class ServerConnection:
                     mode_letter, mode_char = mode[1], self.info['server']['isupport']['PREFIX'][1][self.info['server']['isupport']['PREFIX'][0].index(mode[1])]
 
                     if mode[0] == '-':
-                        if mode_char in self.info['channels'][channel]['users'][mode[2]]:
-                            self.info['channels'][channel]['users'][mode[2]] = self.info['channels'][channel]['users'][mode[2]].replace(mode_char, '')
+                        if mode_char in self.get_channel_info(channel)['users'][mode[2]]:
+                            self.get_channel_info(channel)['users'][mode[2]] = self.get_channel_info(channel)['users'][mode[2]].replace(mode_char, '')
                     elif mode[0] == '+':
-                        if mode_char not in self.info['channels'][channel]['users'][mode[2]]:
-                            self.info['channels'][channel]['users'][mode[2]] += mode_char
+                        if mode_char not in self.get_channel_info(channel)['users'][mode[2]]:
+                            self.get_channel_info(channel)['users'][mode[2]] += mode_char
 
                 # List modes
                 if mode[1] in self.info['server']['isupport']['CHANMODES'][0]:
                     if mode[0] == '-':
-                        if mode[2] in self.info['channels'][channel]['modes'][mode[1]]:
-                            del self.info['channels'][channel]['modes'][mode[1]][self.info['channels'][channel]['modes'][mode[1]].index(mode[2])]
+                        if mode[2] in self.get_channel_info(channel)['modes'][mode[1]]:
+                            del self.get_channel_info(channel)['modes'][mode[1]][self.get_channel_info(channel)['modes'][mode[1]].index(mode[2])]
                     elif mode[0] == '+':
-                        self.info['channels'][channel]['modes'][mode[1]].append(mode[2])
+                        self.get_channel_info(channel)['modes'][mode[1]].append(mode[2])
 
                 # Channel modes, paramaters
                 if mode[1] in (self.info['server']['isupport']['CHANMODES'][1] + self.info['server']['isupport']['CHANMODES'][2]):
                     if mode[0] == '-':
-                        if mode[1] in self.info['channels'][channel]['modes']:
-                            del self.info['channels'][channel]['modes'][mode[1]]
+                        if mode[1] in self.get_channel_info(channel)['modes']:
+                            del self.get_channel_info(channel)['modes'][mode[1]]
                     elif mode[0] == '+':
-                        self.info['channels'][channel]['modes'][mode[1]] = mode[2]
+                        self.get_channel_info(channel)['modes'][mode[1]] = mode[2]
 
                 # Channel modes, no params
                 if mode[1] in self.info['server']['isupport']['CHANMODES'][3]:
                     if mode[0] == '-':
-                        if mode[1] in self.info['channels'][channel]['modes']:
-                            del self.info['channels'][channel]['modes'][mode[1]]
+                        if mode[1] in self.get_channel_info(channel)['modes']:
+                            del self.get_channel_info(channel)['modes'][mode[1]]
                     elif mode[0] == '+':
-                        self.info['channels'][channel]['modes'][mode[1]] = True
+                        self.get_channel_info(channel)['modes'][mode[1]] = True
 
             changed = True
 
@@ -481,11 +629,15 @@ class ServerConnection:
                 func()
 
     def create_user(self, user):
+        user = self.istring(user).lower()
         user_nick = NickMask(user).nick
+
         if user_nick not in self.info['users']:
             self.info['users'][user_nick] = {}
 
     def create_channel(self, channel):
+        channel = self.istring(channel).lower()
+
         if channel not in self.info['channels']:
             self.info['channels'][channel] = {
                 'topic': {},
@@ -493,7 +645,23 @@ class ServerConnection:
                 'modes': {}
             }
             for mode in self.info['server']['isupport']['CHANMODES'][0]:
-                self.info['channels'][channel]['modes'][mode] = []
+                self.get_channel_info(channel)['modes'][mode] = []
+
+    # setting/getting info
+    def del_channel_info(self, channel_name):
+        """Delete channel info dict."""
+        channel_name = self.istring(channel_name).lower()
+        del self.info['channels'][channel_name]
+
+    def get_channel_info(self, channel_name):
+        """Return channel info dict."""
+        channel_name = self.istring(channel_name).lower()
+        return self.info['channels'][channel_name]
+
+    def get_user_info(self, user_nick):
+        """Return user info dict."""
+        user_nick = self.istring(user_nick).lower()
+        return self.info['users'][user_nick]
 
     # privs
     def is_prived(self, user_privs, required_level):
