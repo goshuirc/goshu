@@ -17,7 +17,7 @@ from functools import partial
 # lots of this taken from PyPsd's istring:
 # http://gitlab.com/rizon/pypsd
 class IString(str):
-    """String wrapper for IRC chans/nicks, based on casemapping standards."""
+    """Case-insensitive IRC string (for channel/usernames), based on IRC casemapping standards."""
     # setting info
     def set_std(self, std):
         """Set the standard we'll be using (isupport CASEMAPPING)."""
@@ -71,12 +71,10 @@ class IString(str):
 
     # magic
     def __eq__(self, other):
-        if not other or len(self) != len(other):
-            return False
-        for i in range(0, len(self)):
-            if ord(self[i]) != ord(other[i]):
-                return False
-        return True
+        # use str's built-in equality operator
+        me = str(self.lower())
+        other = str(self._irc_lower(other))
+        return me == other
 
     def __lt__(self, other):
         for i in range(0, min(len(self), len(other))):
