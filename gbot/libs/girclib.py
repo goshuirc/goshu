@@ -98,7 +98,7 @@ class IString(str):
         return hash(str(self._irc_lower(self)))
 
     # str methods
-    # this is so we can just do normal .title() / .split / .etc calls as though IString were a str class
+    # this is so we can just do normal .title() / .split() / .etc calls as though IString were a str class
     def __getattribute__(self, name):
         f = str.__getattribute__(self, name)
 
@@ -654,11 +654,19 @@ class ServerConnection:
     def get_channel_info(self, channel_name):
         """Return channel info dict."""
         channel_name = self.istring(channel_name).lower()
+
+        if channel_name not in self.info['channels']:
+            self.info['channels'][channel_name] = {}
+
         return self.info['channels'][channel_name]
 
     def get_user_info(self, user_nick):
         """Return user info dict."""
         user_nick = self.istring(user_nick).lower()
+
+        if user_nick not in self.info['users']:
+            self.info['users'][user_nick] = {}
+
         return self.info['users'][user_nick]
 
     # privs
