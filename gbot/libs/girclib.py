@@ -587,6 +587,9 @@ class ServerConnection:
 
                 # User prefix modes - voice, op, etc
                 if mode[1] in self.info['server']['isupport']['PREFIX'][0]:
+                    chan_user_info = self.get_channel_info(channel)['users']
+                    if mode[2] not in chan_user_info:
+                        chan_user_info[mode[2]] = ''
                     mode_letter, mode_char = mode[1], self.info['server']['isupport']['PREFIX'][1][self.info['server']['isupport']['PREFIX'][0].index(mode[1])]
 
                     if mode[0] == '-':
