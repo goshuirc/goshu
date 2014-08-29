@@ -153,7 +153,7 @@ def metric(num, metric_list=[[10 ** 9, 'B'], [10 ** 6, 'M'], [10 ** 3, 'k']], ad
 
             num = (num / metric_count)
             if not additive:
-                num = int(num)
+                num = float(num)
 
             output += format_str.format(num, metric_char)
 
