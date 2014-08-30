@@ -12,6 +12,7 @@ import socket
 
 
 class google(Module):
+    """Lets users search using Google, provides a result."""
 
     def __init__(self, bot):
         Module.__init__(self, bot)

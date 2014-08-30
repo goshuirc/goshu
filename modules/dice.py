@@ -8,6 +8,7 @@ import random
 
 
 class dice(Module):
+    """Lets users roll rpg-like dics, such as d20, d6+3, etc."""
 
     def __init__(self, bot):
         Module.__init__(self, bot)

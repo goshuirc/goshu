@@ -14,6 +14,7 @@ from gbot.libs.fourfn import NumericStringParser
 
 
 class calc(Module):
+    """Lets users calculate math, convert figures, and all sorts of fun stuff thanks to W|A!"""
 
     def __init__(self, bot):
         Module.__init__(self, bot)

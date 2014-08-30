@@ -8,6 +8,7 @@ from gbot.libs.helper import split_num
 
 
 class commands(Module):
+    """Provides general IRC commands such as msg, me, join, part."""
 
     def __init__(self, bot):
         Module.__init__(self, bot)

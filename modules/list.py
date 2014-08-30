@@ -7,6 +7,7 @@ from gbot.modules import Module
 
 
 class list(Module):
+    """Provides help and command listings to users."""
 
     def __init__(self, bot):
         Module.__init__(self, bot)

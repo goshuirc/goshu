@@ -8,6 +8,7 @@ from gbot.libs.girclib import unescape
 
 
 class invite(Module):
+    """Handles joining invited channels, and allowing chanops to ask goshu to autojoin their channel!"""
 
     def __init__(self, bot):
         Module.__init__(self, bot)

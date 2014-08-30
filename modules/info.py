@@ -9,6 +9,7 @@ import json
 
 
 class info(Module):
+    """Provides debugging info to admins when necessary."""
 
     def __init__(self, bot):
         Module.__init__(self, bot)

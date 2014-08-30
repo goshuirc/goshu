@@ -12,6 +12,7 @@ import base64
 
 
 class eggdrop(Module):
+    """Allows for an eggdrop-like response to questions made to goshu."""
 
     def __init__(self, bot):
         Module.__init__(self, bot)

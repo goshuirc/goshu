@@ -13,6 +13,7 @@ import os
 
 
 class dictionary(Module):
+    """Lets users ask for a word's definition."""
 
     def __init__(self, bot):
         Module.__init__(self, bot)

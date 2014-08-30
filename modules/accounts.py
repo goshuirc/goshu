@@ -7,6 +7,7 @@ from gbot.modules import Module
 
 
 class accounts(Module):
+    """Handles goshu accounts, including registration, access levels, and login."""
     name = 'accounts'
 
     def __init__(self, bot):
