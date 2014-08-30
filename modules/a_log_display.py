@@ -15,7 +15,9 @@ from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import filename_escape
 
 
-class a_log_display(Module):  # a_ at the beginning so goshu calls this module first… apparently priority's broken, too
+# TODO: need to put a_ at the beginning so goshu calls this module first… apparently priority's broken, too
+class a_log_display(Module):
+    """Prints and shows IRC activity, with nice colours!"""
 
     def __init__(self, bot):
         Module.__init__(self, bot)
@@ -77,9 +79,12 @@ class a_log_display(Module):  # a_ at the beginning so goshu calls this module f
             output += '@c14<@c'
             try:
                 selected_mode = ''
+                server = self.bot.irc.servers[event.server]
+                channel = server.istring(event.target)
+                user_nick = server.istring(event.source.split('!')[0])
 
-                for mode in ['~', '&', '@', '%', '+']:
-                    if mode in self.bot.irc.servers[event.server].info['channels'][event.target]['users'][event.source.split('!')[0]]:
+                for mode in server.info['server']['isupport']['PREFIX'][1]:
+                    if mode in server.get_channel_info(channel)['users'][user_nick]:
                         output += escape(mode)
                         selected_mode = mode
                         break
@@ -264,6 +269,7 @@ class a_log_display(Module):  # a_ at the beginning so goshu calls this module f
         return '@c' + str(self.nick_colors[nick]) + nick
 
 
+# TODO: this function needs to support @{@} format
 def display_unescape(in_str):
     output = ''
     while in_str != '':
