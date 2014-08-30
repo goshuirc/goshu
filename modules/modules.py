@@ -37,7 +37,7 @@ class modules(Module):
                     reloaded_module_names.append(module_name)
                     self.bot.modules.modules[module_name].reload_json()
 
-            self.bot.irc.msg(event, 'Reloaded JSON dicts for modules: {}'.format(', '.join(reloaded_module_names)))
+            self.bot.irc.msg(event, 'Reloaded JSON dicts for modules: {}'.format(', '.join(sorted(reloaded_module_names))))
 
     def module_handle(self, event, command, usercommand):
         if not usercommand.arguments:
