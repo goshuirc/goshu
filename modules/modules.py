@@ -7,20 +7,43 @@ from gbot.modules import Module
 
 
 class modules(Module):
+    """Handles loading and unloading modules and their internal JSON dicts"""
 
     def __init__(self, bot):
         Module.__init__(self, bot)
         self.events = {
             'commands': {
-                'module': [self.handle, ['<load/unload/reload> [name] --- load/unload/reload module specified by <name>', 'list --- list loaded modules'], 5],
+                'module': [self.module_handle, ['<load/unload/reload> [name] --- load/unload/reload module specified by <name>', 'list --- list loaded modules'], 5],
+                'json': [self.json_handle, "reload [name] --- reload the given module's internal JSON dict", 5],
             },
         }
 
-    def handle(self, event, command, usercommand):
+    def json_handle(self, event, command, usercommand):
         if not usercommand.arguments:
             return
 
-        do = usercommand.arguments.split()[0]
+        do = usercommand.arguments.split()[0].lower()
+
+        if do == 'reload':
+            if len(usercommand.arguments.split()) < 2:
+                self.bot.irc.msg(event, "Reloading @ball@b modules' JSON dicts")
+                modules = True
+            else:
+                modules = usercommand.arguments.lower().split(' ', 1)[1].split()
+
+            reloaded_module_names = []
+            for module_name in self.bot.modules.modules:
+                if modules is True or module_name in modules:
+                    reloaded_module_names.append(module_name)
+                    self.bot.modules.modules[module_name].reload_json()
+
+            self.bot.irc.msg(event, 'Reloaded JSON dicts for modules: {}'.format(', '.join(reloaded_module_names)))
+
+    def module_handle(self, event, command, usercommand):
+        if not usercommand.arguments:
+            return
+
+        do = usercommand.arguments.split()[0].lower()
 
         if do == 'list':
             response = 'Loaded modules: ' + ', '.join(sorted(list(self.bot.modules.whole_modules.keys())))
