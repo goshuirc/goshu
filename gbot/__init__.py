@@ -4,7 +4,7 @@
 # licensed under the BSD 2-clause license
 
 from . import gui, info, irc, modules
-import logging
+from .libs import log
 
 
 class Bot:
@@ -12,7 +12,7 @@ class Bot:
 
     def __init__(self, debug=False):
         self.debug = debug
-        self.logger = logging.Logger
+        self.logger = log.Logger
 
         self.accounts = info.Accounts(self)
         self.settings = info.Settings(self)
