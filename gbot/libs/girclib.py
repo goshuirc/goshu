@@ -13,6 +13,9 @@ import time
 import threading
 from functools import partial
 
+from irc.client import NickMask
+from irc.client import is_channel
+
 
 # lots of this taken from PyPsd's istring:
 # http://gitlab.com/rizon/pypsd
@@ -858,12 +861,3 @@ def remove_control_codes(line):
         except IndexError:
             ...
     return new_line
-
-
-# Wrappers to default irc classes/functions
-class NickMask(irc.client.NickMask):
-    ...
-
-
-def is_channel(name):
-    return irc.client.is_channel(name)
