@@ -7,25 +7,25 @@ Installing/Configuring
 ----------------------
 Install Python 3.x, install the dependencies below, and run goshu.py
 
-Deps: [irc](http://bitbucket.org/jaraco/irc), [pyQuery](https://pypi.python.org/pypi/pyquery), [pyYAML](https://bitbucket.org/xi/pyyaml), [Requests](http://python-requests.org), [http_status](https://github.com/DanielOaks/http_status)
+Deps: [irc](http://bitbucket.org/jaraco/irc), [pyQuery](https://pypi.python.org/pypi/pyquery), [pyYAML](https://bitbucket.org/xi/pyyaml), [Requests](http://python-requests.org), [http_status](https://github.com/DanielOaks/http_status), colorama, pyparsing, wolframalpha
 
 When you start the bot, it'll ask you several questions (including the master bot password!)
 
 Once on IRC, privmsg the bot, create an account, and give yourself access as such:
 
 ```
-<danneh> 'register dan usrpaswd
+<dan> 'register coolguy57 usrpaswd
 <goshu> Account registered!
-<danneh> 'login dan usrpaswd
+<dan> 'login coolguy57 usrpaswd
 <goshu> Login accepted!
 
-<danneh> 'list
+<dan> 'list
 <goshu> *** Commands: calc, d, def, egg, google, help, list, loggedin, login, nickserv, pokemon, pokerst, poketeam, random, register, status, suggest, ud
 
-<danneh> 'owner botpassword
+<dan> 'owner botpassword
 <goshu> You are now a bot owner
 
-<danneh> 'list
+<dan> 'list
 <goshu> *** Commands: calc, d, def, egg, google, help, info, join, list, loggedin, login, me, module, msg, nickserv, owner, part, pokemon, pokerst, poketeam, random, register, setaccess, status, suggest, ud
 ```
 
