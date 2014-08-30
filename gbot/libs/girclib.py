@@ -749,7 +749,7 @@ def escape(string):
     return string
 
 
-def unescape(in_string, unescape=_unescape_dict):
+def unescape(in_string, unescape_dict=_unescape_dict):
     """Change goshu codes into IRC codes.
 
     Basically, you can either have a one-character control code after @,
@@ -764,10 +764,10 @@ def unescape(in_string, unescape=_unescape_dict):
 
         # multi-char sequences
         if curly_buffer_active and (in_string[0] == '}'):
-            if curly_buffer in unescape:
+            if curly_buffer in unescape_dict:
                 # you can also pass functions, rather than strings
                 # needed for stuff like {randomchannelnick}
-                out_string += unescape_format(unescape[curly_buffer])
+                out_string += unescape_format(unescape_dict[curly_buffer])
             else:
                 out_string += '@{' + curly_buffer + '}'
             curly_buffer = ''
@@ -784,8 +784,8 @@ def unescape(in_string, unescape=_unescape_dict):
             if in_string[1] == '{':
                 curly_buffer_active = True
 
-            elif in_string[1] in unescape:
-                out_string += unescape_format(unescape[in_string[1]])
+            elif in_string[1] in unescape_dict:
+                out_string += unescape_format(unescape_dict[in_string[1]])
 
             else:
                 out_string += '@' + in_string[1]
