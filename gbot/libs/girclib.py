@@ -6,7 +6,7 @@
 import collections
 import bisect
 import ssl
-import irc, irc.client, irc.modes
+import irc, irc.buffer, irc.client, irc.modes
 import datetime
 import calendar
 import time
@@ -15,6 +15,10 @@ from functools import partial
 
 from irc.client import NickMask
 from irc.client import is_channel
+is_channel
+
+# make everything decodable by irc lib
+irc.client.ServerConnection.buffer_class = irc.buffer.LenientDecodingLineBuffer
 
 
 # lots of this taken from PyPsd's istring:
@@ -73,6 +77,11 @@ class IString(str):
         return str.upper(conv_string)
 
     # magic
+    def __contains__(self, item):
+        me = str(self.lower())
+        item = str(self._irc_lower(item))
+        return item in me
+
     def __eq__(self, other):
         # use str's built-in equality operator
         me = str(self.lower())
@@ -494,7 +503,7 @@ class ServerConnection:
 
         elif event.type == 'namreply':
             channel = self.istring(event.arguments[1]).lower()
-            names_list = self.istring(event.arguments[2]).lower().split()
+            names_list = self.istring(event.arguments[2]).split()
 
             # merge user list if it already exists, used for heaps of nicks
             if 'users' not in self.get_channel_info(channel):
@@ -640,16 +649,16 @@ class ServerConnection:
             self.info['users'][user_nick] = {}
 
     def create_channel(self, channel):
-        channel = self.istring(channel).lower()
+        channel_name = self.istring(channel).lower()
 
-        if channel not in self.info['channels']:
-            self.info['channels'][channel] = {
+        if channel_name not in self.info['channels']:
+            self.info['channels'][channel_name] = {
                 'topic': {},
                 'users': {},
                 'modes': {}
             }
             for mode in self.info['server']['isupport']['CHANMODES'][0]:
-                self.get_channel_info(channel)['modes'][mode] = []
+                self.info['channels'][channel_name]['modes'][mode] = []
 
     # setting/getting info
     def del_channel_info(self, channel_name):
@@ -662,7 +671,11 @@ class ServerConnection:
         channel_name = self.istring(channel_name).lower()
 
         if channel_name not in self.info['channels']:
-            self.info['channels'][channel_name] = {}
+            self.info['channels'][channel_name] = {
+                'topic': {},
+                'users': {},
+                'modes': {}
+            }
 
         return self.info['channels'][channel_name]
 

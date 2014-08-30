@@ -234,7 +234,7 @@ class a_log_display(Module):
 
         # # TODO: make this a bool debug option
         # debugmsg = [event.direction, event.type, event.source, event.target, event.arguments]
-        # self.bot.gui.put_line(str(debugmsg))
+        # self.bot.gui.put_line(escape(str(debugmsg)))
 
         self.bot.gui.put_line(display_unescape(output + '@r'))  # +@r because that means reset
         self.log(output, event.server, targets)
