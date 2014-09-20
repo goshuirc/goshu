@@ -76,6 +76,10 @@ class IRC(girclib.IRC):
             except:
                 timeout_length = girclib.timeout_length
 
+            # nickserv
+            nickserv_serv_nick = info.store[name]['connection'].get('nickserv_nick', 'Nickserv')
+            nickserv_password = info.store[name]['connection'].get('nickserv_password', None)
+
             # server creation
             s = self.server(name, timeout_check_interval=timeout_check_interval, timeout_length=timeout_length)
             s.connect(srv_address, srv_port, srv_nick, srv_password, srv_username, srv_ircname, srv_localaddress, srv_localport, srv_ssl, srv_ipv6, autojoin_channels=autojoin_channels, wait_time=wait_time)

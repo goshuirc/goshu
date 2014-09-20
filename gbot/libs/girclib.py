@@ -296,8 +296,10 @@ class ServerConnection:
         # if this long has passed without server ping, we consider ourselves timed out. defaults to 5 minutes
         self.timeout_length = timeout_length
 
+        self.nickserv_format = 'IDENTIFY {ns_pass}'
+
     # Connection
-    def connect(self, address, port, nick, password=None, username=None, ircname=None, localaddress="", localport=0, sslsock=False, ipv6=False, autojoin_channels=[], wait_time=5):
+    def connect(self, address, port, nick, password=None, username=None, ircname=None, localaddress="", localport=0, sslsock=False, ipv6=False, autojoin_channels=[], wait_time=5, nickserv_serv_nick='Nickserv', nickserv_password=None):
         self.connection = self.irc.irc.server()
         self.info['connection'] = {
             'address': address,
@@ -318,6 +320,9 @@ class ServerConnection:
             self.info['connection']['sslsock'] = sslsock
         if ipv6 is not False:
             self.info['connection']['ipv6'] = ipv6
+
+        self.info['connection']['nickserv_serv_nick'] = nickserv_serv_nick
+        self.info['connection']['nickserv_password'] = nickserv_password
 
         if sslsock:
             Factory = irc.connection.Factory(wrapper=ssl.wrap_socket, ipv6=ipv6)
@@ -368,6 +373,12 @@ class ServerConnection:
         self.connected = True
         self.last_ping = ping_timestamp()
 
+        # nickserv
+        ns_serv = self.info['connection'].get('nickserv_serv_nick', 'Nickserv')
+        ns_pass = self.info['connection'].get('nickserv_password', None)
+        if ns_pass is not None:
+            self.privmsg(ns_serv, self.nickserv_format.format(ns_pass=ns_pass), chanserv_escape=False)
+
         # autojoining channels
         if self.autojoin_channels:
             ChannelJoiner(self, self.name, self.autojoin_channels, self.autojoin_wait_time).start()
@@ -388,8 +399,8 @@ class ServerConnection:
         else:
             self.irc._handle_event(Event(self.irc, self.name, 'out', 'cap', self.info['connection']['nick'], [subcommand]))
 
-    def ctcp(self, type, target, string):
-        self.connection.ctcp(type, target, string)
+    def ctcp(self, ct_type, target, string):
+        self.connection.ctcp(ct_type, target, string)
         if len(string.split()) > 1:
             (ctcp_type, ctcp_args) = string.split(' ', 1)
         else:
@@ -489,7 +500,7 @@ class ServerConnection:
 
         elif event.type == 'join' and event.direction == 'in':
             user = self.istring(event.source).lower()
-            user_nick = NickMask(user).nick
+            user_nick = self.istring(NickMask(user).nick).lower()
             channel = self.istring(event.target).lower()
 
             self.create_user(user)
@@ -535,7 +546,7 @@ class ServerConnection:
 
         elif event.type == 'nick':
             user_old = self.istring(event.source).lower()
-            user_old_nick = NickMask(user_old).nick
+            user_old_nick = self.istring(NickMask(user_old).nick).lower()
             user_new_nick = self.istring(event.target).lower()
 
             for channel in self.info['channels'].copy():
@@ -548,7 +559,7 @@ class ServerConnection:
 
         elif event.type == 'part':
             user = self.istring(event.source).lower()
-            user_nick = NickMask(user).nick
+            user_nick = self.istring(NickMask(user).nick).lower()
             channel = self.istring(event.target).lower()
 
             if user_nick == self.info['connection']['nick']:
@@ -569,7 +580,7 @@ class ServerConnection:
 
         elif event.type == 'quit':
             user = self.istring(event.source).lower()
-            user_nick = NickMask(user).nick
+            user_nick = self.istring(NickMask(user).nick).lower()
 
             for channel in self.info['channels']:
                 if user_nick in self.get_channel_info(channel)['users']:
@@ -592,8 +603,7 @@ class ServerConnection:
                 channel = self.istring(event.arguments[0]).lower()
                 mode_list = ' '.join(event.arguments[1:])
 
-            if channel not in self.info['channels']:
-                return
+            self.create_channel(channel)
 
             for mode in irc.modes._parse_modes(mode_list, unary_modes):
 
@@ -643,7 +653,7 @@ class ServerConnection:
 
     def create_user(self, user):
         user = self.istring(user).lower()
-        user_nick = NickMask(user).nick
+        user_nick = self.istring(NickMask(user).nick)
 
         if user_nick not in self.info['users']:
             self.info['users'][user_nick] = {}
@@ -655,7 +665,7 @@ class ServerConnection:
             self.info['channels'][channel_name] = {
                 'topic': {},
                 'users': {},
-                'modes': {}
+                'modes': {},
             }
             for mode in self.info['server']['isupport']['CHANMODES'][0]:
                 self.info['channels'][channel_name]['modes'][mode] = []

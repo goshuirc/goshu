@@ -4,6 +4,8 @@
 # licensed under the BSD 2-clause license
 
 from .libs import helper
+from .libs import girclib
+
 import hashlib
 import json
 import codecs
@@ -310,22 +312,23 @@ class Accounts(Manager):
     def login(self, name, password, server, userstring):
         self.load()
         if self.is_password(name, password):
-            if userstring.split('!')[0] not in self.bot.irc.servers[server].info['users']:
-                self.bot.irc.servers[server].create_user(userstring)
-            self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo'] = {}
-            self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo']['name'] = name
-            self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo']['userhost'] = userstring.split('!')[1]
+            self.bot.irc.servers[server].create_user(userstring)
+            user_nick = self.bot.irc.servers[server].istring(girclib.NickMask(userstring).nick)
+            self.bot.irc.servers[server].info['users'][user_nick]['accountinfo'] = {}
+            self.bot.irc.servers[server].info['users'][user_nick]['accountinfo']['name'] = name
+            self.bot.irc.servers[server].info['users'][user_nick]['accountinfo']['userhost'] = userstring.split('!')[1]
             return True
         else:
             return False
 
     def account(self, userstring, server):
         self.load()
-        if userstring.split('!')[0] in self.bot.irc.servers[server].info['users']:
-            if 'accountinfo' in self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]:
-                if 'userhost' in self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo']:
-                    if self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo']['userhost'] == userstring.split('!')[1]:
-                        return self.bot.irc.servers[server].info['users'][userstring.split('!')[0]]['accountinfo']['name']
+        user_nick = self.bot.irc.servers[server].istring(girclib.NickMask(userstring).nick)
+        if user_nick in self.bot.irc.servers[server].info['users']:
+            if 'accountinfo' in self.bot.irc.servers[server].info['users'][user_nick]:
+                if 'userhost' in self.bot.irc.servers[server].info['users'][user_nick]['accountinfo']:
+                    if self.bot.irc.servers[server].info['users'][user_nick]['accountinfo']['userhost'] == userstring.split('!')[1]:
+                        return self.bot.irc.servers[server].info['users'][user_nick]['accountinfo']['name']
         return None
 
     def set_access_level(self, name, level=0):
