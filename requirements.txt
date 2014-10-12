@@ -6,3 +6,4 @@ PyYAML
 colorama
 pyparsing
 wolframalpha
+nose2

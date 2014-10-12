@@ -72,6 +72,7 @@ class IString(str):
 
     def _irc_upper(self, in_string):
         """Convert us to our upper-case equivalent, given our std."""
+        conv_string = in_string
         if self._upper_trans is not None:
             conv_string = in_string.translate(self._upper_trans)
         return str.upper(conv_string)
@@ -514,7 +515,7 @@ class ServerConnection:
 
         elif event.type == 'namreply':
             channel = self.istring(event.arguments[1]).lower()
-            names_list = self.istring(event.arguments[2]).split()
+            names_list = self.istring(event.arguments[2]).lower().split()
 
             # merge user list if it already exists, used for heaps of nicks
             if 'users' not in self.get_channel_info(channel):
