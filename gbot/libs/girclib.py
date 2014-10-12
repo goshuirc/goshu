@@ -502,6 +502,7 @@ class ServerConnection:
         elif event.type == 'join' and event.direction == 'in':
             user = self.istring(event.source).lower()
             user_nick = self.istring(NickMask(user).nick).lower()
+            our_nick = self.istring(self.info['connection']['nick']).lower()
             channel = self.istring(event.target).lower()
 
             self.create_user(user)
@@ -509,7 +510,7 @@ class ServerConnection:
             self.get_channel_info(channel)['users'][user_nick] = ''
 
             # request channel modes on join
-            if user_nick == self.info['connection']['nick']:
+            if user_nick == our_nick:
                 self.mode(channel)
             changed = True
 
@@ -541,7 +542,8 @@ class ServerConnection:
         elif event.type == 'topicinfo':
             channel = self.istring(event.arguments[0]).lower()
 
-            self.get_channel_info(channel)['topic']['user'] = event.arguments[1]
+            nick = self.istring(NickMask(event.arguments[1]).nick).lower()
+            self.get_channel_info(channel)['topic']['user'] = nick
             self.get_channel_info(channel)['topic']['time'] = event.arguments[2]
             changed = True
 
@@ -561,9 +563,10 @@ class ServerConnection:
         elif event.type == 'part':
             user = self.istring(event.source).lower()
             user_nick = self.istring(NickMask(user).nick).lower()
+            our_nick = self.istring(self.info['connection']['nick']).lower()
             channel = self.istring(event.target).lower()
 
-            if user_nick == self.info['connection']['nick']:
+            if user_nick == our_nick:
                 self.del_channel_info(channel)
             else:
                 del self.get_channel_info(channel)['users'][user_nick]
@@ -571,9 +574,10 @@ class ServerConnection:
 
         elif event.type == 'kick':
             user_nick = self.istring(event.arguments[0]).lower()
+            our_nick = self.istring(self.info['connection']['nick']).lower()
             channel = self.istring(event.target).lower()
 
-            if event.arguments[0] == self.info['connection']['nick']:
+            if user_nick == our_nick:
                 self.del_channel_info(channel)
             else:
                 del self.get_channel_info(channel)['users'][user_nick]
