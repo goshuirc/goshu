@@ -505,7 +505,7 @@ class ServerConnection:
             our_nick = self.istring(self.info['connection']['nick']).lower()
             channel = self.istring(event.target).lower()
 
-            self.create_user(user)
+            self.create_user(user_nick)
             self.create_channel(channel)
             self.get_channel_info(channel)['users'][user_nick] = ''
 
@@ -658,7 +658,7 @@ class ServerConnection:
 
     def create_user(self, user):
         user = self.istring(user).lower()
-        user_nick = self.istring(NickMask(user).nick)
+        user_nick = self.istring(NickMask(user).nick).lower()
 
         if user_nick not in self.info['users']:
             self.info['users'][user_nick] = {}
