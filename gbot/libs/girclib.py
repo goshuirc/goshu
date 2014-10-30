@@ -550,7 +550,7 @@ class ServerConnection:
         elif event.type == 'nick':
             user_old = self.istring(event.source).lower()
             user_old_nick = self.istring(NickMask(user_old).nick).lower()
-            user_new_nick = self.istring(event.target).lower()
+            user_new_nick = self.istring(NickMask(event.target).nick).lower()
 
             for channel in self.info['channels'].copy():
                 if user_old_nick in self.get_channel_info(channel)['users']:
