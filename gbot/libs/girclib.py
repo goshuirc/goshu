@@ -794,6 +794,8 @@ class ServerConnection:
             required_level: String like 'o', 'h', 'v'
         """
         privs_we_support = self.info['server']['isupport']['PREFIX']
+        print('supported', privs_we_support)
+        print('required_level', required_level)
 
         # changing h, q, a to something we can use if necessary
         if required_level not in privs_we_support[0]:
@@ -807,11 +809,16 @@ class ServerConnection:
                 print('We do not have required_level:', required_level)
                 return False
 
+        print('required_level', required_level)
+
         # get list of levels we can use
         index = privs_we_support[0].index(required_level)
         acceptable_prefixes = privs_we_support[1][:index + 1]
 
+        print('acceptable_prefixes', acceptable_prefixes)
+
         for prefix in user_privs:
+            print('prefix', prefix)
             if prefix in acceptable_prefixes:
                 return True
 
