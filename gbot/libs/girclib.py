@@ -10,6 +10,7 @@ import irc, irc.buffer, irc.client, irc.modes
 import datetime
 import calendar
 import time
+import json
 import threading
 from functools import partial
 
@@ -19,6 +20,21 @@ is_channel
 
 # make everything decodable by irc lib
 irc.client.ServerConnection.buffer_class = irc.buffer.LenientDecodingLineBuffer
+
+
+def log_error_nick(info, **err_vars):
+    """Log an error"""
+    print('FOR SOME REASON QUITTING THE USER FAILED')
+    with open('errlog.txt', 'a') as errlog:
+        errlog.write('Quit failed\n')
+        for var_name in err_vars:
+            errlog.write('  info:  {}  {}'.format(var_name, err_vars[var_name]))
+        errlog.write('\n')
+    with open('info.txt', 'a') as infolog:
+        infolog.write('["Quit Failed"],')
+        infolog.write(json.dumps(info, sort_keys=True, indent=4))
+        infolog.write(',\n')
+        infolog.write('\n')
 
 
 # lots of this taken from PyPsd's istring:
@@ -556,7 +572,10 @@ class ServerConnection:
                 if user_old_nick in self.get_channel_info(channel)['users']:
                     self.get_channel_info(channel)['users'][user_new_nick] = self.get_channel_info(channel)['users'][user_old_nick]
                     del self.get_channel_info(channel)['users'][user_old_nick]
-            self.info['users'][user_new_nick] = self.info['users'][user_old_nick]
+            try:
+                self.info['users'][user_new_nick] = dict(self.info['users'][user_old_nick])
+            except KeyError:
+                log_error_nick(self.info, type='nick', source=event.source, user=user_old, user_nick=user_old_nick)
             del self.info['users'][user_old_nick]
             changed = True
 
@@ -590,7 +609,10 @@ class ServerConnection:
             for channel in self.info['channels']:
                 if user_nick in self.get_channel_info(channel)['users']:
                     del self.get_channel_info(channel)['users'][user_nick]
-            del self.info['users'][user_nick]
+            try:
+                del self.info['users'][user_nick]
+            except KeyError:
+                log_error_nick(self.info, type='quit', source=event.source, user=user, user_nick=user_nick)
             changed = True
 
         elif event.type == 'channelcreate':
