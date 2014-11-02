@@ -93,6 +93,12 @@ class IDict(collections.MutableMapping):
             key = key.translate(self._lower_trans)
         return key.lower()
 
+    def copy(self):
+        """Return a copy of ourself."""
+        new_dict = IDict(std=self._std)
+        new_dict.update(self.store)
+        return new_dict
+
 
 # lots of this taken from PyPsd's istring:
 # http://gitlab.com/rizon/pypsd
@@ -628,16 +634,14 @@ class ServerConnection:
             user_old_nick = self.istring(NickMask(user_old).nick).lower()
             user_new_nick = self.istring(NickMask(event.target).nick).lower()
 
-            for channel in self.info['channels'].copy():
-                if user_old_nick in self.get_channel_info(channel)['users']:
-                    self.get_channel_info(channel)['users'][user_new_nick] = self.get_channel_info(channel)['users'][user_old_nick]
-                    del self.get_channel_info(channel)['users'][user_old_nick]
-            try:
+            if user_old_nick != user_new_nick:
+                for channel in self.info['channels'].copy():
+                    if user_old_nick in self.get_channel_info(channel)['users']:
+                        self.get_channel_info(channel)['users'][user_new_nick] = self.get_channel_info(channel)['users'][user_old_nick]
+                        del self.get_channel_info(channel)['users'][user_old_nick]
                 self.info['users'][user_new_nick] = dict(self.info['users'][user_old_nick])
-            except KeyError:
-                log_error_nick(self.info, type='nick', source=event.source, user=user_old, user_nick=user_old_nick)
-            del self.info['users'][user_old_nick]
-            changed = True
+                del self.info['users'][user_old_nick]
+                changed = True
 
         elif event.type == 'part':
             user = self.istring(event.source).lower()
@@ -669,10 +673,7 @@ class ServerConnection:
             for channel in self.info['channels']:
                 if user_nick in self.get_channel_info(channel)['users']:
                     del self.get_channel_info(channel)['users'][user_nick]
-            try:
-                del self.info['users'][user_nick]
-            except KeyError:
-                log_error_nick(self.info, type='quit', source=event.source, user=user, user_nick=user_nick)
+            del self.info['users'][user_nick]
             changed = True
 
         elif event.type == 'channelcreate':
@@ -768,11 +769,7 @@ class ServerConnection:
         channel_name = self.istring(channel_name).lower()
 
         if channel_name not in self.info['channels']:
-            self.info['channels'][channel_name] = {
-                'topic': {},
-                'users': {},
-                'modes': {}
-            }
+            self.create_channel(channel_name)
 
         return self.info['channels'][channel_name]
 
@@ -794,8 +791,6 @@ class ServerConnection:
             required_level: String like 'o', 'h', 'v'
         """
         privs_we_support = self.info['server']['isupport']['PREFIX']
-        print('supported', privs_we_support)
-        print('required_level', required_level)
 
         # changing h, q, a to something we can use if necessary
         if required_level not in privs_we_support[0]:
@@ -809,16 +804,11 @@ class ServerConnection:
                 print('We do not have required_level:', required_level)
                 return False
 
-        print('required_level', required_level)
-
         # get list of levels we can use
         index = privs_we_support[0].index(required_level)
         acceptable_prefixes = privs_we_support[1][:index + 1]
 
-        print('acceptable_prefixes', acceptable_prefixes)
-
         for prefix in user_privs:
-            print('prefix', prefix)
             if prefix in acceptable_prefixes:
                 return True
 
