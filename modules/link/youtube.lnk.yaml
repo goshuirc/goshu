@@ -1,6 +1,6 @@
 {
     "display_name": "You@c5Tube@c",
-    "match": "^(?:www\\.)?(?:(?:youtube\\.com/(?:watch)?(?:[?&][a-z]+=[a-z_]+)?(?:[?&]v=))|(?:youtu\\.be\\/))([a-zA-Z0-9-_]+)",
+    "match": "^(?:www\\.|m\\.)?(?:(?:youtube\\.com/(?:watch)?(?:[?&][a-z]+=[a-z_]+)?(?:[?&]v=))|(?:youtu\\.be\\/))([a-zA-Z0-9-_]+)",
     "url": "http://gdata.youtube.com/feeds/api/videos/{regex_1}?v=2&alt=jsonc",
     "format": "json",
     "response": "@c12@b{title}@r by @c3@b{author}@r [{length}] [{category}] [@c3+{likes}@r,@c4-{dislikes}@r,{comments}c,{views}v]",
