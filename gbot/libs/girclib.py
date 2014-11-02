@@ -37,6 +37,63 @@ def log_error_nick(info, **err_vars):
         infolog.write('\n')
 
 
+class IDict(collections.MutableMapping):
+    """Case-insensitive IRC dict, based on IRC casemapping standards."""
+    def __init__(self, std='ascii', *args, **kwargs):
+        self.store = dict()
+        self.set_std(std)
+        self.update(dict(*args, **kwargs))  # use the free update to set keys
+
+    def set_std(self, std):
+        """Set the standard we'll be using (isupport CASEMAPPING)."""
+        # translation based on std
+        self._lower_chars = None
+        self._upper_chars = None
+
+        self._lower_trans = None
+        self._upper_trans = None
+
+        self._std = std.lower()
+
+        if self._std == 'ascii':
+            pass
+        elif self._std == 'rfc1459':
+            self._lower_chars = ''.join(chr(i) for i in range(91, 95))
+            self._upper_chars = ''.join(chr(i) for i in range(123, 127))
+
+        elif self._std == 'rfc1459-strict':
+            self._lower_chars = ''.join(chr(i) for i in range(91, 94))
+            self._upper_chars = ''.join(chr(i) for i in range(123, 126))
+
+        if self._lower_chars:
+            self._lower_trans = str.maketrans(self._lower_chars, self._upper_chars)
+        if self._upper_chars:
+            self._upper_trans = str.maketrans(self._upper_chars, self._lower_chars)
+
+    def __json__(self):
+        return self.store
+
+    def __getitem__(self, key):
+        return self.store[self.__keytransform__(key)]
+
+    def __setitem__(self, key, value):
+        self.store[self.__keytransform__(key)] = value
+
+    def __delitem__(self, key):
+        del self.store[self.__keytransform__(key)]
+
+    def __iter__(self):
+        return iter(self.store)
+
+    def __len__(self):
+        return len(self.store)
+
+    def __keytransform__(self, key):
+        if self._lower_trans is not None:
+            key = key.translate(self._lower_trans)
+        return key.lower()
+
+
 # lots of this taken from PyPsd's istring:
 # http://gitlab.com/rizon/pypsd
 class IString(str):
@@ -64,9 +121,9 @@ class IString(str):
             self._upper_chars = ''.join(chr(i) for i in range(123, 126))
 
         if self._lower_chars:
-            self.lower_trans = str.maketrans(self._lower_chars, self._upper_chars)
+            self._lower_trans = str.maketrans(self._lower_chars, self._upper_chars)
         if self._upper_chars:
-            self.upper_trans = str.maketrans(self._upper_chars, self._lower_chars)
+            self._upper_trans = str.maketrans(self._upper_chars, self._lower_chars)
 
     # upperlower
     def lower(self):
@@ -376,8 +433,8 @@ class ServerConnection:
 
     def disconnect(self, message):
         # don't wipe info['connection'] in case we reconnect
-        self.info['channels'] = {}
-        self.info['users'] = {}
+        self.info['channels'] = IDict(std=self.info['server']['isupport']['CASEMAPPING'])
+        self.info['users'] = IDict(std=self.info['server']['isupport']['CASEMAPPING'])
 
         self.connected = False
         self.connection.disconnect(message)
@@ -510,6 +567,9 @@ class ServerConnection:
                     # sets up our istring casemapping
                     if feature_name == 'CASEMAPPING':
                         self._istring_casemapping = feature_value
+                        # set dict info
+                        self.info['channels'] = IDict(std=feature_value)
+                        self.info['users'] = IDict(std=feature_value)
                 else:
                     if feature[-1] == '=':
                         feature = feature[:-1]
@@ -536,7 +596,7 @@ class ServerConnection:
 
             # merge user list if it already exists, used for heaps of nicks
             if 'users' not in self.get_channel_info(channel):
-                self.get_channel_info(channel)['users'] = {}
+                self.get_channel_info(channel)['users'] = IDict(std=self.info['server']['isupport']['CASEMAPPING'])
             for user in names_list:
                 # supports multi-prefix
                 user_privs = ''
@@ -691,7 +751,7 @@ class ServerConnection:
         if channel_name not in self.info['channels']:
             self.info['channels'][channel_name] = {
                 'topic': {},
-                'users': {},
+                'users': IDict(std=self.info['server']['isupport']['CASEMAPPING']),
                 'modes': {},
             }
             for mode in self.info['server']['isupport']['CHANMODES'][0]:

@@ -8,6 +8,14 @@ import os
 import json
 
 
+class IEncoder(json.JSONEncoder):
+    def default(self, o):
+        try:
+            return o.__json__()
+        except:
+            return o
+
+
 class info(Module):
     """Provides debugging info to admins when necessary."""
 
@@ -20,7 +28,7 @@ class info(Module):
         }
 
     def info(self, event, command, usercommand):
-        pretty_json = json.dumps(self.bot.irc.servers[event.server].info, sort_keys=True, indent=4)
+        pretty_json = json.dumps(self.bot.irc.servers[event.server].info, sort_keys=True, indent=4, cls=IEncoder)
 
         info_filename = os.sep.join(['config', 'modules', 'info.json'])
         info_file = open(info_filename, 'w', encoding='utf-8')
