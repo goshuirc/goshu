@@ -10,7 +10,6 @@ import irc, irc.buffer, irc.client, irc.modes
 import datetime
 import calendar
 import time
-import json
 import threading
 from functools import partial
 
@@ -20,21 +19,6 @@ is_channel
 
 # make everything decodable by irc lib
 irc.client.ServerConnection.buffer_class = irc.buffer.LenientDecodingLineBuffer
-
-
-def log_error_nick(info, **err_vars):
-    """Log an error"""
-    print('FOR SOME REASON QUITTING THE USER FAILED')
-    with open('errlog.txt', 'a') as errlog:
-        errlog.write('Quit failed\n')
-        for var_name in err_vars:
-            errlog.write('  info:  {}  {}'.format(var_name, err_vars[var_name]))
-        errlog.write('\n')
-    with open('info.txt', 'a') as infolog:
-        infolog.write('["Quit Failed"],')
-        infolog.write(json.dumps(info, sort_keys=True, indent=4))
-        infolog.write(',\n')
-        infolog.write('\n')
 
 
 class IDict(collections.MutableMapping):
