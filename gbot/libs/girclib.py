@@ -296,7 +296,7 @@ class IRC:
             event_arguments = []
             for arg in event.arguments:
                 event_arguments.append(escape(arg))
-            self.servers[self.name(event.server)].last_activity = ping_timestamp()
+            self.servers[self.name(connection)].last_activity = ping_timestamp()
         else:
             event_arguments = event.arguments
 
