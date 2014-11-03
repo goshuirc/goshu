@@ -296,6 +296,7 @@ class IRC:
             event_arguments = []
             for arg in event.arguments:
                 event_arguments.append(escape(arg))
+            self.servers[self.name(event.server)].last_activity = ping_timestamp()
         else:
             event_arguments = event.arguments
 
@@ -322,7 +323,7 @@ class IRC:
 
     def _handle_ping(self, event):
         self.servers[event.server].pong(event.arguments[0])
-        self.servers[event.server].last_ping = ping_timestamp()
+        self.servers[event.server].last_activity = ping_timestamp()
 
     def _handle_cap(self, event):
         if event.arguments[0] == 'ACK':
@@ -422,7 +423,7 @@ class ServerConnection:
     def _timeout_check(self):
         """Checks if we've timed out. Reconnects if so."""
         if self.connection.connected:
-            timeout_seconds = self.last_ping + timestamp(**self.timeout_length)
+            timeout_seconds = self.last_activity + timestamp(**self.timeout_length)
             now_seconds = ping_timestamp()
             if now_seconds > timeout_seconds:
                 self.disconnect('Ping timeout.')
@@ -451,7 +452,7 @@ class ServerConnection:
         self.cap('REQ', 'multi-prefix')
 
         self.connected = True
-        self.last_ping = ping_timestamp()
+        self.last_activity = ping_timestamp()
 
         # nickserv
         ns_serv = self.info['connection'].get('nickserv_serv_nick', 'Nickserv')
