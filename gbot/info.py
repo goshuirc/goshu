@@ -4,7 +4,6 @@
 # licensed under the BSD 2-clause license
 
 from .libs import helper
-from .libs import girclib
 
 import hashlib
 import json

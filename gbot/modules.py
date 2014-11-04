@@ -11,6 +11,7 @@ import importlib
 import threading
 
 from .libs.helper import JsonHandler
+from .libs.girclib import NickMask
 from .users import USER_LEVEL_NOPRIVS
 
 
@@ -196,11 +197,21 @@ class Modules:
                     if search_command in module_commands:
                         command_info = module_commands[search_command]
                         if userlevel >= command_info.call_level:
-                            if command_info.call not in called:
-                                called.append(command_info.call)
-                                threading.Thread(target=command_info.call,
-                                                 args=(event, command_info,
-                                                       UserCommand(command_name, command_args))).start()
+                            # for commands restricted by channel, make and check the priv lists
+                            source_chan = event.target
+                            source_nick = NickMask(event.source).nick
+
+                            current_channel_whitelist = [self.bot.irc.servers[event.server].istring(chan) for chan in command_info.channel_whitelist]
+                            current_user_whitelist = []
+                            for chan in current_channel_whitelist:
+                                [current_user_whitelist.append(user) for user in self.bot.irc.servers[event.server].get_channel_info(chan)['users']]
+
+                            if source_chan in current_channel_whitelist or source_nick in current_user_whitelist or (not current_channel_whitelist):
+                                if command_info.call not in called:
+                                    called.append(command_info.call)
+                                    threading.Thread(target=command_info.call,
+                                                     args=(event, command_info,
+                                                           UserCommand(command_name, command_args))).start()
                         else:
                             self.bot.gui.put_line('        No Privs')
 
@@ -232,22 +243,23 @@ class Modules:
         else:
             desc = ''
 
-        if 'call_level' in info:
-            call_level = info['call_level']
-        else:
-            call_level = USER_LEVEL_NOPRIVS
+        call_level = info.get('call_level', USER_LEVEL_NOPRIVS)
 
         if 'view_level' in info:
             view_level = info['view_level']
         else:
             view_level = call_level
 
+        channel_whitelist = info.get('channel_whitelist', [])
+
         commands[info['name'][0]] = Command(call=call, desc=desc, call_level=call_level,
-                                            view_level=view_level, json=info)
+                                            view_level=view_level, channel_whitelist=channel_whitelist,
+                                            json=info)
 
         for command in info['name'][1:]:
             commands[command] = Command(call=call, desc=desc, call_level=call_level,
-                                        view_level=view_level, json=info, alias=info['name'][0])
+                                        view_level=view_level, channel_whitelist=channel_whitelist,
+                                        json=info, alias=info['name'][0])
 
         return commands
 
@@ -255,13 +267,18 @@ class Modules:
 class Command:
     """Goshubot command storage."""
     def __init__(self, base_info=None, **kwargs):
+        # defaults
+        self.alias = False
+        self.channel_whitelist = []
+
+        # all other actual data
         if base_info:
             self.call = base_info[0]
             self.desc = base_info[1]
             if len(base_info) > 2:
                 self.call_level = base_info[2]
             else:
-                self.call_level = 0
+                self.call_level = USER_LEVEL_NOPRIVS
 
             if len(base_info) > 3:
                 self.view_level = base_info[3]
@@ -271,9 +288,6 @@ class Command:
         if kwargs:
             for key in kwargs:
                 setattr(self, key, kwargs[key])
-
-        if not hasattr(self, 'alias'):
-            self.alias = False
 
         if isinstance(self.desc, str):
             self.desc = [self.desc]

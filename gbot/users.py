@@ -4,6 +4,7 @@
 # licensed under the BSD 2-clause license
 
 from .info import InfoStore
+from .libs import girclib
 
 USER_LEVEL_NOPRIVS = 0
 USER_LEVEL_ADMIN = 5
