@@ -9,7 +9,9 @@ import imp
 import inspect
 import importlib
 import threading
+
 from .libs.helper import JsonHandler
+from .users import USER_LEVEL_NOPRIVS
 
 
 class Module:
@@ -233,7 +235,7 @@ class Modules:
         if 'call_level' in info:
             call_level = info['call_level']
         else:
-            call_level = 0
+            call_level = USER_LEVEL_NOPRIVS
 
         if 'view_level' in info:
             view_level = info['view_level']

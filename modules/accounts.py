@@ -4,6 +4,7 @@
 # licensed under the BSD 2-clause license
 
 from gbot.modules import Module
+from gbot.users import USER_LEVEL_OWNER
 
 
 class accounts(Module):
@@ -76,8 +77,8 @@ class accounts(Module):
     def owner(self, event, command, usercommand):
         name = self.bot.accounts.account(event.source, event.server)
         if name:
-            if self.bot.settings._encrypt(usercommand.arguments) == self.bot.settings.store['passhash']:
-                self.bot.accounts.set_access_level(name, 10)
+            if self.bot.settings.encrypt(usercommand.arguments) == self.bot.settings.get('passhash', None):
+                self.bot.accounts.set_access_level(name, USER_LEVEL_OWNER)
                 self.bot.irc.msg(event, 'You are now a bot owner')
 
     def setaccess(self, event, command, usercommand):

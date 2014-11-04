@@ -12,10 +12,10 @@ import codecs
 import os
 
 
-class Manager():
-    """Manages info/settings; to be subclassed."""
+class InfoStore():
+    """Stores and manages information, settings, etc; to be subclassed."""
 
-    name = 'Manager'
+    name = 'InfoStore'
 
     def __init__(self, bot, path=None):
         self.bot = bot
@@ -83,25 +83,34 @@ class Manager():
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
-        file = open(save_path, 'w')
-        file.write(json.dumps(self.store, sort_keys=True, indent=4))
-        file.close()
+        with open(save_path, 'w') as save_file:
+            save_file.write(json.dumps(self.store, sort_keys=True, indent=4))
 
     def update(self):
         """Update the current data file, to be overwritten by subclass."""
         ...
 
-    def _encrypt(self, password):
+    # data funcs
+    def set(self, key, value):
+        """Sets the given value in our store"""
+        self.store[key] = value
+
+    def get(self, key, default=None):
+        """Gets the given value from our store, or default."""
+        return self.store.get(key, default)
+
+    # misc
+    def encrypt(self, password):
         """Returns hashed password."""
         if type(password) == str:
             password = password.encode()
         return hashlib.sha512(password).hexdigest()
 
 
-class Info(Manager):
+class IrcInfo(InfoStore):
     """Manages goshubot IRC info."""
 
-    name = 'Info'
+    name = 'IrcInfo'
 
     def update(self):
         """Make sure servers are correct, etc."""
@@ -216,10 +225,10 @@ class Info(Manager):
             new_path[attribute_name] = new_value
 
 
-class Settings(Manager):
+class BotSettings(InfoStore):
     """Manages goshubot settings."""
 
-    name = 'Settings'
+    name = 'BotSettings'
 
     def update(self):
         """Update the current data file."""
@@ -242,14 +251,14 @@ class Settings(Manager):
                 if password:
                     new_data = self.bot.gui.get_input(' %s [*****]: ' % display_name, password=True).strip()
                     if new_data != '':
-                        return self._encrypt(new_data.encode('utf8'))
+                        return self.encrypt(new_data.encode('utf8'))
                     else:
                         return old_data
             except KeyError:
                 data = ''
                 while data == '':
                     data = self.bot.gui.get_input(' %s: ' % display_name, password=password).strip()
-                return self._encrypt(data.split()[0].encode('utf8'))
+                return self.encrypt(data.split()[0].encode('utf8'))
 
         else:
             try:
@@ -264,86 +273,3 @@ class Settings(Manager):
                 while data == '':
                     data = self.bot.gui.get_input(' %s: ' % display_name).strip()
                 return data.split()[0]
-
-
-class Accounts(Manager):
-    """Manages Goshubot Account Info."""
-
-    name = 'Accounts'
-
-    def add_account(self, name, password):
-        self.store[name] = {}
-        self.store[name]['password'] = self._encrypt(password)
-
-        self.store[name]['modules'] = {}
-
-        self.save()
-
-    def remove_account(self, name):
-        self.load()
-        if name in self.store:
-            del self.store[name]
-            self.save()
-            return True
-        else:
-            self.save()
-            return False
-
-    def account_exists(self, name):
-        self.load()
-        if name in self.store:
-            return True
-        else:
-            return False
-
-    def is_password(self, name, password):
-        self.load()
-        if self.account_exists(name):
-            if self.store[name]['password'] == self._encrypt(password):
-                return True
-        return False
-
-    def set_password(self, name, password):
-        self.load()
-        if self.account_exists(name):
-            self.store[name]['password'] = self._encrypt(password)
-            self.save()
-
-    def login(self, name, password, server, userstring):
-        self.load()
-        if self.is_password(name, password):
-            self.bot.irc.servers[server].create_user(userstring)
-            user_nick = self.bot.irc.servers[server].istring(girclib.NickMask(userstring).nick)
-            self.bot.irc.servers[server].info['users'][user_nick]['accountinfo'] = {}
-            self.bot.irc.servers[server].info['users'][user_nick]['accountinfo']['name'] = name
-            self.bot.irc.servers[server].info['users'][user_nick]['accountinfo']['userhost'] = userstring.split('!')[1]
-            return True
-        else:
-            return False
-
-    def account(self, userstring, server):
-        self.load()
-        user_nick = self.bot.irc.servers[server].istring(girclib.NickMask(userstring).nick)
-        if user_nick in self.bot.irc.servers[server].info['users']:
-            if 'accountinfo' in self.bot.irc.servers[server].info['users'][user_nick]:
-                if 'userhost' in self.bot.irc.servers[server].info['users'][user_nick]['accountinfo']:
-                    if self.bot.irc.servers[server].info['users'][user_nick]['accountinfo']['userhost'] == userstring.split('!')[1]:
-                        return self.bot.irc.servers[server].info['users'][user_nick]['accountinfo']['name']
-        return None
-
-    def set_access_level(self, name, level=0):
-        if self.account_exists(name):
-            self.store[name]['level'] = level
-            if level == 0:
-                del self.store[name]['level']
-            self.save()
-            return True
-        return False
-
-    def access_level(self, name):
-        self.load()
-        level = 0
-        if self.account_exists(name):
-            if 'level' in self.store[name]:
-                level = self.store[name]['level']
-        return level

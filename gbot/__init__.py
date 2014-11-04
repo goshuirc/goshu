@@ -3,7 +3,7 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the BSD 2-clause license
 
-from . import gui, info, irc, modules
+from . import gui, info, irc, modules, users
 from .libs import log
 
 
@@ -14,9 +14,9 @@ class Bot:
         self.debug = debug
         self.logger = log.Logger
 
-        self.accounts = info.Accounts(self)
-        self.settings = info.Settings(self)
-        self.info = info.Info(self)
+        self.accounts = users.AccountInfo(self)
+        self.settings = info.BotSettings(self)
+        self.info = info.IrcInfo(self)
         self.irc = irc.IRC(self)
         self.modules = modules.Modules(self)
         self.gui = gui.GuiManager(self)
