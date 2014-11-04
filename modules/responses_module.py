@@ -14,10 +14,10 @@ class responses_module(Module):
         Module.__init__(self, bot)
         random.seed()
 
-        # /s means source, the nick of whoever did the command
-        # /t means target, either whoever they write afterwards, or the current self nick
-        # note: /S and /T represent allcaps versions of /s and /t
-        # /m at the start means: send this line as a /me rather than a /msg
+        # @s means source, the nick of whoever did the command
+        # @t means target, either whoever they write afterwards, or the current self nick
+        # note: @S and @T represent allcaps versions of @s and @t
+        # @m at the start means: send this line as a /me rather than a /msg
 
     def combined(self, event, command, usercommand):
         source = event.source.split('!')[0]
