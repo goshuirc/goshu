@@ -7,6 +7,8 @@ from gbot.modules import Module
 import os
 import json
 
+from gbot.users import USER_LEVEL_OWNER
+
 
 class IEncoder(json.JSONEncoder):
     def default(self, o):
@@ -23,7 +25,7 @@ class info(Module):
         Module.__init__(self, bot)
         self.events = {
             'commands': {
-                'info': [self.info, 'output bot debug info', 10],
+                'info': [self.info, 'output bot debug info', USER_LEVEL_OWNER],
             },
         }
 

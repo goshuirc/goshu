@@ -3,21 +3,76 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the BSD 2-clause license
 
+import os
+import json
+import random
+
 from gbot.modules import Module
 from gbot.libs.girclib import unescape
-import random
+from gbot.users import USER_LEVEL_ADMIN
 
 
 class responses_module(Module):
 
     def __init__(self, bot):
         Module.__init__(self, bot)
+        self.events = {
+            'commands': {
+                'response': [self.response_handle, ['create <name> --- Create a new, blank \'response\' under <name>'], USER_LEVEL_ADMIN],
+            },
+        }
+
         random.seed()
 
         # @s means source, the nick of whoever did the command
         # @t means target, either whoever they write afterwards, or the current self nick
         # note: @S and @T represent allcaps versions of @s and @t
         # @m at the start means: send this line as a /me rather than a /msg
+
+    def response_handle(self, event, command, usercommand):
+        """Provide useful responses-handling functions."""
+        if not usercommand.arguments:
+            return
+
+        do = usercommand.arguments.split()[0].lower()
+
+        if do == 'create':
+            if len(usercommand.arguments.split()) > 1:
+                module_name = usercommand.arguments.lower().split()[1]
+                filename = os.path.join('modules/responses_module', module_name)
+                filename += '.res.json'
+
+                if os.path.exists(filename):
+                    self.bot.irc.msg(event, 'That module already exists, ignoring')
+                    return
+            else:
+                self.bot.irc.msg(event, 'You must give me name for the response you want to create')
+                return
+
+            new_response_dict = {
+                'description': '-- Description Here',
+                'call_level': 10,
+                'view_level': 10,
+                'channel_whitelist': '#example',
+                '1': [
+                    '@s sent me a message!'
+                ],
+                '1pre': '',
+                '1post': '',
+                '2': [
+                    '@s wants me to talk to @t!'
+                ],
+                '2pre': '',
+                '2post': '',
+            }
+
+            with open(filename, 'w') as module_file:
+                module_file.write('{}\n'.format(json.dumps(new_response_dict, sort_keys=True, indent=4)))
+
+            self.bot.irc.msg(event, 'New responses file created in {}'.format(filename))
+            self.bot.irc.msg(event, 'By default this responses file will not be accessible by ordinary users,'
+                                    ' and will be channel-restricted, so you must modify it on-disk to do'
+                                    ' what you want!')
 
     def combined(self, event, command, usercommand):
         source = event.source.split('!')[0]

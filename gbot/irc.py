@@ -108,14 +108,18 @@ def get_target(event, zone, strict=False):
 
     If dcc is requested but not avaliable and not strict, simply go to private instead.
     If dcc is not avaliable and strict, do not send and feturn False."""
+    # sanity check
+    if zone not in ['public', 'private', 'dcc']:
+        return None
+
     if zone is 'public':
         target = event.from_to
     elif zone is 'dcc':
         # skip to below for now, will handle actual dcc later
         if strict:
-            zone = 'private'
-        else:
             return None
+        else:
+            zone = 'private'
 
     if zone is 'private':
         if girclib.is_channel(event.source):

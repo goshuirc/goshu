@@ -22,10 +22,10 @@ class status(Module):
 
         for server in self.bot.irc.servers:
             server_count += 1
-            server_info += self.bot.irc.servers[server].info['name'] + ' -- '
-            server_info += 'connected to ' + str(len(self.bot.irc.servers[server].info['channels'])) + ' channels'
+            server_info += self.bot.irc.servers[server].info['name'] + ': '
+            server_info += 'Connected to ' + str(len(self.bot.irc.servers[server].info['channels'])) + ' channels'
             server_info += ', '
-            server_info += 'tracking ' + str(len(self.bot.irc.servers[server].info['users'])) + ' users  ;  '
+            server_info += 'I can see ' + str(len(self.bot.irc.servers[server].info['users'])) + ' users  ;  '
 
         response = '*** Status:  ' + server_info[:-5]
 

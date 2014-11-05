@@ -5,6 +5,7 @@
 
 from gbot.modules import Module
 from gbot.libs.helper import split_num
+from gbot.users import USER_LEVEL_ADMIN
 
 
 class commands(Module):
@@ -14,10 +15,10 @@ class commands(Module):
         Module.__init__(self, bot)
         self.events = {
             'commands': {
-                'msg': [self.msg, '<target> <message> --- send a /msg', 5],
-                'me': [self.me, '<target> <message> --- send a /me', 5],
-                'join': [self.join, '<channel> --- join channel', 5],
-                'part': [self.part, '<channel> [reason] --- leave channel', 5],
+                'msg': [self.msg, '<target> <message> --- send a /msg', USER_LEVEL_ADMIN],
+                'me': [self.me, '<target> <message> --- send a /me', USER_LEVEL_ADMIN],
+                'join': [self.join, '<channel> --- join channel', USER_LEVEL_ADMIN],
+                'part': [self.part, '<channel> [reason] --- leave channel', USER_LEVEL_ADMIN],
             },
         }
 

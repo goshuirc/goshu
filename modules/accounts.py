@@ -4,7 +4,7 @@
 # licensed under the BSD 2-clause license
 
 from gbot.modules import Module
-from gbot.users import USER_LEVEL_OWNER
+from gbot.users import USER_LEVEL_ADMIN, USER_LEVEL_OWNER
 
 
 class accounts(Module):
@@ -18,8 +18,8 @@ class accounts(Module):
                 'register': [self.register, '<username> <password> [email] --- register a goshu account'],
                 'login': [self.login, '[[username] [password]] --- login to a goshu account, if no user/pass use nickserv integration'],
                 'loggedin': [self.loggedin, '--- see if you are logged in'],
-                'owner': [self.owner, '<password> --- make yourself a bot owner', 0, 10],
-                'setaccess': [self.setaccess, "<username> <level> --- set user's access level", 1],
+                'owner': [self.owner, '<password> --- make yourself a bot owner', 0, USER_LEVEL_OWNER],
+                'setaccess': [self.setaccess, "<username> <level> --- set user's access level", USER_LEVEL_ADMIN],
                 'nickserv': [self.nickserv, "<link/list/del> --- link, list, or delete nickserv-goshu accounts"],
             },
             'in': {

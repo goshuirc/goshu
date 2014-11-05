@@ -4,7 +4,7 @@
 # licensed under the BSD 2-clause license
 
 from gbot.modules import Module
-
+from gbot.users import USER_LEVEL_ADMIN
 
 class modules(Module):
     """Handles loading and unloading modules and their internal JSON dicts"""
@@ -13,8 +13,8 @@ class modules(Module):
         Module.__init__(self, bot)
         self.events = {
             'commands': {
-                'module': [self.module_handle, ['<load/unload/reload> [name] --- load/unload/reload module specified by <name>', 'list --- list loaded modules'], 5],
-                'json': [self.json_handle, "reload [name] --- reload the given module's internal JSON dict", 5],
+                'module': [self.module_handle, ['load/unload/reload [name] --- load/unload/reload module specified by <name>', 'list --- list loaded modules'], USER_LEVEL_ADMIN],
+                'json': [self.json_handle, "reload [name] --- reload the given module's internal JSON dict", USER_LEVEL_ADMIN],
             },
         }
 
