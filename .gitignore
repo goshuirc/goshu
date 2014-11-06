@@ -22,6 +22,9 @@ Thumbs.db
 *.pyo
 *__pycache__
 
+## docs
+docs/_build/*
+
 ## goshu3
 config/*
 logs/*
