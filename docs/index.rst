@@ -1,4 +1,4 @@
-.. image:: logo.svg
+.. image:: logo.*
     :align: center
     :alt: Goshu
 
