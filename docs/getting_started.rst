@@ -16,14 +16,17 @@ Installing
 
 First off, get a copy of Goshu using Git – this method makes it extremely easy to update and get new patches and fixes.
 
+.. highlight:: none
     $ git clone https://github.com/DanielOaks/goshu.git
 
 Install Goshu's Python dependencies – this may take a while:
 
+.. highlight:: none
     $ pip3 install -r requirements.txt
 
 And start the bot itself with:
 
+.. highlight:: none
     $ python3 goshu.py
 
 
@@ -47,17 +50,21 @@ Account Setup
 
 Once the bot connects to your given IRC networks, you'll need to make sure you can control the bot! You need to create a bot account, login, and make yourself a 'Bot Owner', and the below log shows how you can do that.
 
+.. highlight:: none
     <dan> 'register coolguy57 usrpaswd
     <goshu> Account registered!
     <dan> 'login coolguy57 usrpaswd
     <goshu> Login accepted!
 
+.. highlight:: none
     <dan> 'list
     <goshu> *** Commands: calc, d, def, egg, google, help, list, loggedin, login, nickserv, pokemon, pokerst, poketeam, random, register, status, suggest, ud
 
+.. highlight:: none
     <dan> 'owner botpassword
     <goshu> You are now a bot owner
 
+.. highlight:: none
     <dan> 'list
     <goshu> *** Commands: calc, d, def, egg, google, help, info, join, list, loggedin, login, me, module, msg, nickserv, owner, part, pokemon, pokerst, poketeam, random, register, setaccess, status, suggest, ud
 

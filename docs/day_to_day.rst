@@ -11,6 +11,7 @@ Bot Admins are people who can access lots of the backend functions of Goshu. Thi
 
 To appoint a Bot Admin, you need to make sure the user has created their own account with your Goshu IRC bot. After this, you simply set their account level with the following:
 
+.. highlight:: none
     <dan> 'login coolguy57 usrpaswd
     <goshu> Login accepted!
     <dan> 'setaccess my_good_friend admin
