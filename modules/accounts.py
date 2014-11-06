@@ -86,12 +86,29 @@ class accounts(Module):
         if len(splitargs) < 2:
             return
 
+        # make sure user has privs
         useraccount = self.bot.accounts.account(event.source, event.server)
         if useraccount:
             accesslevel = self.bot.accounts.access_level(useraccount)
         else:
             return
 
+        # get access level
+        access_level_to_set = None
+        if splitargs[1].isdecimal():
+            access_level_to_set = int(splitargs[1])
+        elif splitargs[1].lower() == 'admin':
+            access_level_to_set = USER_LEVEL_ADMIN
+        elif splitargs[1].lower() == 'owner':
+            access_level_to_set = USER_LEVEL_OWNER
+        else:
+            self.bot.irc.msg(event, "Don't know what that access level means. You can either use a number, or admin/owner")
+            return
+
+        if access_level_to_set >= accesslevel and accesslevel != USER_LEVEL_OWNER:
+            self.bot.irc.msg(event, 'You can only set access levels lower than your own (lower than {})'.format(accesslevel))
+            return
+
         if splitargs[1].isdecimal() and accesslevel >= int(splitargs[1]):
-            self.bot.irc.msg(event, "Setting {acct}'s Access Level to {level}".format(acct=splitargs[0], level=splitargs[1]))
+            self.bot.irc.msg(event, "Setting {acct}'s access level to {level}".format(acct=splitargs[0], level=splitargs[1]))
             self.bot.accounts.set_access_level(splitargs[0], int(splitargs[1]))

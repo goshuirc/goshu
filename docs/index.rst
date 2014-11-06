@@ -20,6 +20,8 @@ Using Goshu
    :maxdepth: 2
 
    getting_started
+   day_to_day
+
    faq
 
 
