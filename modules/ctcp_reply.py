@@ -22,7 +22,15 @@ class ctcp_reply(Module):
     def ctcp_reply(self, event):
 
         if event.arguments[0] == 'VERSION':
-            self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'VERSION Goshu:3:https://github.com/DanielOaks/goshu')
+            message = 'VERSION Goshu:3:https://github.com/DanielOaks/goshu'
+
+            # add owner's nick if one is online
+            runner_level, online_runners = self.bot.accounts.online_bot_runners(event.server)
+            if online_runners:
+                message += ' ' * 7
+                message += 'online contact{}: {}'.format('s' if len(online_runners) > 1 else '', ' '.join(online_runners))
+
+            self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, message)
 
         elif event.arguments[0] == 'USERINFO':
             userinfostring = None

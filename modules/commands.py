@@ -49,5 +49,3 @@ class commands(Module):
     def shutdown(self, event, command, usercommand):
         message = usercommand.arguments
         self.bot.irc.servers[event.server].shutdown(message)
-        # self.bot.irc.disconnect_all(message)
-        # self.bot.irc.running = False

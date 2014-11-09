@@ -94,3 +94,21 @@ class AccountInfo(InfoStore):
             if 'level' in self.store[name]:
                 level = self.store[name]['level']
         return level
+
+    def online_bot_runners(self, server):
+        """Returns a list of the currently online owners, superadmins/admins, or none."""
+        privs = {}
+        user_info = dict(self.bot.irc.servers[server].info['users'])
+        for user_nick in user_info:
+            if 'accountinfo' in user_info[user_nick]:
+                access_level = self.access_level(user_info[user_nick]['accountinfo']['name'])
+                if access_level >= USER_LEVEL_ADMIN:
+                    if access_level not in privs:
+                        privs[access_level] = []
+                    privs[access_level].append(user_nick)
+
+        if privs:
+            max_priv_level = sorted(privs)[-1]
+            return max_priv_level, privs[max_priv_level]
+
+        return 0, []
