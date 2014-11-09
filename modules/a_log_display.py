@@ -6,6 +6,7 @@
 from time import strftime, localtime
 import random
 import os
+import datetime
 
 import colorama
 colorama.init()
@@ -71,6 +72,17 @@ class a_log_display(Module):
             output += '-@c '
             output += event.arguments[0]
 
+        elif event.type in ['cannotsendtochan', '408', ]:
+            chan = escape(event.arguments[0])
+            msg = escape(event.arguments[1])
+            targets.append(chan)
+
+            output += '@c3-@c'
+            output += escape(chan)
+            output += '@c3- '
+            output += '@r@b** @c4Message Rejected@r: '
+            output += msg
+
         elif event.type in ['pubmsg', ]:
             targets.append(event.target)
             output += '@c3-@c'
@@ -95,7 +107,7 @@ class a_log_display(Module):
                 output += ' '
             output += self.nick_color(event.source.split('!')[0])
             output += '@c14>@c '
-            output += event.arguments[0]
+            output += hide_pw_if_necessary(event.arguments[0], self.bot.settings.store['prefix'])
 
         elif event.type in ['privmsg', ]:
             output += '@c3-@c'
@@ -109,7 +121,7 @@ class a_log_display(Module):
             output += '@c14<@c'
             output += self.nick_color(event.source.split('!')[0])
             output += '@c14>@c '
-            output += event.arguments[0]
+            output += hide_pw_if_necessary(event.arguments[0], self.bot.settings.store['prefix'])
 
         elif event.type in ['action', ]:
             output += '@c3-@c'
@@ -156,6 +168,22 @@ class a_log_display(Module):
             output += modes
             output += '@c14]@c'
 
+        elif event.type in ['channelcreate', ]:
+            chan = escape(event.arguments[0])
+            timestamp = escape(event.arguments[1])
+
+            try:
+                created_ts = datetime.datetime.fromtimestamp(int(timestamp))
+            except:
+                return  # malformed
+
+            targets.append(chan)
+            output += '@c6-@c!@c6-@c '
+            output += 'times:'
+            output += '@c10' + chan + '@c '
+            output += 'Channel created @b'
+            output += created_ts.strftime('%a, %d %b %Y %H:%M:%S')
+
         elif event.type in ['namreply', ]:
             chan = escape(event.arguments[1])
             nicks = escape(event.arguments[2])
@@ -167,6 +195,48 @@ class a_log_display(Module):
             output += '@c14[@c'
             output += nicks
             output += '@c14]@c'
+
+        elif event.type in ['endofnames', ]:
+            chan = escape(event.arguments[0])
+            user_dict = self.bot.irc.servers[event.server].get_channel_info(chan)['users']
+
+            targets.append(chan)
+            output += '@c6-@c!@c6-@c '
+            output += 'stats:'
+            output += '@c10' + chan + '@c: '
+            output += '{} nick{} '.format(len(user_dict), 's' if len(user_dict) > 1 else '')
+            output += '@c3(@c'
+
+            normal_users = 0
+            voiced_users = 0
+            halfop_users = 0
+            op_users = 0
+
+            for user in user_dict:
+                # todo: populate and work from ISUPPORT lists
+                if '@' in user_dict[user] or '!' in user_dict[user] or '&' in user_dict[user] or '~' in user_dict[user]:
+                    op_users += 1
+                elif '%' in user_dict[user]:
+                    halfop_users += 1
+                elif '+' in user_dict[user]:
+                    voiced_users += 1
+                else:
+                    normal_users += 1
+
+            priv_lists = []
+
+            if op_users:
+                priv_lists.append('@b{}@r ops'.format(op_users))
+            if halfop_users:
+                priv_lists.append('@b{}@r halfops'.format(halfop_users))
+            if voiced_users:
+                priv_lists.append('@b{}@r voices'.format(voiced_users))
+            if normal_users:
+                priv_lists.append('@b{}@r normals'.format(normal_users))
+
+            output += ', '.join(priv_lists)
+
+            output += '@c3)@c'
 
         elif event.type in ['kick', ]:
             targets.append(escape(event.target))
@@ -218,15 +288,19 @@ class a_log_display(Module):
         elif event.type in ['ctcp', ] and event.arguments[0] == 'ACTION':
             return
 
-        elif event.type in ['ping', 'pong', 'endofnames', ]:
+        elif event.type in ['ping', 'pong', ]:
             return
 
         elif event.type in ['cap', ]:
             if event.direction == 'out':
-                return
+                if event.target[0].upper() == 'REQ':
+                    output += 'IRCv3 CAP Requested by Client: {}'.format(' '.join(event.target[1:]))
+                else:
+                    return  # end, so ignore
 
-            if event.arguments[0].upper() == 'ACK':
-                output += 'IRCv3 CAP Enabled: {}'.format(' '.join(event.arguments[1:]))
+            if event.direction == 'in':
+                if event.arguments[0].upper() == 'ACK':
+                    output += 'IRCv3 CAP Enabled by Server: {}'.format(' '.join(event.arguments[1:]))
 
         else:
             targets.append('tofix')
@@ -252,11 +326,11 @@ class a_log_display(Module):
             path = 'logs/{}.{}.log'.format(server_escape, target)
 
             if target not in self.logfiles_open or not os.path.exists(path):
-                output = '@c14 Logfile Opened - ' + strftime("%A %B %d, %H:%M:%S %Y", localtime()) + '\n' + output
-                self.logfiles_open[target] = strftime("%A %B %d", localtime())
-            elif self.logfiles_open[target] != strftime("%A %B %d", localtime()):
-                output = '@c14 New Day - ' + strftime("%A %B %d, %H:%M:%S %Y", localtime()) + '\n' + output
-                self.logfiles_open[target] = strftime("%A %B %d", localtime())
+                output = '@c14 Logfile Opened - ' + strftime('%A %B %d, %H:%M:%S %Y', localtime()) + '\n' + output
+                self.logfiles_open[target] = strftime('%A %B %d', localtime())
+            elif self.logfiles_open[target] != strftime('%A %B %d', localtime()):
+                output = '@c14 New Day - ' + strftime('%A %B %d, %H:%M:%S %Y', localtime()) + '\n' + output
+                self.logfiles_open[target] = strftime('%A %B %d', localtime())
 
             outfile = open(path.lower(), 'a', encoding='utf-8')
             outfile.write(unescape(output) + '\n')
@@ -269,8 +343,24 @@ class a_log_display(Module):
         return '@c' + str(self.nick_colors[nick]) + nick
 
 
+def hide_pw_if_necessary(msg, command_char="'"):
+    """If a password message is in the input string, hide it in the output."""
+    msg_parts = msg.split()
+    command = msg_parts[0].lower()
+
+    if command == '{}login'.format(command_char):
+        if len(msg_parts) > 2:
+            msg_parts[2] = '******'
+    elif command == '{}register'.format(command_char):
+        if len(msg_parts) > 2:
+            msg_parts[2] = '******'
+
+    return ' '.join(msg_parts)
+
+
 # TODO: this function needs to support @{@} format
 def display_unescape(in_str):
+    in_str = in_str.replace('@{@}', '@@')
     output = ''
     while in_str != '':
         if in_str[0] == '@':
