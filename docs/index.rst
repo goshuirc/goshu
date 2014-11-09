@@ -9,7 +9,7 @@ Goshu was written, initially, over the course of a few months to replace and rep
 .. WARNING::
     Although I do try my best to not break things when working on Goshu, I'm not aware of anyone besides myself using it. Thus, I'm not as worried about breaking module interfaces and such in minor ways, because I can fix my own modules without issue.
 
-    If you can't program in Python, it may be best to use another well-proven IRC bot project, that's less likely to break compatability. If you do run into anything, please feel free to come yell at me either with the details on the contact page below, or on `Rizon IRC Network <http://rizon.net/chat>`_ – I'll be under the nick ``danneh_``!
+    If you can't program in Python, it may be best to use another well-proven IRC bot project that's less likely to break compatability. If you do run into anything, please feel free to come yell at me either with the details on the contact page below, or on `Rizon IRC Network <http://rizon.net/chat>`_ – I'll be under the nick ``danneh_``
 
 The documentation is split into two sections below, the first being for users of Goshu and the second for those who want to work on or write their own modules for Goshu.
 
