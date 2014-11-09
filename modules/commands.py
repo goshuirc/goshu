@@ -5,7 +5,7 @@
 
 from gbot.modules import Module
 from gbot.libs.helper import split_num
-from gbot.users import USER_LEVEL_ADMIN
+from gbot.users import USER_LEVEL_ADMIN, USER_LEVEL_SUPERADMIN
 
 
 class commands(Module):
@@ -19,9 +19,12 @@ class commands(Module):
                 'me': [self.me, '<target> <message> --- send a /me', USER_LEVEL_ADMIN],
                 'join': [self.join, '<channel> --- join channel', USER_LEVEL_ADMIN],
                 'part': [self.part, '<channel> [reason] --- leave channel', USER_LEVEL_ADMIN],
+
+                'shutdown': [self.shutdown, '[message] -- shutdown goshu', USER_LEVEL_SUPERADMIN]
             },
         }
 
+    # irc
     def msg(self, event, command, usercommand):
         msg_target, msg_msg = split_num(usercommand.arguments)
 
@@ -41,3 +44,10 @@ class commands(Module):
         channel, reason = split_num(usercommand.arguments)
 
         self.bot.irc.servers[event.server].part(channel, reason)
+
+    # goshu control
+    def shutdown(self, event, command, usercommand):
+        message = usercommand.arguments
+        self.bot.irc.servers[event.server].shutdown(message)
+        # self.bot.irc.disconnect_all(message)
+        # self.bot.irc.running = False

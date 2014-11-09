@@ -236,6 +236,10 @@ class IRC:
         self.add_handler('in', 'ping', self._handle_ping, -42)
         self.add_handler('in', 'cap', self._handle_cap)
 
+        self.running = True
+        self.shutdown_message = 'Goodbye'
+        self.servers_shutting_down = {}
+
     # Servers
     def server(self, name, **kwargs):
         connection = ServerConnection(name, self, **kwargs)
@@ -253,12 +257,41 @@ class IRC:
             if self.servers[server].connection == connection:
                 return server
 
-    # Processing
+    # Processing and shutting down
     def process_once(self, timeout=0):
         self.irc.process_once(timeout)
 
     def process_forever(self, timeout=0.2):
-        self.irc.process_forever(timeout)
+        while self.running:
+            self.irc.process_once(timeout)
+
+            # let us shut servers down nicely
+            if self.servers_shutting_down:
+                for server_name in dict(self.servers_shutting_down):
+                    message = self.servers_shutting_down[server_name]
+                    self.servers[server_name].irc_disconnect(message)
+                    del self.servers_shutting_down[server_name]
+                    del self.servers[server_name]
+
+                # shutdown if no servers are running anymore
+                if len(self.servers) == 0:
+                    self.running = False
+
+        # and let us shut ourselves down nicely
+        self.shutdown()
+
+    def shutdown(self, message=''):
+        """When called once, starts the shutdown. process_forever() then finishes it off properly once finished processing.
+
+        We need to shutdown this way, because otherwise process_once gets its socket ripped away before it's finished!
+        """
+        if self.running:
+            if message:
+                self.shutdown_message = message
+        else:
+            for server in self.servers:
+                self.servers[server].irc_disconnect(self.shutdown_message)
+                del self.servers[server]
 
     # Handling
     def add_handler(self, direction, event, handler, priority=0):
@@ -313,12 +346,6 @@ class IRC:
         if event.arguments[0] == 'ACK':
             if self.servers[event.server]._first_cap:
                 self.servers[event.server].cap('END')
-
-    # Disconnect
-    def disconnect_all(self, message):
-        for name in self.servers.copy():
-            self.servers[name].disconnect(message)
-            del self.servers[name]
 
 # ping timeouts
 timeout_check_interval = {
@@ -422,7 +449,12 @@ class ServerConnection:
 
         self._send_startup()
 
-    def disconnect(self, message):
+    def shutdown(self, message):
+        """Shutdown command user gives us."""
+        if self.connected:
+            self.irc.servers_shutting_down[self.name] = message
+
+    def irc_disconnect(self, message):
         # don't wipe info['connection'] in case we reconnect
         self.info['channels'] = IDict(std=self.info['server']['isupport']['CASEMAPPING'])
         self.info['users'] = IDict(std=self.info['server']['isupport']['CASEMAPPING'])

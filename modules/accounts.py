@@ -4,7 +4,7 @@
 # licensed under the BSD 2-clause license
 
 from gbot.modules import Module
-from gbot.users import USER_LEVEL_ADMIN, USER_LEVEL_OWNER
+from gbot.users import USER_LEVEL_ADMIN, USER_LEVEL_SUPERADMIN, USER_LEVEL_OWNER
 
 
 class accounts(Module):
@@ -99,10 +99,12 @@ class accounts(Module):
             access_level_to_set = int(splitargs[1])
         elif splitargs[1].lower() == 'admin':
             access_level_to_set = USER_LEVEL_ADMIN
+        elif splitargs[1].lower() == 'superadmin':
+            access_level_to_set = USER_LEVEL_SUPERADMIN
         elif splitargs[1].lower() == 'owner':
             access_level_to_set = USER_LEVEL_OWNER
         else:
-            self.bot.irc.msg(event, "Don't know what that access level means. You can either use a number, or admin/owner")
+            self.bot.irc.msg(event, "Don't know what that access level means. You can either use a number, or admin/superadmin/owner")
             return
 
         if access_level_to_set >= accesslevel and accesslevel != USER_LEVEL_OWNER:

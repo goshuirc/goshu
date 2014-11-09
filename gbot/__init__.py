@@ -27,4 +27,4 @@ class Bot:
         try:
             self.irc.process_forever()
         except KeyboardInterrupt:
-            self.irc.disconnect_all('Goodbye')
+            self.irc.shutdown('Goodbye')
