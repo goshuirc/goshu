@@ -346,7 +346,10 @@ class a_log_display(Module):
 def hide_pw_if_necessary(msg, command_char="'"):
     """If a password message is in the input string, hide it in the output."""
     msg_parts = msg.split()
-    command = msg_parts[0].lower()
+    if len(msg_parts):
+        command = msg_parts[0].lower()
+    else:
+        command = ''
 
     if command == '{}login'.format(command_char):
         if len(msg_parts) > 2:
