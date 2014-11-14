@@ -219,7 +219,7 @@ class IRC:
     """Wrapper for irclib's IRC class."""
 
     def __init__(self):
-        self.irc = irc.client.IRC()
+        self.irc = irc.client.Manifold()
 
         self.info_funcs = []  # funcs to call when info updates
 
@@ -232,9 +232,10 @@ class IRC:
         }
 
         self.irc.add_global_handler('all_events', self._handle_irclib)
-        self.irc.remove_global_handler('irc', irc.client._ping_ponger)
+        self.irc.remove_global_handler('ping', irc.client._ping_ponger)
         self.add_handler('in', 'ping', self._handle_ping, -42)
         self.add_handler('in', 'cap', self._handle_cap)
+        self.add_handler('in', 'welcome', self._handle_startup)
 
         self.running = True
         self.shutdown_message = 'Goodbye'
@@ -338,6 +339,9 @@ class IRC:
                             called.append(h[1])
                             h[1](event)
 
+    def _handle_startup(self, event):
+        self.servers[event.server].send_startup()
+
     def _handle_ping(self, event):
         self.servers[event.server].pong(event.arguments[0])
         self.servers[event.server].last_activity = ping_timestamp()
@@ -391,7 +395,9 @@ class ServerConnection:
         self.nickserv_format = 'IDENTIFY {ns_pass}'
 
     # Connection
-    def connect(self, address, port, nick, password=None, username=None, ircname=None, localaddress="", localport=0, sslsock=False, ipv6=False, autojoin_channels=[], wait_time=5, nickserv_serv_nick='Nickserv', nickserv_password=None):
+    def connect(self, address, port, nick, password=None, username=None, ircname=None,
+                localaddress="", localport=0, sslsock=False, ipv6=False, autojoin_channels=[],
+                wait_time=5, nickserv_serv_nick='Nickserv', nickserv_password=None):
         self.connection = self.irc.irc.server()
         self.info['connection'] = {
             'address': address,
@@ -427,8 +433,6 @@ class ServerConnection:
         self.connection.connect(address, port, nick, password, username, ircname, Factory)
         self.connection.buffer.errors = 'replace'
 
-        self._send_startup()
-
         self.irc.irc.execute_every(timestamp(**self.timeout_check_interval), self._timeout_check)
 
     def _timeout_check(self):
@@ -447,8 +451,6 @@ class ServerConnection:
     def reconnect(self):
         self.connection.reconnect()
 
-        self._send_startup()
-
     def shutdown(self, message):
         """Shutdown command user gives us."""
         if self.connected:
@@ -462,7 +464,7 @@ class ServerConnection:
         self.connected = False
         self.connection.disconnect(message)
 
-    def _send_startup(self):
+    def send_startup(self):
         """Send the stuff we need to at startup."""
         self._first_cap = True
         self.cap('REQ', 'multi-prefix')

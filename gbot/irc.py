@@ -82,10 +82,10 @@ class IRC(girclib.IRC):
 
             # server creation
             s = self.server(name, timeout_check_interval=timeout_check_interval, timeout_length=timeout_length)
-            s.connect(srv_address, srv_port, srv_nick, srv_password, srv_username, srv_ircname, srv_localaddress, srv_localport, srv_ssl, srv_ipv6, autojoin_channels=autojoin_channels, wait_time=wait_time)
-
-            if 'nickserv_password' in info.store[name]['connection']:
-                s.privmsg('nickserv', 'identify ' + info.store[name]['connection']['nickserv_password'])
+            s.connect(srv_address, srv_port, srv_nick, srv_password, srv_username, srv_ircname,
+                      srv_localaddress, srv_localport, srv_ssl, srv_ipv6,
+                      autojoin_channels=autojoin_channels, wait_time=wait_time,
+                      nickserv_serv_nick=nickserv_serv_nick, nickserv_password=nickserv_password)
 
     def action(self, event, message, zone='private'):
         """Automagically message someone. Zone can be public or private, for preferring channel or user."""
