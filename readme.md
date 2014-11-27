@@ -1,10 +1,8 @@
-![Goshu](logo.png)
+![Goshu](docs/logo.png)
 
 Goshu is a powerful IRC bot, written in Python3. Utilising simple YAML configuration files, a fast, extensible module system and useful, configurable logging, Goshu allows you to create your own personalised IRC bot in no time!
 
-[Installation info](install.md)
-
-[Modules info](modules.md)
+[Hosted Documentation](http://goshu.readthedocs.org/en/latest/)
 
 girclib - Goshu IRC Library
 ---------------------------
