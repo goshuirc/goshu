@@ -29,6 +29,8 @@ docs/_build/*
 config/*
 logs/*
 suggestions/*
+/irc/*
+/raw_log*
 
 ## 2to3, mainly
 *.bak

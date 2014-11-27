@@ -441,7 +441,7 @@ class ServerConnection:
             timeout_seconds = self.last_activity + timestamp(**self.timeout_length)
             now_seconds = ping_timestamp()
             if now_seconds > timeout_seconds:
-                self.disconnect('Ping timeout.')
+                self.irc_disconnect('Ping timeout.')
                 # we disconnect now, wait another `timeout_check_interval`, and then reconnect
                 return
 
