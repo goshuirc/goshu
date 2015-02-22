@@ -1,36 +1,125 @@
-## linux backup
+# Created by https://www.gitignore.io
+
+### Windows ###
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+
+### Linux ###
 *~
 
-## windows cache
-Thumbs.db
+# KDE directory preferences
+.directory
 
-## mac cache
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
+
+### OSX ###
 .DS_Store
+.AppleDouble
+.LSOverride
 
-## CTags
-.tags
-.tags_sorted_by_file
+# Icon must end with two \r
+Icon
 
-## ide files
-.project
-.pydevproject
-.settings/*
-*.sublime-*
 
-## python
-*.pyc
-*.pyo
-*__pycache__
+# Thumbnails
+._*
 
-## docs
-docs/_build/*
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
 
-## goshu3
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+
+### Python ###
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+
+# goshu3
 config/*
 logs/*
 suggestions/*
 /irc/*
 /raw_log*
+
+/modules/responses_module/*/
 
 ## 2to3, mainly
 *.bak
