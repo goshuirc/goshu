@@ -29,9 +29,9 @@ class list(Module):
     def list(self, event, command, usercommand):
         bot_commands = {}
 
-        for module in self.bot.modules.modules:
+        for module in sorted(self.bot.modules.modules):
             module_commands = self.bot.modules.modules[module].commands
-            for name in module_commands:
+            for name in sorted(module_commands):
                 if name == '*':
                     continue
                 command = module_commands[name]

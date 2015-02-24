@@ -35,15 +35,22 @@ class Module:
         self.commands = {}
         self.json_handlers = []
         self.dynamic_commands = {}
+
         if os.path.exists(self.dynamic_path):
-            self.json_handlers.append(JsonHandler(self, 'dynamic_commands', self.dynamic_path, ext=self.ext, commands=True, yaml=True))
+            # setup our new module's dynamic json command handler
+            new_handler = JsonHandler(self, self.dynamic_path, **{
+                'attr': 'dynamic_commands',
+                'callback_name': '_json_command_callback',
+                'ext': self.ext,
+                'yaml': True,
+            })
+            self.json_handlers.append(new_handler)
 
     def combined(self, event, command, usercommand):
         ...
 
     def load(self):
-        self.commands = self.static_commands
-        self.commands.update(self.dynamic_commands)
+        self.commands.update(getattr(self, 'static_commands', {}))
 
     def unload(self):
         pass
@@ -55,6 +62,23 @@ class Module:
 
         self.commands = self.static_commands
         self.commands.update(self.dynamic_commands)
+
+    def _json_command_callback(self, new_json):
+        """Update our command dictionary.
+        Mixes new json dynamic commands with our static ones.
+        """
+        # assemble new json dict into actual commands dict
+        new_commands = {}
+        for key in new_json:
+            single_command_dict = self.bot.modules.return_command_dict(self, new_json[key])
+            new_commands.update(single_command_dict)
+
+        # merge new dynamic commands with static ones
+        commands = getattr(self, 'static_commands', {}).copy()
+        commands.update(new_commands)
+        commands.update(getattr(self, 'static_commands', {}))
+
+        self.commands = commands
 
 
 def isModule(member):

@@ -354,7 +354,7 @@ import importlib
 
 
 class JsonHandler:
-    def __init__(self, base, attr, folder, ext=None, commands=False, yaml=False):
+    def __init__(self, base, folder, attr=None, callback_name=None, ext=None, yaml=False):
         if ext:
             self.pattern = ['*.{}.yaml'.format(ext), '*.{}.json'.format(ext), '*_{}.py'.format(ext)]
         else:
@@ -363,70 +363,87 @@ class JsonHandler:
         self.attr = attr
         self.folder = folder
         self.ext = ext
-        self.commands = commands
+        self.callback_name = callback_name
         self.yaml = yaml
 
         self.reload()
 
+    def spread_new_json(self, new_json):
+        if self.attr:
+            setattr(self.base, self.attr, new_json)
+
+        if self.callback_name:
+            getattr(self.base, self.callback_name, None)(new_json)
+
     def reload(self):
         new_json = {}
 
-        # json
-        for file in os.listdir(self.folder):
-            if os.path.isfile(os.path.join(self.folder, file)):
-                try:
-                    (extname, json_ext) = os.path.splitext(file)
-                    if (json_ext == os.extsep + 'json') or (self.yaml and (json_ext == os.extsep + 'yaml')):
-                        if self.ext:
-                            (name, ext) = os.path.splitext(extname)
-                            pyfile = self.folder.split(os.sep)[-1] + '.' + name + '_' + self.ext
-                            cont = (ext == os.extsep + self.ext)
-                        else:
-                            name, ext = extname, ''
-                            pyfile = self.folder.split(os.sep)[-1] + '.' + name
-                            cont = True
-                        if cont:
-                            # py
-                            if self.yaml:
-                                try:
-                                    module = importlib.import_module(pyfile)
-                                    imp.reload(module)  # so reloading works
-                                except ImportError:
-                                    pass
-                                except:
-                                    pass
-                            # yaml
-                            with open(os.path.join(self.folder, file)) as f:
-                                if self.yaml:
-                                    try:
-                                        info = yaml.load(f.read())
-                                    except:
-                                        continue
-                                else:
-                                    info = json.loads(f.read())
+        if not os.path.exists(self.folder):
+            self.spread_new_json(new_json)
+            return
 
-                            if 'name' not in info:
-                                info['name'] = [name]
+        # loading
+        folders_to_scan = [self.folder]
 
-                            if self.commands:
-                                new_json.update(self.base.bot.modules.return_command_dict(self.base, info))
-                            else:
-                                new_json[info['name'][0]] = info
+        # loading list of folders that contain modules
+        for f in os.listdir(self.folder):
+            if f == 'disabled':
+                continue
 
-                                if len(info['name']) > 1:
-                                    info['alias'] = info['name'][0]
-                                    for alias_name in info['name'][1:]:
-                                        new_json[alias_name] = info
-                        else:
+            full_name = os.path.join(self.folder, f)
+            if os.path.isdir(full_name):
+                folders_to_scan.append(full_name)
+
+        # loading actual modules
+        for folder in folders_to_scan:
+            for f in os.listdir(folder):
+                full_name = os.path.join(folder, f)
+                if os.path.isfile(full_name):
+                    (extname, ext) = os.path.splitext(full_name)
+                    if ext.lower() not in ['.json', '.yaml']:
+                        continue
+
+                    # check for loader-specific extension
+                    if self.ext:
+                        name, ext = os.path.splitext(extname)
+                        pyfile = '{}_{}'.format('.'.join(name.split(os.sep)), self.ext)
+
+                        # not really our module
+                        if ext != os.extsep + self.ext:
                             continue
                     else:
-                        continue
-                except ValueError:
-                    continue
+                        name, ext = extname, ''
+                        pyfile = '.'.join(name[2:].split(os.sep))
 
-        setattr(self.base, self.attr, new_json)
+                    # NOTE: this is static, and that is bad
+                    pyfile = pyfile.lstrip('..modules.')
 
-        if self.commands:
-            commands = getattr(self.base, 'static_commands', {}).copy()
-            commands.update(new_json)
-            setattr(self.base, 'commands', commands)
+                    # py file
+                    if self.yaml:
+                        try:
+                            module = importlib.import_module(pyfile)
+                            imp.reload(module)  # so reloading works
+                        # we should capture this and output errors to stderr
+                        except:
+                            pass
+
+                    # yaml / json
+                    with open(full_name) as js_f:
+                        if self.yaml:
+                            try:
+                                info = yaml.load(js_f.read())
+                            # we should capture this and output errors to stderr
+                            except:
+                                continue
+                        else:
+                            info = json.loads(js_f.read())
+
+                    # set module name and info
+                    if 'name' not in info:
+                        new_name = name.split('/')[-1]
+                        info['name'] = [new_name]
+
+                    new_json[info['name'][0]] = info
+
+        # set info on base object and / or call callback
+        self.spread_new_json(new_json)
