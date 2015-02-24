@@ -59,11 +59,11 @@ class AccountInfo(InfoStore):
     def login(self, name, password, server, userstring):
         self.load()
         if self.is_password(name, password):
-            self.bot.irc.servers[server].create_user(userstring)
+            self.bot.irc.servers[server].create_or_update_user(userstring)
             user_nick = self.bot.irc.servers[server].istring(girclib.NickMask(userstring).nick)
             self.bot.irc.servers[server].info['users'][user_nick]['accountinfo'] = {}
             self.bot.irc.servers[server].info['users'][user_nick]['accountinfo']['name'] = name
-            self.bot.irc.servers[server].info['users'][user_nick]['accountinfo']['userhost'] = userstring.split('!')[1]
+            self.bot.irc.servers[server].info['users'][user_nick]['accountinfo']['userhost'] = girclib.NickMask(userstring).userhost
             return True
         else:
             return False

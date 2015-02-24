@@ -15,6 +15,7 @@ from functools import partial
 
 from irc.client import NickMask
 from irc.client import is_channel
+NickMask
 is_channel
 
 # make everything decodable by irc lib
@@ -467,7 +468,7 @@ class ServerConnection:
     def send_startup(self):
         """Send the stuff we need to at startup."""
         self._first_cap = True
-        self.cap('REQ', 'multi-prefix')
+        self.cap('REQ', 'multi-prefix userhost-in-names')
 
         self.connected = True
         self.last_activity = ping_timestamp()
@@ -492,6 +493,8 @@ class ServerConnection:
         self.irc._handle_event(Event(self.irc, self.name, 'out', 'admin', self.info['connection']['nick'], server))
 
     def cap(self, subcommand, args=''):
+        if ' ' in args.strip():
+            args = ':' + args.strip()
         self.connection.cap(subcommand, args)
         if args:
             self.irc._handle_event(Event(self.irc, self.name, 'out', 'cap', self.info['connection']['nick'], [subcommand, args]))
@@ -601,12 +604,12 @@ class ServerConnection:
                     self.info['server']['isupport'][feature] = True
 
         elif event.type == 'join' and event.direction == 'in':
-            user = self.istring(event.source).lower()
-            user_nick = self.istring(NickMask(user).nick).lower()
+            user = NickMask(event.source)
+            user_nick = self.istring(user.nick).lower()
             our_nick = self.istring(self.info['connection']['nick']).lower()
             channel = self.istring(event.target).lower()
 
-            self.create_user(user_nick)
+            self.create_or_update_user(event.source)
             self.create_channel(channel)
             self.get_channel_info(channel)['users'][user_nick] = ''
 
@@ -624,14 +627,16 @@ class ServerConnection:
                 self.get_channel_info(channel)['users'] = IDict(std=self.info['server']['isupport']['CASEMAPPING'])
             for user in names_list:
                 # supports multi-prefix
+                # we don't do a check for the cap here because this way supports
+                #   both  +user  and  ~!@+user  just as well, for free!
                 user_privs = ''
                 while user[0] in self.info['server']['isupport']['PREFIX'][1]:
                     user_privs += user[0]
                     user = user[1:]
-                user_nick = user
 
-                self.create_user(user_nick)
-                self.get_channel_info(channel)['users'][user_nick] = user_privs
+                # userhost-in-names supported implicitly here
+                self.create_or_update_user(user)
+                self.get_channel_info(channel)['users'][NickMask(user).nick] = user_privs
                 changed = True
 
         elif event.type == 'currenttopic':
@@ -758,12 +763,17 @@ class ServerConnection:
             for func in self.irc.info_funcs:
                 func()
 
-    def create_user(self, user):
-        user = self.istring(user).lower()
-        user_nick = self.istring(NickMask(user).nick).lower()
+    def create_or_update_user(self, user):
+        """Creates a user if they don't already exist, and updates their info."""
+        user = NickMask(user)
+        user_nick = self.istring(user.nick).lower()
 
         if user_nick not in self.info['users']:
             self.info['users'][user_nick] = {}
+        if user.user:
+            self.info['users'][user_nick]['user'] = user.user
+        if user.host:
+            self.info['users'][user_nick]['host'] = user.host
 
     def create_channel(self, channel):
         channel_name = self.istring(channel).lower()
