@@ -24,7 +24,7 @@ class link(Module):
             },
         }
         self.links = []
-        self.json_handlers.append(JsonHandler(self, 'links', self.dynamic_path, ext='lnk', yaml=True))
+        self.json_handlers.append(JsonHandler(self, self.dynamic_path, attr='links', ext='lnk', yaml=True))
 
     def link(self, event):
         url_matches = re.search('(?:https?://)(\\S+)', unescape(event.arguments[0]))
@@ -60,7 +60,7 @@ class link(Module):
                         return
 
                     # parsing
-                    response += format_extract(self.links[provider], r.text, fail='*** {}: Failed'.format(self.links[provider]['display_name']))
+                    response += format_extract(self.links[provider], r.text, debug=True, fail='*** {}: Failed'.format(self.links[provider]['display_name']))
 
             if response:
                 self.bot.irc.msg(event, response, 'public')

@@ -276,11 +276,23 @@ def json_return(input_json, selector):
     elif selector[0] == 'text.escape':
         return escape(selector[1])
     elif selector[0] == 'json.quote_plus':
-        return urllib.parse.quote_plus(str(json_element(input_json, selector[1])))
+        if len(selector) > 2:
+            default = selector[2]
+        else:
+            default = ""
+        return urllib.parse.quote_plus(str(json_element(input_json, selector[1], default=default)))
     elif selector[0] == 'json.num.metric':
-        return metric(int(json_element(input_json, selector[1])))
+        if len(selector) > 2:
+            default = selector[2]
+        else:
+            default = 0
+        return metric(int(json_element(input_json, selector[1], default=default)))
     elif selector[0] == 'json.datetime.fromtimestamp':
-        return datetime.datetime.fromtimestamp(json_element(input_json, selector[1])).strftime(selector[2])
+        if len(selector) > 2:
+            default = selector[2]
+        else:
+            default = 0
+        return datetime.datetime.fromtimestamp(json_element(input_json, selector[1], default=default)).strftime(selector[2])
     elif selector[0] == 'json.dict.returntrue':
         keys = []
         json_dict = json_element(input_json, selector[1])
@@ -290,13 +302,20 @@ def json_return(input_json, selector):
         return selector[2].join(keys)
     # before general json
     else:
-        return escape(str(json_element(input_json, selector[1])))
+        if len(selector) > 2:
+            default = selector[2]
+        else:
+            default = None
+        return escape(str(json_element(input_json, selector[1], default=default)))
 
 
-def json_element(input_dict, query):
+def json_element(input_dict, query, default=None):
     """Runs through a data structure and returns the selected element."""
     for element in query:
-        input_dict = input_dict[element]
+        if element in input_dict:
+            input_dict = input_dict[element]
+        else:
+            return default
     return input_dict
 
 

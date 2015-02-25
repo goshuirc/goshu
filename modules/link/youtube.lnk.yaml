@@ -6,12 +6,12 @@
     "response": "@c12@b{title}@r by @c3@b{author}@r [{length}] [{category}] [@c3+{likes}@r,@c4-{dislikes}@r,{comments}c,{views}v]",
     "response_dict": {
         "title": ["json", ["data", "title"]],
-        "author": ["json", ["data", "uploader"]],
+        "author": ["json", ["data", "uploader"], "Nobody"],
         "length": !!python/name:link.youtube_lnk.length ,
         "category": ["json", ["data", "category"]],
-        "likes": ["json.num.metric", ["data", "likeCount"]],
+        "likes": ["json.num.metric", ["data", "likeCount"], 0],
         "dislikes": !!python/name:link.youtube_lnk.dislikes ,
-        "comments": ["json.num.metric", ["data", "commentCount"]],
-        "views": ["json.num.metric", ["data", "viewCount"]]
+        "comments": ["json.num.metric", ["data", "commentCount"], 0],
+        "views": ["json.num.metric", ["data", "viewCount"], 0]
     }
 }
