@@ -10,7 +10,7 @@ import os
 
 from gbot.modules import Module
 from gbot.libs.girclib import escape
-from gbot.libs.fourfn import NumericStringParser
+from gbot.libs.nsp import NumericStringParser
 
 
 class calc(Module):
