@@ -24,11 +24,11 @@ class ctcp_reply(Module):
         if event.arguments[0] == 'VERSION':
             message = 'VERSION Goshu:3:https://github.com/DanielOaks/goshu'
 
-            # add owner's nick if one is online
+            # tell them owner nick(s) if one is online
             runner_level, online_runners = self.bot.accounts.online_bot_runners(event.server)
             if online_runners:
-                message += ' ' * 7
-                message += 'online contact{}: {}'.format('s' if len(online_runners) > 1 else '', ' '.join(online_runners))
+                runner_msg = "Hi, I'm an IRC bot! These are my online contact{}: {}".format('s' if len(online_runners) > 1 else '', ' '.join(online_runners))
+                self.bot.irc.servers[event.server].msg(NickMask(event.source).nick, runner_msg)
 
             self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, message)
 
@@ -36,7 +36,7 @@ class ctcp_reply(Module):
             userinfostring = None
             # userinfostring = "Please don't kline me, I'll play nice!"
             if userinfostring:
-                self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, "USERINFO :{}".format(userinfostring))
+                self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'USERINFO :{}'.format(userinfostring))
 
         elif event.arguments[0] == 'CLIENTINFO':
             self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'CLIENTINFO :Understood CTCP Pairs: CLIENTINFO, ERRMSG, PING, TIME, USERINFO, VERSION')
@@ -50,4 +50,4 @@ class ctcp_reply(Module):
 
         elif event.arguments[0] == 'PING':
             if len(event.arguments) > 1:
-                self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, "PING " + event.arguments[1])
+                self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'PING ' + event.arguments[1])
