@@ -30,7 +30,7 @@ class Module:
             else:
                 self.ext = self.name
 
-        self.dynamic_path = '.' + os.sep + 'modules' + os.sep + self.name
+        self.dynamic_path = os.path.join('.', 'modules', self.name)
 
         self.commands = {}
         self.json_handlers = []
@@ -159,7 +159,7 @@ class Modules:
             module.static_commands = {}
             for command in module.events['commands']:
                 self.add_command_info(module.name, command)
-            module.folder_path = 'modules' + os.sep + name
+            module.folder_path = os.path.join('modules', name)
             module.bot = self.bot
 
             module.load()

@@ -21,7 +21,7 @@ class pokemon(Module):
             },
         }
 
-        self.path = 'modules'+os.sep+'pokemon'+os.sep
+        self.path = os.path.join('modules', 'pokemon', '')  # '' to have trailing slash
         self.files = ['pokemon_list.json', 'corrupt_list.json']
         self.corrupted = False
 
