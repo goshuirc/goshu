@@ -27,8 +27,9 @@ class ctcp_reply(Module):
             # tell them owner nick(s) if one is online
             runner_level, online_runners = self.bot.accounts.online_bot_runners(event.server)
             if online_runners:
-                runner_msg = "Hi, I'm an IRC bot! These are my online contact{}: {}".format('s' if len(online_runners) > 1 else '', ' '.join(online_runners))
-                self.bot.irc.servers[event.server].msg(NickMask(event.source).nick, runner_msg)
+                trailing_s = 's' if len(online_runners) > 1 else ''
+                runner_msg = "Hi, I'm an IRC bot! Online Contact{}:  {}".format(trailing_s, ' '.join(online_runners))
+                self.bot.irc.msg(event, runner_msg, 'private')
 
             self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, message)
 
