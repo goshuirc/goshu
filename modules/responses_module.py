@@ -7,7 +7,7 @@ import os
 import json
 import random
 
-from gbot.modules import Module
+from gbot.modules import Module, cmd_split, std_ignore_command
 from gbot.libs.girclib import unescape
 from gbot.users import USER_LEVEL_ADMIN
 
@@ -18,7 +18,7 @@ class responses_module(Module):
         Module.__init__(self, bot)
         self.events = {
             'commands': {
-                'response': [self.response_handle, ['create <name> --- Create a new, blank \'response\' under <name>'], USER_LEVEL_ADMIN],
+                'response': [self.response_handle, ['create <name> --- ignore list --- ignore add <target> --- ignore del <target> --- Create a new, blank \'response\' under <name>'], USER_LEVEL_ADMIN],
             },
         }
 
@@ -34,11 +34,16 @@ class responses_module(Module):
         if not usercommand.arguments:
             return
 
-        do = usercommand.arguments.split()[0].lower()
+        do, args = cmd_split(usercommand.arguments)
 
-        if do == 'create':
+        if do == 'ignore':
+            do, args = cmd_split(args)
+
+            std_ignore_command(self, event, do, args)
+
+        elif do == 'create':
             if len(usercommand.arguments.split()) > 1:
-                module_name = usercommand.arguments.lower().split()[1]
+                module_name = args.lower().split()[0]
                 filename = os.path.join('modules/responses_module', module_name)
                 filename += '.res.json'
 
@@ -75,6 +80,9 @@ class responses_module(Module):
                                     ' what you want!')
 
     def combined(self, event, command, usercommand):
+        if self.is_ignored(event.from_to):
+            return
+
         source = event.source.split('!')[0]
         if usercommand.arguments.strip() == '':
             target = self.bot.irc.servers[event.server].info['connection']['nick']

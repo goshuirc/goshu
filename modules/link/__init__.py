@@ -8,9 +8,10 @@
 
 import re
 
-from gbot.modules import Module
+from gbot.modules import Module, cmd_split, std_ignore_command
 from gbot.libs.girclib import unescape
 from gbot.libs.helper import get_url, format_extract, JsonHandler
+from gbot.users import USER_LEVEL_ADMIN
 
 
 class link(Module):
@@ -18,6 +19,9 @@ class link(Module):
     def __init__(self, bot):
         Module.__init__(self, bot)
         self.events = {
+            'commands': {
+                'link': [self.link_handle, ['ignore list --- ignore add <target> --- ignore del <target> --- Ignore targets'], USER_LEVEL_ADMIN],
+            },
             'in': {
                 'pubmsg': [(0, self.link)],
                 'privmsg': [(0, self.link)],
@@ -26,7 +30,22 @@ class link(Module):
         self.links = []
         self.json_handlers.append(JsonHandler(self, self.dynamic_path, attr='links', ext='lnk', yaml=True))
 
+    def link_handle(self, event, command, usercommand):
+        """Provide useful link-handling functions."""
+        if not usercommand.arguments:
+            return
+
+        do, args = cmd_split(usercommand.arguments)
+
+        if do == 'ignore':
+            do, args = cmd_split(args)
+
+            std_ignore_command(self, event, do, args)
+
     def link(self, event):
+        if self.is_ignored(event.from_to):
+            return
+
         url_matches = re.search('(?:https?://)(\\S+)', unescape(event.arguments[0]))
         if not url_matches:
             return

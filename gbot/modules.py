@@ -6,13 +6,28 @@
 import os
 import sys
 import imp
+import json
 import inspect
 import importlib
 import threading
 
 from .libs.helper import JsonHandler
-from .libs.girclib import NickMask
+from .libs.girclib import NickMask, is_channel
 from .users import USER_LEVEL_NOPRIVS
+
+
+# special custom json encoder
+class IEncoder(json.JSONEncoder):
+    def default(self, o):
+        try:
+            return o.__json__()
+        except:
+            return o
+
+
+def json_dumps(*pargs, **kwargs):
+    """Special json dumper to use our __json__ function where appropriate."""
+    return json.dumps(*pargs, cls=IEncoder, **kwargs)
 
 
 class Module:
@@ -21,10 +36,10 @@ class Module:
     def __init__(self, bot):
         self.bot = bot
 
-        if not getattr(self, 'name', None):
+        if getattr(self, 'name', None) is None:
             self.name = self.__class__.__name__
 
-        if not getattr(self, 'ext', None):
+        if getattr(self, 'ext', None) is None:
             if len(self.name) >= 3:
                 self.ext = self.name[:3]
             else:
@@ -45,6 +60,36 @@ class Module:
                 'yaml': True,
             })
             self.json_handlers.append(new_handler)
+
+        self.config = {}
+        self.config_filename = os.sep.join(['config', 'modules', '{}.json'.format(self.name)])
+        self.load_config()
+
+    def load_config(self, path=None):
+        """Load config from our config file."""
+        if path is None:
+            path = self.config_filename
+
+        try:
+            with open(path, 'r', encoding='utf-8') as config_file:
+                self.config = json.loads(config_file.read())
+        except FileNotFoundError:
+            self.config = {}
+
+    def save_config(self, path=None):
+        """Save config to our config file."""
+        if path is None:
+            path = self.config_filename
+
+        with open(path, 'w', encoding='utf-8') as config_file:
+            config_file.write(json_dumps(self.config, sort_keys=True, indent=4))
+
+    def is_ignored(self, target):
+        """Whether the target is ignored in our config."""
+        if is_channel(target):
+            return target.lower() in self.config.get('ignored', [])
+        else:
+            return NickMask(target).nick.lower() in self.config.get('ignored', [])
 
     def combined(self, event, command, usercommand):
         ...
@@ -323,3 +368,57 @@ class UserCommand:
     def __init__(self, command, arguments):
         self.command = command
         self.arguments = arguments
+
+
+# command splitting for modules
+def cmd_split(in_str):
+    if len(in_str.split()) > 1:
+        do, args = in_str.split(' ', 1)
+    else:
+        do = in_str
+        args = ''
+
+    do = do.lower()
+
+    return do, args
+
+
+def std_ignore_command(self, event, do, args):
+    """Provides the standard 'ignore' command."""
+    if do == 'list':
+        target_list = ', '.join(self.config.get('ignored', []))
+        if not target_list:
+            target_list = 'None'
+
+        msg = 'Ignored targets: {}'.format(target_list)
+        self.bot.irc.msg(event, msg, 'private')
+
+    elif do == 'add':
+        targets = args.lower().split()
+
+        if 'ignored' not in self.config:
+            self.config['ignored'] = []
+
+        for target in targets:
+            if target not in self.config['ignored']:
+                self.config['ignored'].append(target)
+
+        self.save_config()
+
+        msg = 'All given targets are now ignored'
+        self.bot.irc.msg(event, msg, 'private')
+
+    elif do == 'del':
+        targets = args.lower().split()
+
+        if 'ignored' not in self.config:
+            self.config['ignored'] = []
+
+        for target in targets:
+            if target in self.config['ignored']:
+                self.config['ignored'].remove(target)
+
+        self.save_config()
+
+        msg = 'All given targets are no longer ignored'
+        self.bot.irc.msg(event, msg, 'private')

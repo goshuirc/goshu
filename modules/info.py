@@ -3,19 +3,10 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the BSD 2-clause license
 
-from gbot.modules import Module
+from gbot.modules import Module, json_dumps
 import os
-import json
 
 from gbot.users import USER_LEVEL_OWNER
-
-
-class IEncoder(json.JSONEncoder):
-    def default(self, o):
-        try:
-            return o.__json__()
-        except:
-            return o
 
 
 class info(Module):
@@ -30,9 +21,11 @@ class info(Module):
         }
 
     def info(self, event, command, usercommand):
-        pretty_json = json.dumps(self.bot.irc.servers[event.server].info, sort_keys=True, indent=4, cls=IEncoder)
+        pretty_json = json_dumps(self.bot.irc.servers[event.server].info, sort_keys=True, indent=4)
 
-        info_filename = os.sep.join(['config', 'modules', 'info.json'])
-        info_file = open(info_filename, 'w', encoding='utf-8')
+        info_filename = os.sep.join(['config', 'modules', 'info_dict.json'])
+        with open(info_filename, 'w', encoding='utf-8') as info_file:
+            info_file.write(pretty_json)
+            info_file.write('\n')
+
         self.bot.gui.put_line('info: debugging info written to: {}'.format(info_filename))
-        info_file.write(pretty_json)
