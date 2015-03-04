@@ -105,9 +105,6 @@ class Module:
         for json_h in self.json_handlers:
             json_h.reload()
 
-        self.commands = self.static_commands
-        self.commands.update(self.dynamic_commands)
-
     def _json_command_callback(self, new_json):
         """Update our command dictionary.
         Mixes new json dynamic commands with our static ones.
