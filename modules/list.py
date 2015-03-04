@@ -46,7 +46,7 @@ class list(Module):
                 command = bot_commands[name]
 
                 # fix help display for single help strings
-                for help_string in command.desc:
+                for help_string in command.description:
                     response = '*** Command:  {prefix}{cmd} {desc}'.format(prefix=self.bot.settings.store['prefix'],
                                                                            cmd=name,
                                                                            desc=help_string)

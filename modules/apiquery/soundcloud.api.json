@@ -1,6 +1,6 @@
 {
     "display_name": "SoundCloud", 
-    "desc": "<query> --- music search!", 
+    "description": "<query> --- music search!", 
     "url": "https://api.soundcloud.com/tracks.json?client_id=e3dfa9998292005f9e73329b1dd9dfb7&q={escaped_query}", 
     "format": "json", 
     "response": "@c2@b{title}@r by @c3@b{artist}@r  {url}",

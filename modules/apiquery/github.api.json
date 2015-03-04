@@ -1,6 +1,6 @@
 {
     "display_name": "GitHub", 
-    "desc": "<query> --- github repo search", 
+    "description": "<query> --- github repo search", 
     "url": "https://api.github.com/legacy/repos/search/{escaped_query}", 
     "format": "json", 
     "response": "https://github.com/@c3@b{author}@r/@c2@b{name}@r --- {description}",

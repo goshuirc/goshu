@@ -13,7 +13,7 @@ from gbot.users import USER_LEVEL_ADMIN
 
 
 class responses_module(Module):
-
+    """Supports creating special custom commands with simple json dictionaries."""
     def __init__(self, bot):
         Module.__init__(self, bot)
         self.events = {
@@ -27,6 +27,7 @@ class responses_module(Module):
         # @s means source, the nick of whoever did the command
         # @t means target, either whoever they write afterwards, or the current self nick
         # note: @S and @T represent allcaps versions of @s and @t
+        # @f at the start means: ignore the standard pre / post lines
         # @m at the start means: send this line as a /me rather than a /msg
 
     def response_handle(self, event, command, usercommand):
@@ -118,6 +119,11 @@ class responses_module(Module):
         response_num = random.randint(1, len(response_list)) - 1
         random.shuffle(response_list)
         response = response_list[response_num]
+
+        if response[0:2] == '@f':
+            pre = ''
+            post = ''
+            response = response[2:]
 
         if type(response) == str:
             response = [response]

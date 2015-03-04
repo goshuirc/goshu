@@ -1,6 +1,6 @@
 {
     "display_name": "iTunes", 
-    "desc": "<query> --- return itunes media", 
+    "description": "<query> --- return itunes media", 
     "url": "http://itunes.apple.com/search?limit=2&term={escaped_query}", 
     "format": "json", 
     "response": "@c2@b{title}@r by @c3@b{artist}@r   {url}",

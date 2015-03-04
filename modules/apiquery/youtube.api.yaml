@@ -1,6 +1,6 @@
 {
     "display_name": "You@c5Tube@c",
-    "desc": "<query> --- stupid videos and all that fun stuff",
+    "description": "<query> --- stupid videos and all that fun stuff",
     "url": "https://gdata.youtube.com/feeds/api/videos?alt=jsonc&v=2&max-results=1&q={escaped_query}",
     "format": "json",
     "response": "@c2@b{title}@r by @c3@b{author}@r [{length}] [{category}] [@c3+{likes}@r,@c4-{dislikes}@r,{comments}c,{views}v]   http://youtu.be/{id}",

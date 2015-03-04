@@ -1,6 +1,6 @@
 {
     "display_name": "Wikipedia", 
-    "desc": "<query> --- search for wikipedia articles", 
+    "description": "<query> --- search for wikipedia articles", 
     "url": "https://secure.wikimedia.org/wikipedia/en/w/api.php?action=query&list=search&format=json&srsearch={escaped_query}", 
     "format": "json", 
     "response": "https://secure.wikimedia.org/wikipedia/en/wiki/{title}",

@@ -301,13 +301,13 @@ class Modules:
         else:
             call = base.combined
 
-        if 'desc' in info:
-            if isinstance(info['desc'], str):
-                desc = [info['desc']]
-            elif isinstance(info['desc'], list):
-                desc = info['desc']
+        if 'description' in info:
+            if isinstance(info['description'], str):
+                description = [info['description']]
+            elif isinstance(info['description'], list):
+                description = info['description']
         else:
-            desc = ''
+            description = ''
 
         call_level = info.get('call_level', USER_LEVEL_NOPRIVS)
 
@@ -318,12 +318,12 @@ class Modules:
 
         channel_whitelist = info.get('channel_whitelist', [])
 
-        commands[info['name'][0]] = Command(call=call, desc=desc, call_level=call_level,
+        commands[info['name'][0]] = Command(call=call, description=description, call_level=call_level,
                                             view_level=view_level, channel_whitelist=channel_whitelist,
                                             json=info)
 
         for command in info['name'][1:]:
-            commands[command] = Command(call=call, desc=desc, call_level=call_level,
+            commands[command] = Command(call=call, description=description, call_level=call_level,
                                         view_level=view_level, channel_whitelist=channel_whitelist,
                                         json=info, alias=info['name'][0])
 
@@ -340,7 +340,7 @@ class Command:
         # all other actual data
         if base_info:
             self.call = base_info[0]
-            self.desc = base_info[1]
+            self.description = base_info[1]
             if len(base_info) > 2:
                 self.call_level = base_info[2]
             else:
@@ -355,8 +355,8 @@ class Command:
             for key in kwargs:
                 setattr(self, key, kwargs[key])
 
-        if isinstance(self.desc, str):
-            self.desc = [self.desc]
+        if isinstance(self.description, str):
+            self.description = [self.description]
 
 
 class UserCommand:
