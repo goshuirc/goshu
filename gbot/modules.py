@@ -32,7 +32,6 @@ def json_dumps(*pargs, **kwargs):
 
 class Module:
     """Module to add commands/functionality to the bot."""
-
     def __init__(self, bot):
         self.bot = bot
 
@@ -131,12 +130,12 @@ def isModule(member):
 
 class Modules:
     """Manages goshubot's modules."""
-
-    def __init__(self, bot):
+    def __init__(self, bot, path):
         self.bot = bot
         self.whole_modules = {}
         self.modules = {}
         self.paths = []
+        self.add_path(path)
 
     def add_path(self, path):
         if path not in sys.path:
@@ -154,8 +153,8 @@ class Modules:
                 modules.append(entry)
         return modules
 
-    def load_init(self, path):
-        self.add_path(path)
+    def load_init(self):
+        path = self.paths[0]
         modules = self.modules_from_path(path)
         output = 'modules '
         for module in modules:

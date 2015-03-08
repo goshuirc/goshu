@@ -27,6 +27,18 @@ import requests
 from gbot.libs.girclib import escape
 
 
+def true_or_false(in_str):
+    """Returns True/False if string represents it, else None."""
+    in_str = in_str.lower()
+
+    if in_str.startswith(('true', 'y', '1', 'on')):
+        return True
+    elif in_str.startswith(('false', 'n', '0', 'off')):
+        return False
+    else:
+        return None
+
+
 def split_num(line, chars=' ', maxsplits=1, empty=''):
     """/lazy/ wrapper, to stop us having to bounds-check when splitting.
 

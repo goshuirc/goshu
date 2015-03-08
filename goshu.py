@@ -11,21 +11,10 @@ if sys.stdout.encoding.lower() != 'utf-8':
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding=sys.stdout.encoding, errors='replace', line_buffering=True)
 
-
+# create bot
 import gbot
 
-bot = gbot.Bot(debug=True)
+bot = gbot.Bot(config_path='config', modules_path='modules', debug=True)
 
-accountinfo_path = 'config/info.json'
-bot.accounts.use_file(accountinfo_path)
-
-settings_path = 'config/bot.json'
-bot.settings.use_file(settings_path, update=True)
-
-info_path = 'config/irc.json'
-bot.info.use_file(info_path, update=True)
-
-modules_path = 'modules'
-bot.modules.load_init(modules_path)
-
+# start bot
 bot.start()
