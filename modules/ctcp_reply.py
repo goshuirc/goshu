@@ -10,6 +10,7 @@ from gbot.libs.girclib import NickMask
 
 class ctcp_reply(Module):
     """Provides basic CTCP replies."""
+    core = True
 
     def __init__(self, bot):
         Module.__init__(self, bot)

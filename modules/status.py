@@ -7,6 +7,7 @@ from gbot.modules import Module
 
 
 class status(Module):
+    core = True
 
     def __init__(self, bot):
         Module.__init__(self, bot)

@@ -10,6 +10,7 @@ from gbot.users import USER_LEVEL_ADMIN, USER_LEVEL_SUPERADMIN
 
 class commands(Module):
     """Provides general IRC commands such as msg, me, join, part."""
+    core = True
 
     def __init__(self, bot):
         Module.__init__(self, bot)

@@ -8,6 +8,7 @@ from gbot.modules import Module
 
 class list(Module):
     """Provides help and command listings to users."""
+    core = True
 
     def __init__(self, bot):
         Module.__init__(self, bot)
@@ -23,7 +24,7 @@ class list(Module):
 
     def privmsg(self, event):
         if event.arguments[0].lower() in ['help', 'hello', 'hi']:
-            response = 'Hello! I am a bot, to view the avaliable commands, please type {format}list'.format(format=self.bot.settings.store['prefix'])
+            response = 'Hello! I am a bot, to view the avaliable commands, please type {format}list'.format(format=self.bot.settings.store['command_prefix'])
             self.bot.irc.msg(event, response)
 
     def list(self, event, command, usercommand):
@@ -47,7 +48,7 @@ class list(Module):
 
                 # fix help display for single help strings
                 for help_string in command.description:
-                    response = '*** Command:  {prefix}{cmd} {desc}'.format(prefix=self.bot.settings.store['prefix'],
+                    response = '*** Command:  {prefix}{cmd} {desc}'.format(prefix=self.bot.settings.store['command_prefix'],
                                                                            cmd=name,
                                                                            desc=help_string)
                     self.bot.irc.msg(event, response)
@@ -66,7 +67,7 @@ class list(Module):
                 output[i] += name + ', '
             output[i] = output[i][:-2]  # remove last ', '
 
-            output.append('Note: to display information on a specific command, use @i{prefix}list <command>@i. eg: @i{prefix}list 8ball'.format(prefix=self.bot.settings.store['prefix']))
+            output.append('Note: to display information on a specific command, use @i{prefix}list <command>@i. eg: @i{prefix}list 8ball'.format(prefix=self.bot.settings.store['command_prefix']))
 
             for line in output:
                 self.bot.irc.msg(event, line)

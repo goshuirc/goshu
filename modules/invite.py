@@ -25,7 +25,7 @@ class invite(Module):
     def invite(self, event):
         """When someone /invites us, join the channel."""
         self.bot.irc.servers[event.server].join(event.arguments[0])
-        self.bot.irc.servers[event.server].privmsg(event.arguments[0], 'Thanks for inviting me, {nick}. To keep me in here, use the command:   {pre}addchan'.format(nick=event.source.split('!')[0], pre=self.bot.settings.store['prefix']))
+        self.bot.irc.servers[event.server].privmsg(event.arguments[0], 'Thanks for inviting me, {nick}. To keep me in here, use the command:   {pre}addchan'.format(nick=event.source.split('!')[0], pre=self.bot.settings.store['command_prefix']))
 
     def addchan(self, event, command, usercommand):
         """Add the current channel to our autojoin list."""
@@ -40,14 +40,18 @@ class invite(Module):
             self.bot.irc.msg(event, 'Sorry, you need to be a channel operator to do this')
             return
 
-        if 'autojoin_channels' not in self.bot.info.store[event.server]['connection']:
-            self.bot.info.store[event.server]['connection']['autojoin_channels'] = []
+        if 'autojoin_channels' not in self.bot.info.get(event.server, {}):
+            server_dict = self.bot.info.get(event.server, {})
+            server_dict['autojoin_channels'] = []
+            self.bot.info.set(event.server, server_dict)
 
-        if unescape(event.target) not in self.bot.info.store[event.server]['connection']['autojoin_channels']:
-            self.bot.info.store[event.server]['connection']['autojoin_channels'].append(unescape(event.target))
+        if unescape(event.target.lower()) not in self.bot.info.get(event.server, {})['autojoin_channels']:
+            server_dict = self.bot.info.get(event.server, {})
+            server_dict['autojoin_channels'].append(unescape(event.target.lower()))
+            self.bot.info.set(event.server, server_dict)
             self.bot.info.save()
 
-        self.bot.irc.msg(event, 'Added this channel to my autojoin list! To remove:  {pre}remchan'.format(pre=self.bot.settings.store['prefix']), 'public')
+        self.bot.irc.msg(event, 'Added this channel to my autojoin list! To remove:  {pre}remchan'.format(pre=self.bot.settings.store['command_prefix']), 'public')
 
     def remchan(self, event, command, usercommand):
         """Remove the current channel from our autojoin list."""
@@ -62,11 +66,15 @@ class invite(Module):
             self.bot.irc.msg(event, 'Sorry, you need to be a channel operator to do this')
             return
 
-        if 'autojoin_channels' not in self.bot.info.store[event.server]['connection']:
-            self.bot.info.store[event.server]['connection']['autojoin_channels'] = []
+        if 'autojoin_channels' not in self.bot.info.get(event.server, {}):
+            server_dict = self.bot.info.get(event.server, {})
+            server_dict['autojoin_channels'] = []
+            self.bot.info.set(event.server, server_dict)
 
-        if unescape(event.target) in self.bot.info.store[event.server]['connection']['autojoin_channels']:
-            self.bot.info.store[event.server]['connection']['autojoin_channels'].remove(unescape(event.target))
+        if unescape(event.target.lower()) in self.bot.info.get(event.server, {})['autojoin_channels']:
+            server_dict = self.bot.info.get(event.server, {})
+            server_dict['autojoin_channels'].remove(unescape(event.target.lower()))
+            self.bot.info.set(event.server, server_dict)
             self.bot.info.save()
 
-        self.bot.irc.msg(event, 'Removed this channel from my autojoin list! To readd:  {pre}addchan'.format(pre=self.bot.settings.store['prefix']), 'public')
+        self.bot.irc.msg(event, 'Removed this channel from my autojoin list! To readd:  {pre}addchan'.format(pre=self.bot.settings.store['command_prefix']), 'public')

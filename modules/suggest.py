@@ -10,6 +10,7 @@ from gbot.libs.helper import filename_escape
 
 
 class suggest(Module):
+    core = True
 
     def __init__(self, bot):
         Module.__init__(self, bot)

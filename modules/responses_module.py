@@ -137,7 +137,7 @@ class responses_module(Module):
                 'S': source.upper(),
                 't': target,
                 'T': target.upper(),
-                'prefix': self.bot.settings.store['prefix'],
+                'prefix': self.bot.settings.store['command_prefix'],
                 'randomchannelnick': [random_channel_nick, [self.bot, event]]
             })
 

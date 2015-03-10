@@ -14,76 +14,51 @@ class IRC(girclib.IRC):
         self.bot = bot
 
     def connect_info(self, info, settings):
-        for name in info.store:
-            try:
-                srv_nick = info.store[name]['connection']['nick']
-            except KeyError:
-                srv_nick = settings.store['nick']
+        server_dict = info.get('servers', {})
+        for name, server in server_dict.items():
+            srv_nick = server.get('nick')
+            srv_host = server.get('hostname')
+            srv_port = server.get('port')
 
-            srv_address = info.store[name]['connection']['address']
-            srv_port = info.store[name]['connection']['port']
+            srv_password = None
+            if server.get('connect_password'):
+                srv_password = server.get('connect_password')
 
-            try:
-                srv_password = info.store[name]['connection']['password']
-            except KeyError:
-                srv_password = None
+            srv_username = None
+            if server.get('connect_username'):
+                srv_username = server.get('connect_username')
 
-            try:
-                srv_username = info.store[name]['connection']['username']
-            except:
-                srv_username = None
+            srv_realname = None
+            if server.get('srv_realname'):
+                srv_realname = server.get('realname')
 
-            try:
-                srv_ircname = info.store[name]['connection']['ircname']
-            except:
-                srv_ircname = None
+            local_address = ""
+            if server.get('localaddress'):
+                local_address = server.get('localaddress')
+            local_port = server.get('localport', 0)
 
-            try:
-                srv_localaddress = info.store[name]['connection']['localaddress']
-                srv_localport = info.store[name]['connection']['localport']
-            except:
-                srv_localaddress = ""
-                srv_localport = 0
+            srv_ssl = server.get('ssl', False)
+            srv_ipv6 = server.get('ipv6', False)
 
-            try:
-                srv_ssl = info.store[name]['connection']['ssl']
-            except:
-                srv_ssl = False
-
-            try:
-                srv_ipv6 = info.store[name]['connection']['ipv6']
-            except:
-                srv_ipv6 = False
-
-            # autojoin channels
-            wait_time = 5
-            if 'vhost_wait' in info.store[name]['connection']:
-                wait_time = int(info.store[name]['connection']['vhost_wait'])
-            self.bot.gui.put_line('Waiting {} seconds to join channels. To change this, set the connection:vhost_wait setting for this server.'.format(wait_time))
+            wait_time = server.get('vhost_wait', 0)
+            if wait_time:
+                self.bot.gui.put_line('Waiting {} seconds to join channels. This can be changed in the connection configuration.'.format(wait_time))
 
             autojoin_channels = []
-            if 'autojoin_channels' in info.store[name]['connection']:
-                autojoin_channels = info.store[name]['connection']['autojoin_channels']
+            if server.get('autojoin_channels'):
+                autojoin_channels = server.get('autojoin_channels')
 
-            # timeout
-            try:
-                timeout_check_interval = info.store[name]['connection']['timeout_check_interval']
-            except:
-                timeout_check_interval = girclib.timeout_check_interval
-
-            try:
-                timeout_length = info.store[name]['connection']['timeout_length']
-            except:
-                timeout_length = girclib.timeout_length
+            timeout_check_interval = server.get('timeout_check_interval', girclib.timeout_check_interval)
+            timeout_length = server.get('timeout_length', girclib.timeout_length)
 
             # nickserv
-            nickserv_serv_nick = info.store[name]['connection'].get('nickserv_nick', 'Nickserv')
-            nickserv_password = info.store[name]['connection'].get('nickserv_password', None)
+            nickserv_serv_nick = server.get('nickserv_serv_nick', 'NickServ')
+            nickserv_password = server.get('nickserv_password', None)
 
             # server creation
             s = self.server(name, timeout_check_interval=timeout_check_interval, timeout_length=timeout_length)
-            s.connect(srv_address, srv_port, srv_nick, srv_password, srv_username, srv_ircname,
-                      srv_localaddress, srv_localport, srv_ssl, srv_ipv6,
+            s.connect(srv_host, srv_port, srv_nick, srv_password, srv_username, srv_realname,
+                      local_address, local_port, srv_ssl, srv_ipv6,
                       autojoin_channels=autojoin_channels, wait_time=wait_time,
                       nickserv_serv_nick=nickserv_serv_nick, nickserv_password=nickserv_password)
 

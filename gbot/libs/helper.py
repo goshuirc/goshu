@@ -478,3 +478,41 @@ class JsonHandler:
 
         # set info on base object and / or call callback
         self.spread_new_json(new_json)
+
+
+# timedelta functions
+import re
+
+_td_str_map = [
+    ('d', 'days'),
+    ('h', 'hours'),
+    ('m', 'minutes'),
+    ('s', 'seconds'),
+]
+
+_str_td = r''
+for istr, td in _td_str_map:
+    _str_td += r'\s*(?:(?P<' + td + r'>[0-9]+)\s*' + istr + r')?'
+
+_TD_STR_REGEX = re.compile(_str_td)
+
+
+def timedelta_to_string(delta):
+    """Converts a timedelta dict to a string."""
+    td_string = ''
+    for istr, td in _td_str_map:
+        if td in delta:
+            td_string += delta[td]
+            td_string += istr
+
+    return td_string
+
+
+def string_to_timedelta(td_string):
+    """Converts a string to a timedelta dict."""
+    match = _TD_STR_REGEX.match(td_string)
+    delta = {}
+    for istr, td in _td_str_map:
+        if match.group(td):
+            delta[td] = match.group(td)
+    return delta

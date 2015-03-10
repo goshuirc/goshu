@@ -9,7 +9,7 @@ import os
 
 from colorama import Fore, Back, Style
 
-from .libs import helper
+from .libs.helper import timedelta_to_string, string_to_timedelta
 
 
 class InfoStore():
@@ -204,16 +204,6 @@ class BotSettings(InfoStore):
         #
         print(wrap['section']('Bot Control'))
 
-        repeating_prompt = wrap['prompt']('Default Nick:')
-        prompt = '\n'.join([
-            wrap['subsection']('Default Nick'),
-            "This will be the default nick your bot uses for new networks. You may also set a "
-            "custom nick on each network, this will just be the default choice.",
-            '',
-            repeating_prompt,
-        ])
-        self.add_key(str, 'default_nick', prompt, repeating_prompt=repeating_prompt)
-
         repeating_prompt = wrap['prompt']("Command prefix: [']")
         prompt = '\n'.join([
             wrap['subsection']('Command Prefix'),
@@ -257,25 +247,32 @@ class IrcInfo(InfoStore):
         #
         print(wrap['section']('IRC Info'))
 
-        if self.has('servers'):
-            repeating_prompt = wrap['prompt']('Current IRC connections OK? [y]')
-            prompt = '\n'.join([
-                wrap['subsection']('Current IRC Connections'),
-                "If you wish to edit the current IRC connections, type 'no' here.",
-                '',
-                repeating_prompt,
-            ])
-            modify_connections = self.bot.gui.get_bool(prompt, repeating_prompt=repeating_prompt, default=True)
+        repeating_prompt = wrap['prompt']('Default Nick:')
+        prompt = '\n'.join([
+            wrap['subsection']('Default Nick'),
+            "This will be the default nick your bot uses for new networks. You may also set a "
+            "custom nick on each network, this will just be the default choice.",
+            '',
+            repeating_prompt,
+        ])
+        self.add_key(str, 'default_nick', prompt, repeating_prompt=repeating_prompt)
+
+        # so we always modify connections on first run
+        modify_connections = True
+
+        if self.has_key('servers'):
+            prompt = wrap['prompt']('Current IRC connections OK? [y]')
+            modify_connections = not self.bot.gui.get_bool(prompt, default=True)
 
             # remove connections
             if modify_connections:
                 current_servers = self.get('servers', {})
                 for name in current_servers:
                     server_info = current_servers[name]
-                    prompt = wrap['prompt']('Delete Server {name} [{ssl}{addr}:{port}] [n]'.format(**{
+                    prompt = wrap['prompt']('Delete Server {name} [{ssl}{host}:{port}] [n]'.format(**{
                         'name': name,
                         'ssl': '+' if server_info['ssl'] else '',
-                        'addr': server_info['address'],
+                        'host': server_info['hostname'],
                         'port': server_info['port'],
                     }))
                     delete_server = self.bot.gui.get_bool(prompt, default=False)
@@ -285,87 +282,136 @@ class IrcInfo(InfoStore):
 
                 self.set('servers', current_servers)
 
-            # new connections
+        # new connections
+        if modify_connections:
             header = '\n'.join([
                 wrap['subsection']('New IRC Connections'),
             ])
             print(header)
 
             while True:
-                if not self.has('servers') or not self.get('servers', None):
-                    new_connection = True
+                if not self.has_key('servers') or not self.get('servers', None):
+                    setup_new_connection = True
                 else:
                     prompt = wrap['prompt']('Add new server? [n]')
                     setup_new_connection = self.bot.gui.get_bool(prompt, default=False)
 
-                    if not setup_new_connection
-                        break
+                if not setup_new_connection:
+                    break
 
                 # setup new connection
-                if setup_new_connection:
-                    new_connection = {}
+                new_connection = {}
 
-                    prompt = wrap['prompt']('Server Nickname:')
-                    server_name = self.bot.gui.get_string(prompt)
+                prompt = wrap['prompt']('Server Nickname:')
+                server_name = self.bot.gui.get_string(prompt)
 
-                    prompt = wrap['prompt']('Hostname:')
-                    new_connection['hostname'] = self.bot.gui.get_string(prompt)
+                prompt = wrap['prompt']('Hostname:')
+                new_connection['hostname'] = self.bot.gui.get_string(prompt)
 
-                    prompt = wrap['prompt']('IPv6?')
-                    new_connection['ipv6'] = self.bot.gui.get_bool(prompt)
+                prompt = wrap['prompt']('IPv6? [n]')
+                new_connection['ipv6'] = self.bot.gui.get_bool(prompt, default=False)
 
-                    prompt = wrap['prompt']('SSL?')
-                    new_connection['ssl'] = self.bot.gui.get_bool(prompt)
+                prompt = wrap['prompt']('SSL? [y]')
+                new_connection['ssl'] = self.bot.gui.get_bool(prompt, default=True)
 
-                    if new_connection['ssl']:
-                        default_port = 6697
-                    else:
-                        default_port = 6667
+                if new_connection['ssl']:
+                    default_port = 6697
+                else:
+                    default_port = 6667
 
-                    prompt = wrap['prompt']('Port? [{}]'.format(default_port))
-                    new_connection['port'] = self.bot.gui.get_number(prompt, force_int=True, default=default_port)
+                prompt = wrap['prompt']('Port? [{}]'.format(default_port))
+                new_connection['port'] = self.bot.gui.get_number(prompt, force_int=True, default=default_port)
 
-                    print(wrap['note']('If you do not have a NickServ password, simply hit enter here'))
-                    prompt = wrap['prompt']('NickServ Password:')
-                    new_connection['nickserv_password'] = self.bot.gui.get_string(prompt, password=True)
+                prompt = wrap['prompt']('Connect Username:')
+                new_connection['connect_username'] = self.bot.gui.get_string(prompt, blank_allowed=True)
 
-                    if new_connection['nickserv_password']:
-                        prompt = wrap['prompt']('NickServ Wait Period')
+                prompt = wrap['prompt']('Connect Realname:')
+                new_connection['connect_realname'] = self.bot.gui.get_string(prompt, blank_allowed=True)
+
+                print(wrap['note']('This is not your NickServ password, this is the IRC server connection password.'))
+                prompt = wrap['prompt']('Connect Password:')
+                confirm_prompt = wrap['prompt']('Confirm Connect Password:')
+                new_connection['connect_password'] = self.bot.gui.get_string(prompt, confirm_prompt=confirm_prompt, blank_allowed=True, password=True)
+
+                default_nick = self.get('default_nick')
+                prompt = wrap['prompt']('Nickname: [{}]'.format(default_nick))
+                new_connection['nick'] = self.bot.gui.get_string(prompt, default=default_nick)
+
+                print(wrap['note']('If you do not have a NickServ password, simply leave this empty'))
+                prompt = wrap['prompt']('NickServ Password:')
+                confirm_prompt = wrap['prompt']('Confirm NickServ Password:')
+                ns_password = self.bot.gui.get_string(prompt, confirm_prompt=confirm_prompt, blank_allowed=True, password=True)
+                if ns_password:
+                    new_connection['nickserv_password'] = ns_password
+
+                    repeating_prompt = wrap['prompt']('NickServ Wait Period in seconds: [10]')
+                    prompt = '\n'.join([
+                        "NickServ authentication sometimes takes a number of seconds to complete.",
+                        "Here, you can type in a number of seconds to wait before joining channels "
+                        "to make sure you're properly authenticated with NickServ.",
+                        '',
+                        "This is commonly used to wait for vhosts to apply, before joining channels, "
+                        "as well as waiting for login so ChanServ-protected channels don't kick you."
+                        '',
+                        repeating_prompt,
+                    ])
+                    new_connection['vhost_wait'] = self.bot.gui.get_number(prompt, repeating_prompt=repeating_prompt, force_int=True, default=10)
+
+                repeating_prompt = wrap['prompt']('Channels to autojoin:')
+                prompt = '\n'.join([
+                    wrap['subsection']('Channels to Autojoin'),
+                    "In here, you list the channels you want to autojoin when connecting to the network!",
+                    '',
+                    wrap['note']('Separate the channels by spaces, eg:  #a #b #chat #ret'),
+                    '',
+                    repeating_prompt
+                ])
+                chanlist = self.bot.gui.get_string(prompt, repeating_prompt=repeating_prompt)
+
+                new_connection['autojoin_channels'] = []
+                for chan in chanlist.split():
+                    if not chan.startswith('#'):
+                        continue
+                    if chan.lower() not in new_connection['autojoin_channels']:
+                        new_connection['autojoin_channels'].append(chan.lower())
+
+                default_timeout = timedelta_to_string(girclib.timeout_check_interval)
+                repeating_prompt = wrap['prompt']('Timeout Check Interval: [{}]'.format(default_timeout))
+                prompt = '\n'.join({
+                    wrap['subsection']('Timeout Check Interval'),
+                    "This is how long between our checks to see if we have timed out. "
+                    "Changing this can help if your connection keeps timing out.",
+                    '',
+                    wrap['note']('This is a string like:  "5m14s"  "1h3m12s'),
+                    '',
+                    repeating_prompt,
+                })
+                timeout_check = self.bot.gui.get_string(prompt, repeating_prompt=repeating_prompt, default=default_timeout, validate=string_to_timedelta)
+                new_connection['timeout_check_interval'] = string_to_timedelta(timeout_check)
+
+                default_timeout = timedelta_to_string(girclib.timeout_check_interval)
+                repeating_prompt = wrap['prompt']('Timeout Length: [{}]'.format(default_timeout))
+                prompt = '\n'.join({
+                    wrap['subsection']('Timeout Length'),
+                    "This is how long without a message from the server we can go before we "
+                    "assume we have been timed out and try to reconnect. Higher values here "
+                    "can help prevent disconnections on some networks, but will increase the "
+                    "time it takes to automatically reconnect after pinging out."
+                    '',
+                    wrap['note']('This is a string like:  "5m14s"  "1h3m12s'),
+                    '',
+                    repeating_prompt,
+                })
+                timeout_length = self.bot.gui.get_string(prompt, repeating_prompt=repeating_prompt, default=default_timeout, validate=string_to_timedelta)
+                new_connection['timeout_length'] = string_to_timedelta(timeout_length)
 
 
+                # add new connection to our list
+                new_server_dict = self.get('servers', {})
+                new_server_dict[server_name] = new_connection
+                self.set('servers', new_server_dict)
 
-
-#         if server:
-#             new_server_name = ''
-#             while new_server_name == '':
-#                 try:
-#                     new_server_name = self.bot.gui.get_input(' server nickname [%s]: ' % server).split()[0].strip()
-#                 except IndexError:
-#                     new_server_name = server
-#         else:
-#             new_server_name = ''
-#             while new_server_name == '':
-#                 try:
-#                     new_server_name = self.bot.gui.get_input(' server nickname: ').split()[0].strip()
-#                 except IndexError:
-#                     new_server_name = ''
-
-#         new_server['connection'] = {}
-#         self._update_attribute(old_server, new_server, 'connection.address', 'server address')
-#         self._update_attribute(old_server, new_server, 'connection.ipv6', 'ipv6', truefalse=True, no_old_value=False)
-#         self._update_attribute(old_server, new_server, 'connection.ssl', 'ssl', truefalse=True, no_old_value=False)
-#         if new_server['connection']['ssl']:
-#             assumed_port = 6697
-#         else:
-#             assumed_port = 6667
-#         self._update_attribute(old_server, new_server, 'connection.port', 'port', old_value=assumed_port)
-#         self._update_attribute(old_server, new_server, 'connection.nickserv_password', 'nickserv password', can_ignore=True)
-
-#         store[new_server_name] = new_server
-
-#         return True
-
-
+        print(wrap['success']('IRC Info'))
 
 
 

@@ -8,6 +8,7 @@ from gbot.users import USER_LEVEL_ADMIN
 
 class modules(Module):
     """Handles loading and unloading modules and their internal JSON dicts"""
+    core = True
 
     def __init__(self, bot):
         Module.__init__(self, bot)

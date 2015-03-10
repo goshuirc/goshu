@@ -32,6 +32,10 @@ def json_dumps(*pargs, **kwargs):
 
 class Module:
     """Module to add commands/functionality to the bot."""
+    # whether this module is 'core', or practically required for
+    #   Goshu to operate
+    core = False
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -236,8 +240,8 @@ class Modules:
             self.handle_command(event)
 
     def handle_command(self, event):
-        if event.arguments[0].startswith(self.bot.settings.store['prefix']):
-            in_string = event.arguments[0][len(self.bot.settings.store['prefix']):].strip()
+        if event.arguments[0].startswith(self.bot.settings.store['command_prefix']):
+            in_string = event.arguments[0][len(self.bot.settings.store['command_prefix']):].strip()
             if not in_string:
                 return  # empty
 

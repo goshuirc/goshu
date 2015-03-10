@@ -19,6 +19,7 @@ from gbot.libs.helper import filename_escape
 # TODO: need to put a_ at the beginning so goshu calls this module first… apparently priority's broken, too
 class a_log_display(Module):
     """Prints and shows IRC activity, with nice colours!"""
+    core = True
 
     def __init__(self, bot):
         Module.__init__(self, bot)
@@ -107,7 +108,7 @@ class a_log_display(Module):
                 output += ' '
             output += self.nick_color(event.source.split('!')[0])
             output += '@c14>@c '
-            output += hide_pw_if_necessary(event.arguments[0], self.bot.settings.store['prefix'])
+            output += hide_pw_if_necessary(event.arguments[0], self.bot.settings.store['command_prefix'])
 
         elif event.type in ['privmsg', ]:
             output += '@c3-@c'
@@ -121,7 +122,7 @@ class a_log_display(Module):
             output += '@c14<@c'
             output += self.nick_color(event.source.split('!')[0])
             output += '@c14>@c '
-            output += hide_pw_if_necessary(event.arguments[0], self.bot.settings.store['prefix'])
+            output += hide_pw_if_necessary(event.arguments[0], self.bot.settings.store['command_prefix'])
 
         elif event.type in ['action', ]:
             output += '@c3-@c'

@@ -42,7 +42,7 @@ def _note_wrap(note):
 def _success_wrap(name):
     """Return a little 'success' message."""
     check = Fore.GREEN + Style.BRIGHT + '✓' + Style.RESET_ALL
-    return ' {check} {name}'.format(name=name, check=check)
+    return ' {check}  {name}'.format(name=name, check=check)
 
 
 # Goshu

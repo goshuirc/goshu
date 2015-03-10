@@ -9,7 +9,7 @@ from gbot.users import USER_LEVEL_ADMIN, USER_LEVEL_SUPERADMIN, USER_LEVEL_OWNER
 
 class accounts(Module):
     """Handles goshu accounts, including registration, access levels, and login."""
-    name = 'accounts'
+    core = True
 
     def __init__(self, bot):
         Module.__init__(self, bot)
@@ -77,7 +77,7 @@ class accounts(Module):
     def owner(self, event, command, usercommand):
         name = self.bot.accounts.account(event.source, event.server)
         if name:
-            if self.bot.settings.encrypt(usercommand.arguments) == self.bot.settings.get('passhash', None):
+            if self.bot.settings.encrypt(usercommand.arguments) == self.bot.settings.get('master_bot_password', None):
                 self.bot.accounts.set_access_level(name, USER_LEVEL_OWNER)
                 self.bot.irc.msg(event, 'You are now a bot owner')
 

@@ -11,6 +11,7 @@ from gbot.users import USER_LEVEL_OWNER
 
 class info(Module):
     """Provides debugging info to admins when necessary."""
+    core = True
 
     def __init__(self, bot):
         Module.__init__(self, bot)
