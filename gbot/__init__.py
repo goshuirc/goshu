@@ -63,6 +63,10 @@ class Bot:
         # load gui first, info components depend on it
         self.gui = gui.GuiManager(self)
 
+        # initialize modules
+        self.modules = modules.Modules(self, modules_path)
+        self.modules.load_module_info()
+
         # config paths
         settings_path = os.path.join(config_path, 'bot.json')
         accountinto_path = os.path.join(config_path, 'info.json')
@@ -75,7 +79,6 @@ class Bot:
 
         # other core components
         self.irc = irc.IRC(self)
-        self.modules = modules.Modules(self, modules_path)
 
         # setting up standard information
         if not self.settings.has_key('completed_initial_setup'):

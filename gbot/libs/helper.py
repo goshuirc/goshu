@@ -516,3 +516,11 @@ def string_to_timedelta(td_string):
         if match.group(td):
             delta[td] = match.group(td)
     return delta
+
+# path
+import sys
+
+
+def add_path(path):
+    if path not in sys.path:
+        sys.path.insert(0, path)

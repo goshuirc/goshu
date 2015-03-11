@@ -11,7 +11,7 @@ import inspect
 import importlib
 import threading
 
-from .libs.helper import JsonHandler
+from .libs.helper import JsonHandler, add_path
 from .libs.girclib import NickMask, is_channel
 from .users import USER_LEVEL_NOPRIVS
 
@@ -54,6 +54,11 @@ class Module:
         self.json_handlers = []
         self.dynamic_commands = {}
 
+        self.config = {}
+        self.config_filename = os.sep.join(['config', 'modules', '{}.json'.format(self.name)])
+
+    def load(self):
+        """Actually start up everything we need"""
         if os.path.exists(self.dynamic_path):
             # setup our new module's dynamic json command handler
             new_handler = JsonHandler(self, self.dynamic_path, **{
@@ -63,9 +68,10 @@ class Module:
                 'yaml': True,
             })
             self.json_handlers.append(new_handler)
+            self.reload_json()
 
-        self.config = {}
-        self.config_filename = os.sep.join(['config', 'modules', '{}.json'.format(self.name)])
+        self.commands.update(getattr(self, 'static_commands', {}))
+
         self.load_config()
 
     def load_config(self, path=None):
@@ -97,9 +103,6 @@ class Module:
     def combined(self, event, command, usercommand):
         ...
 
-    def load(self):
-        self.commands.update(getattr(self, 'static_commands', {}))
-
     def unload(self):
         pass
 
@@ -114,7 +117,11 @@ class Module:
         """
         # assemble new json dict into actual commands dict
         new_commands = {}
+        disabled_commands = self.bot.settings.get('dynamic_commands_disabled', {}).get(self.name.lower(), [])
         for key in new_json:
+            if key in disabled_commands:
+                continue
+
             single_command_dict = self.bot.modules.return_command_dict(self, new_json[key])
             new_commands.update(single_command_dict)
 
@@ -138,15 +145,29 @@ class Modules:
         self.bot = bot
         self.whole_modules = {}
         self.modules = {}
-        self.paths = []
-        self.add_path(path)
+        self.path = path
+        add_path(path)
 
-    def add_path(self, path):
-        if path not in sys.path:
-            self.paths.append(path)
-            sys.path.insert(0, path)
+        # info lists
+        self.core_module_names = []
+        self.dcm_module_commands = {}  # dynamic command module command lists
 
-    def modules_from_path(self, path):
+    def load_module_info(self):
+        modules = self._modules_from_path()
+
+        # load so we can work out which modules are core and which aren't
+        for mod_name in modules:
+            loaded_module = self.load(mod_name)
+            if self.modules[mod_name].core:
+                self.core_module_names.append(mod_name)
+            if self.modules[mod_name].dynamic_commands:
+                self.dcm_module_commands[mod_name] = list(self.modules[mod_name].dynamic_commands.keys())
+            self.unload(mod_name)
+
+    def _modules_from_path(self, path=None):
+        if path is None:
+            path = self.path
+
         modules = []
         for entry in os.listdir(path):
             if os.path.isfile(os.path.join(path, entry)):
@@ -158,11 +179,11 @@ class Modules:
         return modules
 
     def load_init(self):
-        path = self.paths[0]
-        modules = self.modules_from_path(path)
+        modules = self._modules_from_path()
         output = 'modules '
         for module in modules:
             loaded_module = self.load(module)
+            self.modules[module].load()
             if loaded_module:
                 output += ', '.join(self.whole_modules[module]) + ', '
             else:
@@ -206,8 +227,6 @@ class Modules:
                 self.add_command_info(module.name, command)
             module.folder_path = os.path.join('modules', name)
             module.bot = self.bot
-
-            module.load()
 
         return True
 
