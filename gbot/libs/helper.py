@@ -502,7 +502,7 @@ def timedelta_to_string(delta):
     td_string = ''
     for istr, td in _td_str_map:
         if td in delta:
-            td_string += delta[td]
+            td_string += str(delta[td])
             td_string += istr
 
     return td_string
@@ -514,7 +514,11 @@ def string_to_timedelta(td_string):
     delta = {}
     for istr, td in _td_str_map:
         if match.group(td):
-            delta[td] = match.group(td)
+            if '.' in match.group(td):
+                val = float(match.group(td))
+            else:
+                val = int(match.group(td))
+            delta[td] = val
     return delta
 
 # path

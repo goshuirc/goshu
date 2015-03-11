@@ -27,7 +27,9 @@ class GuiManager:
         print(line)
 
     # input functions
-    def get_string(self, prompt, repeating_prompt=None, default=None, confirm_prompt=None, blank_allowed=False, password=False):
+    def get_string(self, prompt, repeating_prompt=None, default=None,
+                   confirm_prompt=None, blank_allowed=False,
+                   password=False, validate=None):
         """Get a string."""
         if repeating_prompt is None:
             repeating_prompt = prompt
@@ -43,7 +45,8 @@ class GuiManager:
             val1 = fn(prompt)
             val2 = fn(confirm_prompt)
 
-            while val1 != val2 or (val1.strip() == '' and not blank_allowed and default is None):
+            while (val1 != val2 or (val1.strip() == '' and not blank_allowed and default is None)
+                   or (validate and not validate(val1))):
                 val1 = fn(repeating_prompt)
                 val2 = fn(confirm_prompt)
 
@@ -56,11 +59,11 @@ class GuiManager:
         else:
             output_value = fn(prompt)
 
-            if not blank_allowed:
+            if not blank_allowed or validate:
                 if default is not None:
                     output_value = default
                 else:
-                    while output_value.strip() == '':
+                    while output_value.strip() == '' or (validate and not validate(output_value)):
                         output_value = fn(repeating_prompt)
 
         return output_value

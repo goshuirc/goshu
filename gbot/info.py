@@ -9,6 +9,7 @@ import os
 
 from colorama import Fore, Back, Style
 
+from .libs import girclib
 from .libs.helper import timedelta_to_string, string_to_timedelta
 
 
@@ -447,20 +448,22 @@ class IrcInfo(InfoStore):
                 prompt = wrap['prompt']('Port? [{}]'.format(default_port))
                 new_connection['port'] = self.bot.gui.get_number(prompt, force_int=True, default=default_port)
 
-                prompt = wrap['prompt']('Connect Username:')
-                new_connection['connect_username'] = self.bot.gui.get_string(prompt, blank_allowed=True)
+                default_nick = self.get('default_nick')
+                prompt = wrap['prompt']('Nickname: [{}]'.format(default_nick))
+                new_connection['nick'] = self.bot.gui.get_string(prompt, default=default_nick)
 
+                print(wrap['note']('This is the bit of your userhost before the @ sign, eg:    nick!~username@hostname'))
+                prompt = wrap['prompt']('Connect Username:')
+                new_connection['connect_username'] = self.bot.gui.get_string(prompt)
+
+                print(wrap['note']('This is something users can see when they /whois your bot'))
                 prompt = wrap['prompt']('Connect Realname:')
-                new_connection['connect_realname'] = self.bot.gui.get_string(prompt, blank_allowed=True)
+                new_connection['connect_realname'] = self.bot.gui.get_string(prompt)
 
                 print(wrap['note']('This is not your NickServ password, this is the IRC server connection password.'))
                 prompt = wrap['prompt']('Connect Password:')
                 confirm_prompt = wrap['prompt']('Confirm Connect Password:')
                 new_connection['connect_password'] = self.bot.gui.get_string(prompt, confirm_prompt=confirm_prompt, blank_allowed=True, password=True)
-
-                default_nick = self.get('default_nick')
-                prompt = wrap['prompt']('Nickname: [{}]'.format(default_nick))
-                new_connection['nick'] = self.bot.gui.get_string(prompt, default=default_nick)
 
                 print(wrap['note']('If you do not have a NickServ password, simply leave this empty'))
                 prompt = wrap['prompt']('NickServ Password:')
@@ -502,22 +505,24 @@ class IrcInfo(InfoStore):
 
                 default_timeout = timedelta_to_string(girclib.timeout_check_interval)
                 repeating_prompt = wrap['prompt']('Timeout Check Interval: [{}]'.format(default_timeout))
-                prompt = '\n'.join({
-                    wrap['subsection']('Timeout Check Interval'),
+                prompt = '\n'.join([
+                    '',
+                    wrap['subsection']('Timeout Check Interval').strip(),
                     "This is how long between our checks to see if we have timed out. "
                     "Changing this can help if your connection keeps timing out.",
                     '',
                     wrap['note']('This is a string like:  "5m14s"  "1h3m12s'),
                     '',
                     repeating_prompt,
-                })
+                ])
                 timeout_check = self.bot.gui.get_string(prompt, repeating_prompt=repeating_prompt, default=default_timeout, validate=string_to_timedelta)
                 new_connection['timeout_check_interval'] = string_to_timedelta(timeout_check)
 
                 default_timeout = timedelta_to_string(girclib.timeout_check_interval)
                 repeating_prompt = wrap['prompt']('Timeout Length: [{}]'.format(default_timeout))
-                prompt = '\n'.join({
-                    wrap['subsection']('Timeout Length'),
+                prompt = '\n'.join([
+                    '',
+                    wrap['subsection']('Timeout Length').strip(),
                     "This is how long without a message from the server we can go before we "
                     "assume we have been timed out and try to reconnect. Higher values here "
                     "can help prevent disconnections on some networks, but will increase the "
@@ -526,7 +531,7 @@ class IrcInfo(InfoStore):
                     wrap['note']('This is a string like:  "5m14s"  "1h3m12s'),
                     '',
                     repeating_prompt,
-                })
+                ])
                 timeout_length = self.bot.gui.get_string(prompt, repeating_prompt=repeating_prompt, default=default_timeout, validate=string_to_timedelta)
                 new_connection['timeout_length'] = string_to_timedelta(timeout_length)
 
