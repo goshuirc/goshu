@@ -24,7 +24,7 @@ class list(Module):
 
     def privmsg(self, event):
         if event.arguments[0].lower() in ['help', 'hello', 'hi']:
-            response = 'Hello! I am a bot, to view the avaliable commands, please type {format}list'.format(format=self.bot.settings.store['command_prefix'])
+            response = 'Hello! I am a bot, to view the avaliable commands, please type {prefix}list'.format(prefix=self.bot.settings.store['command_prefix'])
             self.bot.irc.msg(event, response)
 
     def list(self, event, command, usercommand):
@@ -43,6 +43,9 @@ class list(Module):
         if usercommand.arguments:
             # single command info
             name = usercommand.arguments.split()[0].lower()
+            command_prefix = self.bot.settings.store['command_prefix']
+            if name.startswith(command_prefix):
+                name = name[len(command_prefix):]
             if name in bot_commands:
                 command = bot_commands[name]
 
