@@ -12,6 +12,13 @@ USER_LEVEL_ADMIN = 5
 USER_LEVEL_SUPERADMIN = 7
 USER_LEVEL_OWNER = 10
 
+user_levels = {
+    'noprivs': USER_LEVEL_NOPRIVS,
+    'admin': USER_LEVEL_ADMIN,
+    'superadmin': USER_LEVEL_SUPERADMIN,
+    'owner': USER_LEVEL_OWNER,
+}
+
 
 class AccountInfo(InfoStore):
     """Manages and stores user account information."""

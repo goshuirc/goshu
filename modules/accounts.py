@@ -14,22 +14,10 @@ class accounts(Module):
     def __init__(self, bot):
         Module.__init__(self, bot)
         self.events = {
-            'commands': {
-                'register': [self.register, '<username> <password> [email] --- register a goshu account'],
-                'login': [self.login, '[[username] [password]] --- login to a goshu account, if no user/pass use nickserv integration'],
-                'loggedin': [self.loggedin, '--- see if you are logged in'],
-                'owner': [self.owner, '<password> --- make yourself a bot owner', 0, USER_LEVEL_OWNER],
-                'setaccess': [self.setaccess, "<username> <level> --- set user's access level", USER_LEVEL_ADMIN],
-                'nickserv': [self.nickserv, "<link/list/del> --- link, list, or delete nickserv-goshu accounts"],
-            },
             'in': {
                 'privnotice': [(-30, self.nickserv_listener)],
             },
         }
-
-    def nickserv(self, event, command, usercommand):
-        if usercommand.arguments.lower() == 'link':
-            self.bot.irc.servers[event.server].privmsg('nickserv', 'INFO {nick}'.format(nick=event.source.split('!')[0]))
 
     def nickserv_listener(self, event):
         if event.source.split('!')[0].lower() == 'nickserv':
@@ -40,7 +28,19 @@ class accounts(Module):
             elif "isn't registered" in response:
                 self.bot.gui.put_line('Nickserv fail response: {nick} is not registered'.format(nick=sresponse[1]))
 
-    def register(self, event, command, usercommand):
+    def cmd_nickserv(self, event, command, usercommand):
+        """Link, List, or Delete NickServ-linked bot accounts
+
+        @usage <link/list/del>
+        """
+        if usercommand.arguments.lower() == 'link':
+            self.bot.irc.servers[event.server].privmsg('nickserv', 'INFO {nick}'.format(nick=event.source.split('!')[0]))
+
+    def cmd_register(self, event, command, usercommand):
+        """Register a bot account
+
+        @usage <username> <password> [email]
+        """
         user_args = usercommand.arguments.split()
 
         if len(user_args) < 2:
@@ -57,7 +57,11 @@ class accounts(Module):
 
         self.bot.irc.msg(event, 'Account registered!')
 
-    def login(self, event, command, usercommand):
+    def cmd_login(self, event, command, usercommand):
+        """Login to a bot account, if no user/password given try NickServ integration
+
+        @usage [[username] [password]]
+        """
         user_args = usercommand.arguments.split()
 
         if user_args is None:
@@ -67,21 +71,33 @@ class accounts(Module):
         elif (len(user_args) > 1) and self.bot.accounts.login(user_args[0].lower(), user_args[1], event.server, event.source):
             self.bot.irc.msg(event, 'Login accepted!')
 
-    def loggedin(self, event, command, usercommand):
+    def cmd_loggedin(self, event, command, usercommand):
+        """See if you are logged in"""
         name = self.bot.accounts.account(event.source, event.server)
         if name:
             self.bot.irc.msg(event, 'Logged into {acct}'.format(acct=name))
         else:
             self.bot.irc.msg(event, 'Not logged in')
 
-    def owner(self, event, command, usercommand):
+    def cmd_owner(self, event, command, usercommand):
+        """Make yourself a bot owner
+
+        @usage <password>
+        @view_level owner
+        @call_level noprivs
+        """
         name = self.bot.accounts.account(event.source, event.server)
         if name:
             if self.bot.settings.encrypt(usercommand.arguments) == self.bot.settings.get('master_bot_password', None):
                 self.bot.accounts.set_access_level(name, USER_LEVEL_OWNER)
                 self.bot.irc.msg(event, 'You are now a bot owner')
 
-    def setaccess(self, event, command, usercommand):
+    def cmd_setaccess(self, event, command, usercommand):
+        """Set user's access level
+
+        @usage <username> [admin/superadmin/owner/0-10]
+        @call_level admin
+        """
         splitargs = usercommand.arguments.split()
         if len(splitargs) < 2:
             return

@@ -13,7 +13,7 @@ import threading
 
 from .libs.helper import JsonHandler, add_path
 from .libs.girclib import NickMask, is_channel
-from .users import USER_LEVEL_NOPRIVS
+from .users import user_levels, USER_LEVEL_NOPRIVS
 
 
 def extract_mod_info_from_docstring(docstring, name, handler):
@@ -31,7 +31,7 @@ def extract_mod_info_from_docstring(docstring, name, handler):
         return {
             name: {
                 'name': [name],
-                'description': docstring.strip(),
+                'description': '--- {}'.format(docstring.strip()),
                 'call': handler,
             }
         }
@@ -64,8 +64,26 @@ def extract_mod_info_from_docstring(docstring, name, handler):
                 else:
                     info['name'].append(val.strip().lower())
 
+            elif name in ['usage']:
+                if name not in info:
+                    info[name] = [val]
+                else:
+                    info[name].append(val)
+
             else:
-                info[name] = alias
+                info[name] = val
+
+    if info.get('usage'):
+        desc = info.get('description')
+        usage_lines = info.get('usage')
+        del info['usage']
+
+        info['description'] = []
+
+        for use in usage_lines:
+            info['description'].append('{} --- {}'.format(use, desc))
+    elif info.get('description'):
+        info['description'] = '--- {}'.format(info['description'])
 
     module_dict = {}
 
@@ -430,10 +448,16 @@ class Modules:
 
         call_level = info.get('call_level', USER_LEVEL_NOPRIVS)
 
+        if call_level in user_levels:
+            call_level = user_levels[call_level]
+
         if 'view_level' in info:
             view_level = info['view_level']
         else:
             view_level = call_level
+
+        if view_level in user_levels:
+            view_level = user_levels[view_level]
 
         channel_whitelist = info.get('channel_whitelist', [])
 
