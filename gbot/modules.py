@@ -181,13 +181,17 @@ class Modules:
     def load_init(self):
         modules = self._modules_from_path()
         output = 'modules '
+        disabled_modules = self.settings.get('disabled_modules', [])
         for module in modules:
             loaded_module = self.load(module)
-            self.modules[module].load()
-            if loaded_module:
-                output += ', '.join(self.whole_modules[module]) + ', '
+            if self.modules[module].name.lower() in disabled_modules:
+                self.unload(module)
             else:
-                output += module + '[FAILED], '
+                self.modules[module].load()
+                if loaded_module:
+                    output += ', '.join(self.whole_modules[module]) + ', '
+                else:
+                    output += module + '[FAILED], '
         output = output[:-2]
         output += ' loaded'
         self.bot.gui.put_line(output)

@@ -128,6 +128,8 @@ class BotSettings(InfoStore):
         #
         print(wrap['section']('Modules'))
 
+        disabled_modules = []
+
         # core modules
         repeating_prompt = wrap['prompt']('Load all core modules? [yes]')
         prompt = '\n'.join([
@@ -155,6 +157,7 @@ class BotSettings(InfoStore):
                         enabled.append(module_slug)
                     else:
                         disabled.append(module_slug)
+                        disabled_modules.append(module_slug)
 
             self.set('core_modules_enabled', enabled)
             self.set('core_modules_disabled', disabled)
@@ -193,6 +196,7 @@ class BotSettings(InfoStore):
                         enabled.append(module_slug)
                     else:
                         disabled.append(module_slug)
+                        disabled_modules.append(module_slug)
 
             self.set('dynamic_command_modules_enabled', enabled)
             self.set('dynamic_command_modules_disabled', disabled)
@@ -241,6 +245,7 @@ class BotSettings(InfoStore):
             self.set('dynamic_commands_enabled', enabled)
             self.set('dynamic_commands_disabled', disabled)
 
+        self.set('disabled_modules', disabled_modules)
 
         print(wrap['success']('Modules'))
 
