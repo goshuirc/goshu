@@ -14,6 +14,8 @@ from .libs.helper import timedelta_to_string, string_to_timedelta
 
 class InfoStore():
     """Stores and manages general information, settings, etc; to be subclassed."""
+    version = 1
+
     def __init__(self, bot, path):
         self.bot = bot
         self.path = path
@@ -26,13 +28,22 @@ class InfoStore():
         try:
             with open(self.path, 'r') as info_file:
                 self.store = json.loads(info_file.read())
+                current_version = self.store.get('store_version', 1)
+                while current_version < self.version:
+                    current_version = self.update_store_version(current_version)
         except FileNotFoundError:
             self.store = {}
+            self.initialize_store()
 
     def save(self):
         """Save information to our data file."""
         with open(self.path, 'w') as info_file:
             info_file.write(json.dumps(self.store, sort_keys=True, indent=4))
+
+    # version updating
+    def update_store_version(self, current_version):
+        """Update our internal store from the given verison, return the new version."""
+        raise NotImplementedError('update_store_version must be replaced when subclassed')
 
     # getting and setting
     def has_key(self, key):
@@ -121,6 +132,29 @@ class InfoStore():
 
 class BotSettings(InfoStore):
     """Manages basic bot settings."""
+    version = 2
+
+    # version upgrading
+    def update_store_version(self, current_version):
+        if current_version == 1:
+            new_store = {
+                'store_version': 2,
+                'command_prefix': self.get('prefix', "'"),
+            }
+            master_bot_password = self.get('passhash', '')
+            if master_bot_password:
+                new_store['master_bot_password'] = master_bot_password
+
+            # we ignore nick here, but we can ask that on startup anyway, oh well
+
+            self.store = new_store
+            self.save()
+
+            current_version = 2
+
+        return current_version
+
+    # standard menus
     def add_standard_keys(self):
         wrap = self.bot._prompt_wraps
 
@@ -289,6 +323,43 @@ class BotSettings(InfoStore):
 
 class IrcInfo(InfoStore):
     """Manages bot's IRC info."""
+    version = 2
+
+    # version upgrading
+    def update_store_version(self, current_version):
+        if current_version == 1:
+            new_store = {
+                'store_version': 2,
+                'servers': {},
+            }
+
+            for name, info in self.store.items():
+                new_store['servers'][name] = {}
+                new_store['servers'][name]['autojoin_channels'] = info.get('autojoin_channels', [])
+                new_store['servers'][name]['hostname'] = info.get('address')
+                new_store['servers'][name]['ipv6'] = info.get('ipv6', False)
+                new_store['servers'][name]['ssl'] = info.get('ssl', False)
+                new_store['servers'][name]['port'] = info.get('port', 6667)
+
+                ns_pass = info.get('nickserv_password')
+                if ns_pass:
+                    new_store['servers'][name]['nickserv_password'] = ns_pass
+
+                timeout_check_interval = info.get('timeout_check_interval')
+                if timeout_check_interval:
+                    new_store['servers'][name]['timeout_check_interval'] = timeout_check_interval
+                timeout_length = info.get('timeout_length')
+                if timeout_length:
+                    new_store['servers'][name]['timeout_length'] = timeout_length
+
+            self.store = new_store
+            self.save()
+
+            current_version = 2
+
+        return current_version
+
+    # standard menus
     def add_standard_keys(self):
         wrap = self.bot._prompt_wraps
 

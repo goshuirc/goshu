@@ -15,21 +15,52 @@ USER_LEVEL_OWNER = 10
 class AccountInfo(InfoStore):
     """Manages and stores user account information."""
     name = 'Accounts'
+    version = 2
+
+    # version upgrading
+    def update_store_version(self, current_version):
+        if current_version == 1:
+            new_store = {
+                'store_version': 2,
+                'accounts': {},
+            }
+            for name, info in self.store.items():
+                new_store['accounts'][name] = info
+
+            self.store = new_store
+            self.save()
+
+            current_version = 2
+
+        return current_version
+
+    # standard menus
+    def add_standard_keys(self):
+        wrap = self.bot._prompt_wraps
+
+        # module settings
+        #
+        print(wrap['section']('Accounts'))
+
+        print(wrap['success']('Accounts'))
 
     def add_account(self, name, password):
         """Add an account to our internal list."""
-        self.store[name] = {}
-        self.store[name]['password'] = self.encrypt(password)
+        if self.account_exists(name):
+            raise Exception('Given account [{}] already exists'.format(name))
 
-        self.store[name]['modules'] = {}
+        self.store['accounts'][name] = {}
+        self.store['accounts'][name]['password'] = self.encrypt(password)
+
+        self.store['accounts'][name]['modules'] = {}
 
         self.save()
 
     def remove_account(self, name):
         """Remove an account from our internal list."""
         self.load()
-        if name in self.store:
-            del self.store[name]
+        if name in self.store['accounts']:
+            del self.store['accounts'][name]
             self.save()
             return True
         else:
@@ -38,7 +69,7 @@ class AccountInfo(InfoStore):
 
     def account_exists(self, name):
         self.load()
-        if name in self.store:
+        if name in self.store['accounts']:
             return True
         else:
             return False
@@ -46,14 +77,14 @@ class AccountInfo(InfoStore):
     def is_password(self, name, password):
         self.load()
         if self.account_exists(name):
-            if self.store[name]['password'] == self.encrypt(password):
+            if self.store['accounts'][name]['password'] == self.encrypt(password):
                 return True
         return False
 
     def set_password(self, name, password):
         self.load()
         if self.account_exists(name):
-            self.store[name]['password'] = self.encrypt(password)
+            self.store['accounts'][name]['password'] = self.encrypt(password)
             self.save()
 
     def login(self, name, password, server, userstring):
@@ -80,9 +111,9 @@ class AccountInfo(InfoStore):
 
     def set_access_level(self, name, level=0):
         if self.account_exists(name):
-            self.store[name]['level'] = level
+            self.store['accounts'][name]['level'] = level
             if level == 0:
-                del self.store[name]['level']
+                del self.store['accounts'][name]['level']
             self.save()
             return True
         return False
@@ -91,8 +122,8 @@ class AccountInfo(InfoStore):
         self.load()
         level = USER_LEVEL_NOPRIVS
         if self.account_exists(name):
-            if 'level' in self.store[name]:
-                level = self.store[name]['level']
+            if 'level' in self.store['accounts'][name]:
+                level = self.store['accounts'][name]['level']
         return level
 
     def online_bot_runners(self, server):

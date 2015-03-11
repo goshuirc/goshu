@@ -181,7 +181,7 @@ class Modules:
     def load_init(self):
         modules = self._modules_from_path()
         output = 'modules '
-        disabled_modules = self.settings.get('disabled_modules', [])
+        disabled_modules = self.bot.settings.get('disabled_modules', [])
         for module in modules:
             loaded_module = self.load(module)
             if self.modules[module].name.lower() in disabled_modules:
