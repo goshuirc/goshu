@@ -13,13 +13,6 @@ class pokemon(Module):
 
     def __init__(self, bot):
         Module.__init__(self, bot)
-        self.events = {
-            'commands': {
-                'pokemon': [self.get_pokemon, '--- get a random pokemon'],
-                'poketeam': [self.get_pokemon, '--- get a random pokemon team'],
-                'pokerst': [self.reset_pokemon, '--- reset corrupted pokemon save'],
-            },
-        }
 
         self.path = os.path.join('modules', 'pokemon', '')  # '' to have trailing slash
         self.files = ['pokemon_list.json', 'corrupt_list.json']
@@ -27,7 +20,11 @@ class pokemon(Module):
 
         random.seed()
 
-    def get_pokemon(self, event, command, usercommand):
+    def cmd_pokemon(self, event, command, usercommand):
+        """Get a random pokemon
+
+        @alias poketeam --- Get a Pokemon team
+        """
         team = []
         if usercommand.command == 'pokemon' or self.corrupted:
             team.append(Monster(self.corrupted, self.path, self.files, True))
@@ -51,7 +48,8 @@ class pokemon(Module):
 
         self.bot.irc.msg(event, response, 'public')
 
-    def reset_pokemon(self, event, command, usercommand):
+    def cmd_pokerst(self, event, command, usercommand):
+        """Reset a corrupted pokemon save"""
         if not self.corrupted:
             return
 

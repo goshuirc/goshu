@@ -16,6 +16,78 @@ from .libs.girclib import NickMask, is_channel
 from .users import USER_LEVEL_NOPRIVS
 
 
+def extract_mod_info_from_docstring(docstring, name, handler):
+    """Extracts module info from the given docstring.
+
+    Basically, lines starting with @ represent 'variable lines' and their
+    values are extracted and put into the returned dictionary.
+
+    Args:
+        docstring: Docstring we're extracting info from
+        name: Original name
+        handler: Handler function
+    """
+    if len(docstring.split('\n')) < 2:
+        return {
+            name: {
+                'name': [name],
+                'description': docstring.strip(),
+                'call': handler,
+            }
+        }
+
+    # extract info
+    info = {
+        'name': [name],
+        'aliases': {},
+        'call': handler,
+        'description': docstring.split('\n')[0].strip()
+    }
+
+    for line in docstring.split('\n'):
+        if line.lstrip().startswith('@'):
+            line_info = line.lstrip().lstrip('@').split(' ', 1)
+
+            if len(line_info) < 2:
+                name = line_info[0].lower()
+                val = True
+            else:
+                name, val = line_info
+                name = name.lower()
+
+            if name == 'alias':
+                if '---' in val:
+                    alias_name, alias_desc = val.split('---')
+                    alias_name = alias_name.strip()
+                    alias_desc = alias_desc.strip()
+                    info['aliases'][alias_name] = alias_desc
+                else:
+                    info['name'].append(val.strip().lower())
+
+            else:
+                info[name] = alias
+
+    module_dict = {}
+
+    if len(info['name']) < 2:
+        names = info['name'][0]
+    else:
+        names = tuple(info['name'])
+    aliases = info['aliases']
+    del info['aliases']
+
+    module_dict[names] = info
+
+    for name, desc in aliases.items():
+        new_info = dict(info)
+        new_info['name'] = [name]
+        new_info['description'] = desc
+
+        module_dict[name] = new_info
+
+    return module_dict
+
+
 # special custom json encoder
 class IEncoder(json.JSONEncoder):
     def default(self, o):
@@ -51,11 +123,31 @@ class Module:
         self.dynamic_path = os.path.join('.', 'modules', self.name)
 
         self.commands = {}
+        self.static_commands = {}
         self.json_handlers = []
         self.dynamic_commands = {}
 
         self.config = {}
         self.config_filename = os.sep.join(['config', 'modules', '{}.json'.format(self.name)])
+
+        # load commands into our events dictionary
+        self.events = {
+            'commands': {},
+            'admin': {},
+        }
+        for name, handler in inspect.getmembers(self):
+            if handler.__doc__ is None:
+                continue
+
+            if name.startswith('cmd_'):
+                name = name.lstrip('cmd_')
+                info = extract_mod_info_from_docstring(handler.__doc__, name, handler)
+
+                for cmd_name, cmd_info in info.items():
+                    cmd = self.bot.modules.return_command_dict(self, cmd_info)
+                    self.static_commands.update(cmd)
+
+        self.commands.update(self.static_commands)
 
     def load(self):
         """Actually start up everything we need"""
@@ -70,7 +162,7 @@ class Module:
             self.json_handlers.append(new_handler)
             self.reload_json()
 
-        self.commands.update(getattr(self, 'static_commands', {}))
+        self.commands.update(self.static_commands)
 
         self.load_config()
 
@@ -226,7 +318,6 @@ class Modules:
                 if direction not in module.events:
                     module.events[direction] = {}
 
-            module.static_commands = {}
             for command in module.events['commands']:
                 self.add_command_info(module.name, command)
             module.folder_path = os.path.join('modules', name)
@@ -322,7 +413,9 @@ class Modules:
     def return_command_dict(self, base, info):
         commands = {}
 
-        if 'call' in info:
+        if callable(info.get('call', None)):
+            call = info['call']
+        elif 'call' in info:
             call = getattr(self, info['call'])
         else:
             call = base.combined
