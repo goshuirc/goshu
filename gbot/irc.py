@@ -14,9 +14,12 @@ class IRC(girclib.IRC):
         self.bot = bot
 
     def connect_info(self, info, settings):
+        default_nick = info.get('default_nick', None)
         server_dict = info.get('servers', {})
         for name, server in server_dict.items():
             srv_nick = server.get('nick')
+            if not srv_nick:
+                srv_nick = default_nick
             srv_host = server.get('hostname')
             srv_port = server.get('port')
 
