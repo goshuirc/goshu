@@ -340,6 +340,7 @@ class IrcInfo(InfoStore):
             }
 
             for name, info in self.store.items():
+                info = info.get('connection', {})
                 new_store['servers'][name] = {}
                 new_store['servers'][name]['autojoin_channels'] = info.get('autojoin_channels', [])
                 new_store['servers'][name]['hostname'] = info.get('address')
@@ -347,16 +348,19 @@ class IrcInfo(InfoStore):
                 new_store['servers'][name]['ssl'] = info.get('ssl', False)
                 new_store['servers'][name]['port'] = info.get('port', 6667)
 
-                ns_pass = info.get('nickserv_password')
-                if ns_pass:
-                    new_store['servers'][name]['nickserv_password'] = ns_pass
+                # other normal attributes
+                for attr_name in ['nickserv_password', 'vhost_wait',
+                                  'timeout_check_interval', 'timeout_length']:
+                    orig = info.get(attr_name)
+                    if orig:
+                        new_store['servers'][name][attr_name] = orig
 
-                timeout_check_interval = info.get('timeout_check_interval')
-                if timeout_check_interval:
-                    new_store['servers'][name]['timeout_check_interval'] = timeout_check_interval
-                timeout_length = info.get('timeout_length')
-                if timeout_length:
-                    new_store['servers'][name]['timeout_length'] = timeout_length
+                # connect attributes
+                for attr_name in ['username', 'realname', 'password']:
+                    orig = info.get(attr_name)
+                    if orig:
+                        new_attr_name = 'connect_{}'.format(attr_name)
+                        new_store['servers'][name][new_attr_name] = orig
 
             self.store = new_store
             self.save()
