@@ -158,7 +158,7 @@ class Module:
                 continue
 
             if name.startswith('cmd_'):
-                name = name.lstrip('cmd_')
+                name = name.split('_', 1)[-1]
                 info = extract_mod_info_from_docstring(handler.__doc__, name, handler)
 
                 for cmd_name, cmd_info in info.items():

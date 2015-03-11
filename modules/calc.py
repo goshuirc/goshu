@@ -18,11 +18,6 @@ class calc(Module):
 
     def __init__(self, bot):
         Module.__init__(self, bot)
-        self.events = {
-            'commands': {
-                ('calc', 'c'): [self.calculate_result, '<query> --- calculate the given input'],
-            },
-        }
 
         self.parser = NumericStringParser()
         self.wolfram = None
@@ -37,7 +32,12 @@ class calc(Module):
             self.bot.gui.put_line('wolfram: Wolfram Alpha app key file error: {}'.format(wolfram_filename))
             return
 
-    def calculate_result(self, event, command, usercommand):
+    def cmd_calc(self, event, command, usercommand):
+        """Calculate the given input
+
+        @alias c
+        @usage <query>
+        """
         try:
             response = '*** Calc: {}'.format(escape(str(self.parser.eval(usercommand.arguments))))
         except:
