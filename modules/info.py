@@ -13,15 +13,11 @@ class info(Module):
     """Provides debugging info to admins when necessary."""
     core = True
 
-    def __init__(self, bot):
-        Module.__init__(self, bot)
-        self.events = {
-            'commands': {
-                'info': [self.info, 'output bot debug info', USER_LEVEL_OWNER],
-            },
-        }
-
     def info(self, event, command, usercommand):
+        """Output bot debug info
+
+        @call_level owner
+        """
         pretty_json = json_dumps(self.bot.irc.servers[event.server].info, sort_keys=True, indent=4)
 
         info_filename = os.sep.join(['config', 'modules', 'info_dict.json'])

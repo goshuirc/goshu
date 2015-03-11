@@ -16,11 +16,6 @@ class responses_module(Module):
     """Supports creating special custom commands with simple json dictionaries."""
     def __init__(self, bot):
         Module.__init__(self, bot)
-        self.events = {
-            'commands': {
-                'response': [self.response_handle, ['create <name> --- ignore list --- ignore add <target> --- ignore del <target> --- Create a new, blank \'response\' under <name>'], USER_LEVEL_ADMIN],
-            },
-        }
 
         random.seed()
 
@@ -30,8 +25,18 @@ class responses_module(Module):
         # @f at the start means: ignore the standard pre / post lines
         # @m at the start means: send this line as a /me rather than a /msg
 
-    def response_handle(self, event, command, usercommand):
-        """Provide useful responses-handling functions."""
+    def cmd_response(self, event, command, usercommand):
+        """Ignore a certain target
+        @usage ignore add <target>
+
+        @description List ignored targets
+        @usage ignore list
+
+        @description Create a blank response under the given name
+        @usage create <name>
+
+        @call_level admin
+        """
         if not usercommand.arguments:
             return
 

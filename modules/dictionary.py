@@ -15,15 +15,11 @@ import os
 class dictionary(Module):
     """Lets users ask for a word's definition."""
 
-    def __init__(self, bot):
-        Module.__init__(self, bot)
-        self.events = {
-            'commands': {
-                'def': [self.dictionary_definition, '<word> --- returns word definition'],
-            },
-        }
+    def cmd_def(self, event, command, usercommand):
+        """Returns word definition
 
-    def dictionary_definition(self, event, command, usercommand):
+        @usage <word>
+        """
         if usercommand.arguments.strip() == '':
             return
 

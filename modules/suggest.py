@@ -12,15 +12,11 @@ from gbot.libs.helper import filename_escape
 class suggest(Module):
     core = True
 
-    def __init__(self, bot):
-        Module.__init__(self, bot)
-        self.events = {
-            'commands': {
-                'suggest': [self.suggest, '[-section] <suggestion> --- suggest something, anything at all'],
-            },
-        }
+    def cmd_suggest(self, event, command, usercommand):
+        """Suggest something, anything at all!
 
-    def suggest(self, event, command, usercommand):
+        @usage [-section] <suggestion>
+        """
         if usercommand.arguments == '':
             return
         if usercommand.arguments[0] == '-':

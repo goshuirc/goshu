@@ -11,14 +11,11 @@ class random_module(Module):  # so named to prevent random lib issues
 
     def __init__(self, bot):
         Module.__init__(self, bot)
-        self.events = {
-            'commands': {
-                'random': [self.random_command, '--- random selection from phrases seperated by a |'],
-            },
-        }
+
         random.seed()
 
-    def random_command(self, event, command, usercommand):
+    def cmd_random(self, event, command, usercommand):
+        """Random selection from phrases separated by a |"""
         response = event.source.split('!')[0] + ': '
 
         random_list = usercommand.arguments.split('|')

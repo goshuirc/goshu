@@ -14,13 +14,15 @@ import socket
 class google(Module):
     """Lets users search using Google, provides a result."""
 
-    def __init__(self, bot):
-        Module.__init__(self, bot)
-        self.events = {
-            'commands': {
-                ('google', 'g'): [self.google_search, '<query> --- google something, get results'],
-            },
-        }
+    def cmd_google(self, event, command, usercommand):
+        """Google somethin, get results!
+
+        @alias g
+        @usage <query>
+        """
+        response = '*** @c12G@c4o@c8o@c12g@c3l@c4e@c: {}'.format(self.google_result_search(usercommand.arguments))
+
+        self.bot.irc.msg(event, response, 'public')
 
     def combined(self, event, command, usercommand):
         query = ''
@@ -34,11 +36,6 @@ class google(Module):
             name = usercommand.command
         response = '*** ' + name + ': '
         response += self.google_result_search(query)
-
-        self.bot.irc.msg(event, response, 'public')
-
-    def google_search(self, event, command, usercommand):
-        response = '*** @c12G@c4o@c8o@c12g@c3l@c4e@c: {}'.format(self.google_result_search(usercommand.arguments))
 
         self.bot.irc.msg(event, response, 'public')
 

@@ -17,9 +17,6 @@ class eggdrop(Module):
     def __init__(self, bot):
         Module.__init__(self, bot)
         self.events = {
-            'commands': {
-                'egg': [self.cmd_handler, '[-section] <suggestion> --- eggdrop'],
-            },
             'in': {
                 'pubmsg': [(0, self.msg_handler)],
                 'privmsg': [(0, self.msg_handler)],
@@ -43,7 +40,12 @@ class eggdrop(Module):
             conn.commit()
             c.close()
 
-    def cmd_handler(self, event, command, usercommand):
+    def cmd_egg(self, event, command, usercommand):
+        """Eggdrop!
+
+        @usage [-section] <suggestion>
+        @view_level admin
+        """
         if len(usercommand.arguments.split()) < 1:
             return
 

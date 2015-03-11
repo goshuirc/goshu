@@ -10,16 +10,12 @@ class modules(Module):
     """Handles loading and unloading modules and their internal JSON dicts"""
     core = True
 
-    def __init__(self, bot):
-        Module.__init__(self, bot)
-        self.events = {
-            'commands': {
-                'module': [self.module_handle, ['load/unload/reload [name] --- load/unload/reload module specified by <name>', 'list --- list loaded modules'], USER_LEVEL_ADMIN],
-                'json': [self.json_handle, "reload [name] --- reload the given module's internal JSON dict", USER_LEVEL_ADMIN],
-            },
-        }
+    def cmd_json(self, event, command, usercommand):
+        """Reload all of our, or the given module's, internal JSON dicts
 
-    def json_handle(self, event, command, usercommand):
+        @usage reload [name]
+        @call_level admin
+        """
         if not usercommand.arguments:
             return
 
@@ -40,7 +36,15 @@ class modules(Module):
 
             self.bot.irc.msg(event, 'Reloaded JSON dicts for modules: {}'.format(', '.join(sorted(reloaded_module_names))))
 
-    def module_handle(self, event, command, usercommand):
+    def cmd_module(self, event, command, usercommand):
+        """Load/Unload/Reload module specified by <name>
+        @usage load/unload/reload [name]
+
+        @description List loaded modules
+        @usage list
+
+        @call_level admin
+        """
         if not usercommand.arguments:
             return
 

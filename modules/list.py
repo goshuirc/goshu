@@ -13,10 +13,6 @@ class list(Module):
     def __init__(self, bot):
         Module.__init__(self, bot)
         self.events = {
-            'commands': {
-                'list': [self.list, "[command] --- list all commands; if command is present, display info on that command instead~"],
-                'help': [self.list, "[command] --- list all commands; if command is present, display info on that command instead~"],
-            },
             'in': {
                 'privmsg': [(0, self.privmsg)]
             }
@@ -27,7 +23,11 @@ class list(Module):
             response = 'Hello! I am a bot, to view the avaliable commands, please type {prefix}list'.format(prefix=self.bot.settings.store['command_prefix'])
             self.bot.irc.msg(event, response)
 
-    def list(self, event, command, usercommand):
+    def cmd_list(self, event, command, usercommand):
+        """List all commands, or info on given command
+
+        @alias help
+        """
         bot_commands = {}
 
         for module in sorted(self.bot.modules.modules):

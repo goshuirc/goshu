@@ -9,15 +9,11 @@ from gbot.modules import Module
 class status(Module):
     core = True
 
-    def __init__(self, bot):
-        Module.__init__(self, bot)
-        self.events = {
-            'commands': {
-                'status': [self.status, "--- see how imouto's going"],
-            },
-        }
+    def cmd_status(self, event, command, usercommand):
+        """See how the bot is going
 
-    def status(self, event, command, usercommand):
+        @view_level admin
+        """
         server_count = 0
         server_info = ''
 

@@ -21,7 +21,6 @@ class ctcp_reply(Module):
         }
 
     def ctcp_reply(self, event):
-
         if event.arguments[0] == 'VERSION':
             message = 'VERSION Goshu:3:https://github.com/DanielOaks/goshu'
 

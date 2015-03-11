@@ -12,15 +12,15 @@ class dice(Module):
 
     def __init__(self, bot):
         Module.__init__(self, bot)
-        self.events = {
-            'commands': {
-                'd': [self.dice, '<dice> --- rolls dice!'],
-            },
-        }
 
         random.seed()
 
-    def dice(self, event, command, usercommand):
+    def cmd_dice(self, event, command, usercommand):
+        """Rolls dice!
+
+        @alias d
+        @usage <dice>
+        """
         try:
             iline = usercommand.arguments
 
