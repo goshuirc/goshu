@@ -542,6 +542,8 @@ class ServerConnection:
         else:
             command = 'privmsg'
 
+        #TODO: handle this error message, split messages up:
+        #  irc.client.MessageTooLong: Messages limited to 512 bytes including CR/LF
         self.connection.privmsg(target, unescape(message))
         self.irc._handle_event(Event(self.irc, self.name, 'out', command, self.info['connection']['nick'], target, [message]))
 
