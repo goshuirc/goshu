@@ -32,7 +32,6 @@ class InfoStore():
                 while current_version < self.version:
                     current_version = self.update_store_version(current_version)
         except FileNotFoundError:
-            self.store = {}
             self.initialize_store()
 
     def save(self):
@@ -41,6 +40,12 @@ class InfoStore():
             info_file.write(json.dumps(self.store, sort_keys=True, indent=4))
 
     # version updating
+    def initialize_store(self):
+        """Initialize the info store."""
+        self.store = {
+            'store_version': self.version,
+        }
+
     def update_store_version(self, current_version):
         """Update our internal store from the given verison, return the new version."""
         raise NotImplementedError('update_store_version must be replaced when subclassed')
