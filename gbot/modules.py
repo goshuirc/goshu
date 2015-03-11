@@ -31,7 +31,7 @@ def extract_mod_info_from_docstring(docstring, name, handler):
         return {
             name: {
                 'name': [name],
-                'description': '--- {}'.format(docstring.strip()),
+                'description': ['--- {}'.format(docstring.strip())],
                 'call': handler,
             }
         }
@@ -41,7 +41,7 @@ def extract_mod_info_from_docstring(docstring, name, handler):
         'name': [name],
         'aliases': {},
         'call': handler,
-        'description': docstring.split('\n')[0].strip()
+        'description': [docstring.split('\n')[0].strip()]
     }
 
     for line in docstring.split('\n'):
@@ -64,7 +64,7 @@ def extract_mod_info_from_docstring(docstring, name, handler):
                 else:
                     info['name'].append(val.strip().lower())
 
-            elif name in ['usage']:
+            elif name in ['usage', 'description']:
                 if name not in info:
                     info[name] = [val]
                 else:
@@ -74,13 +74,17 @@ def extract_mod_info_from_docstring(docstring, name, handler):
                 info[name] = val
 
     if info.get('usage'):
-        desc = info.get('description')
+        desc_lines = info.get('description')
         usage_lines = info.get('usage')
         del info['usage']
 
         info['description'] = []
 
-        for use in usage_lines:
+        for i, use in enumerate(usage_lines):
+            if len(desc_lines) >= i + 1:
+                desc = desc_lines[i]
+            else:
+                desc = desc_lines[-1]
             info['description'].append('{} --- {}'.format(use, desc))
     elif info.get('description'):
         info['description'] = '--- {}'.format(info['description'])
