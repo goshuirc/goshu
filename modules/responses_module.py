@@ -7,13 +7,15 @@ import os
 import json
 import random
 
-from gbot.modules import Module, cmd_split, std_ignore_command
+from gbot.modules import Module
 from gbot.libs.girclib import unescape
 from gbot.users import USER_LEVEL_ADMIN
 
 
 class responses_module(Module):
     """Supports creating special custom commands with simple json dictionaries."""
+    standard_admin_commands = ['ignore']
+
     def __init__(self, bot):
         Module.__init__(self, bot)
 
@@ -25,65 +27,48 @@ class responses_module(Module):
         # @f at the start means: ignore the standard pre / post lines
         # @m at the start means: send this line as a /me rather than a /msg
 
-    def cmd_response(self, event, command, usercommand):
-        """Ignore a certain target
-        @usage ignore add <target>
+    def acmd_create(self, event, command, usercommand):
+        """Create new responses skeletons dynamically
 
-        @description List ignored targets
-        @usage ignore list
-
-        @description Create a blank response under the given name
-        @usage create <name>
-
-        @call_level admin
+        @usage <name>
         """
-        if not usercommand.arguments:
+        cmd_name, args = usercommand.arg_split(1)
+
+        if not cmd_name:
+            self.bot.irc.msg(event, 'You must give me a name for the response you want to create')
             return
 
-        do, args = cmd_split(usercommand.arguments)
+        filename = os.path.join(self.dynamic_path, cmd_name.lower())
+        filename += '.res.json'
 
-        if do == 'ignore':
-            do, args = cmd_split(args)
+        if os.path.exists(filename):
+            self.bot.irc.msg(event, 'That module already exists, ignoring')
+            return
 
-            std_ignore_command(self, event, do, args)
+        new_response_dict = {
+            'description': '-- Description Here',
+            'call_level': 10,
+            'view_level': 10,
+            'channel_whitelist': '#example',
+            '1': [
+                '@s sent me a message!'
+            ],
+            '1pre': '',
+            '1post': '',
+            '2': [
+                '@s wants me to talk to @t!'
+            ],
+            '2pre': '',
+            '2post': '',
+        }
 
-        elif do == 'create':
-            if len(usercommand.arguments.split()) > 1:
-                module_name = args.lower().split()[0]
-                filename = os.path.join('modules/responses_module', module_name)
-                filename += '.res.json'
+        with open(filename, 'w') as module_file:
+            module_file.write('{}\n'.format(json.dumps(new_response_dict, sort_keys=True, indent=4)))
 
-                if os.path.exists(filename):
-                    self.bot.irc.msg(event, 'That module already exists, ignoring')
-                    return
-            else:
-                self.bot.irc.msg(event, 'You must give me name for the response you want to create')
-                return
-
-            new_response_dict = {
-                'description': '-- Description Here',
-                'call_level': 10,
-                'view_level': 10,
-                'channel_whitelist': '#example',
-                '1': [
-                    '@s sent me a message!'
-                ],
-                '1pre': '',
-                '1post': '',
-                '2': [
-                    '@s wants me to talk to @t!'
-                ],
-                '2pre': '',
-                '2post': '',
-            }
-
-            with open(filename, 'w') as module_file:
-                module_file.write('{}\n'.format(json.dumps(new_response_dict, sort_keys=True, indent=4)))
-
-            self.bot.irc.msg(event, 'New responses file created in {}'.format(filename))
-            self.bot.irc.msg(event, 'By default this responses file will not be accessible by ordinary users,'
-                                    ' and will be channel-restricted, so you must modify it on-disk to do'
-                                    ' what you want!')
+        self.bot.irc.msg(event, 'New responses file created in {}'.format(filename))
+        self.bot.irc.msg(event, 'By default this responses file will not be accessible by ordinary users,'
+                                ' and will be channel-restricted, so you must modify it on-disk to do'
+                                ' what you want!')
 
     def combined(self, event, command, usercommand):
         if self.is_ignored(event.from_to):

@@ -311,6 +311,22 @@ class BotSettings(InfoStore):
         ])
         self.add_key(str, 'command_prefix', prompt, repeating_prompt=repeating_prompt, default="'")
 
+        repeating_prompt = wrap['prompt']("Admin Command prefix: [@]")
+        prompt = '\n'.join([
+            wrap['subsection']('Admin Command Prefix'),
+            "In Goshu, admin commands are used to modify specific modules' settings and provide "
+            "a way to let you access module-specific administrative functions.",
+            '',
+            "Your users will not be seeing this, and admin commands can only be used via a message "
+            "directly to your bot (not to a channel the bot is in).",
+            '',
+            "The recommended (and default) admin command prefix is @ for admin, as it is simple to "
+            "remember and will not cause any conflicts.",
+            '',
+            repeating_prompt,
+        ])
+        self.add_key(str, 'admin_command_prefix', prompt, repeating_prompt=repeating_prompt, default="@")
+
         repeating_prompt = wrap['prompt']('Master Bot Password:')
         confirm_prompt = wrap['prompt']('Confirm Master Bot Password:')
         prompt = '\n'.join([

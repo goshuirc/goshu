@@ -12,8 +12,9 @@ import importlib
 import threading
 
 from .libs.helper import JsonHandler, add_path
-from .libs.girclib import NickMask, is_channel
-from .users import user_levels, USER_LEVEL_NOPRIVS
+from .libs.girclib import NickMask, is_channel, escape, unescape
+from .users import user_levels, USER_LEVEL_NOPRIVS, USER_LEVEL_ADMIN
+from .commands import AdminCommand, Command, UserCommand, cmd_split, standard_admin_commands
 
 LISTENER_HIGHEST_PRIORITY = -30
 LISTENER_HIGHER_PRIORITY = -20
@@ -109,7 +110,14 @@ def extract_mod_info_from_docstring(docstring, name, handler):
                     values.remove('inline')
                 info['inline'] = inline
 
-                if len(values) > 2:
+                if len(values) < 2:
+                    direction = 'in'
+                    event_type = values[0]
+                    priority = LISTENER_NORMAL_PRIORITY
+
+                    # let people use the names defined in listener_priorities
+                    priority = listener_priorities.get(priority, priority)
+                elif len(values) > 2:
                     direction, event_type, priority = values
 
                     # let people use the names defined in listener_priorities
@@ -189,6 +197,7 @@ class Module:
     # whether this module is 'core', or practically required for
     #   Goshu to operate
     core = False
+    standard_admin_commands = []
 
     def __init__(self, bot):
         self.bot = bot
@@ -204,6 +213,7 @@ class Module:
 
         self.dynamic_path = os.path.join('.', 'modules', self.name)
 
+        self.admin_commands = {}
         self.commands = {}
         self.static_commands = {}
         self.json_handlers = []
@@ -221,7 +231,15 @@ class Module:
             if handler.__doc__ is None:
                 continue
 
-            if name.startswith('cmd_'):
+            if name.startswith('acmd_'):
+                name = name.split('_', 1)[-1]
+                info = extract_mod_info_from_docstring(handler.__doc__, name, handler)
+
+                for cmd_name, cmd_info in info.items():
+                    cmd = self.bot.modules.return_admin_command_dict(self, cmd_info)
+                    self.admin_commands.update(cmd)
+
+            elif name.startswith('cmd_'):
                 name = name.split('_', 1)[-1]
                 info = extract_mod_info_from_docstring(handler.__doc__, name, handler)
 
@@ -229,7 +247,7 @@ class Module:
                     cmd = self.bot.modules.return_command_dict(self, cmd_info)
                     self.static_commands.update(cmd)
 
-            if name.endswith('_listener'):
+            elif name.endswith('_listener'):
                 info = extract_mod_info_from_docstring(handler.__doc__, None, handler)
 
                 for listener in info:
@@ -417,6 +435,32 @@ class Modules:
             self.whole_modules[name].append(module.name)
             self.modules[module.name] = module
 
+            # add standard admin commands
+            if module.standard_admin_commands:
+                for name in module.standard_admin_commands:
+                    if name not in standard_admin_commands:
+                        raise Exception('Module {} cannot load, standard admin command {} does not exist'.format(module.name, name))
+
+                    handler = standard_admin_commands[name]
+
+                    new_name = '_standard_admin_command_{}'.format(name)
+                    setattr(module, new_name, handler)
+                    hand = getattr(module, new_name, None)
+
+                    info = extract_mod_info_from_docstring(handler.__doc__, name, hand)
+
+                    # add standard info
+                    if 'call_level' not in info[name]:
+                        info[name]['call_level'] = USER_LEVEL_ADMIN
+                    if 'view_level' not in info[name]:
+                        info[name]['view_level'] = info[name]['call_level']
+
+                    info[name]['bound'] = False
+
+                    command = AdminCommand(**info[name])
+
+                    module.admin_commands[name] = command
+
             if not getattr(module, 'events', None):
                 module.events = {}
 
@@ -479,6 +523,7 @@ class Modules:
         return True
 
     def handle(self, event):
+        # call listeners
         called = []
         for priority in sorted(self.listeners.keys()):
             for search_direction in ['*', event.direction]:
@@ -496,12 +541,54 @@ class Modules:
                             else:
                                 threading.Thread(target=handler, args=[event]).start()
 
+        # then handle commands
         if event.type == 'privmsg' or event.type == 'pubmsg' and event.direction == 'in':
             self.handle_command(event)
+        if event.type == 'privmsg' and event.direction == 'in':
+            self.handle_admin_command(event)
+
+    def handle_admin_command(self, event):
+        if event.arguments[0].startswith(escape(self.bot.settings.store['admin_command_prefix'])):
+            in_string = event.arguments[0][len(escape(self.bot.settings.store['admin_command_prefix'])):].strip()
+            if not in_string:
+                return  # empty
+
+            command_list = in_string.split(' ', 2)
+            if len(command_list) < 2:
+                return
+
+            module_name = command_list[0].lower()
+            command_name = command_list[1].lower()
+
+            if len(command_list) < 3:
+                command_args = ''
+            else:
+                command_args = command_list[2]
+
+            useraccount = self.bot.accounts.account(event.source, event.server)
+            if useraccount:
+                userlevel = self.bot.accounts.access_level(useraccount)
+            else:
+                userlevel = USER_LEVEL_NOPRIVS
+
+            if module_name in self.modules:
+                if command_name in self.modules[module_name].admin_commands:
+                    command_info = self.modules[module_name].admin_commands[command_name]
+                    if userlevel >= command_info.call_level:
+                        if command_info.bound:
+                            args = []
+                        else:
+                            args = [self.modules[module_name]]
+                        args += [event, command_info, UserCommand(command_name, command_args)]
+
+                        threading.Thread(target=command_info.call,
+                                         args=args).start()
+                    else:
+                        self.bot.gui.put_line('        No Privs')
 
     def handle_command(self, event):
-        if event.arguments[0].startswith(self.bot.settings.store['command_prefix']):
-            in_string = event.arguments[0][len(self.bot.settings.store['command_prefix']):].strip()
+        if event.arguments[0].startswith(escape(self.bot.settings.store['command_prefix'])):
+            in_string = event.arguments[0][len(escape(self.bot.settings.store['command_prefix'])):].strip()
             if not in_string:
                 return  # empty
 
@@ -517,7 +604,7 @@ class Modules:
             if useraccount:
                 userlevel = self.bot.accounts.access_level(useraccount)
             else:
-                userlevel = 0
+                userlevel = USER_LEVEL_NOPRIVS
 
             called = []
             for module in sorted(self.modules):
@@ -556,7 +643,10 @@ class Modules:
         elif isinstance(name, str):
             self.modules[module].static_commands[name] = Command(info)
 
-    def return_command_dict(self, base, info):
+    def return_admin_command_dict(self, base, info, cmd_class=AdminCommand):
+        return self.return_command_dict(base, info, cmd_class=cmd_class)
+
+    def return_command_dict(self, base, info, cmd_class=Command):
         commands = {}
 
         if callable(info.get('call', None)):
@@ -575,118 +665,23 @@ class Modules:
             description = ''
 
         call_level = info.get('call_level', USER_LEVEL_NOPRIVS)
-
         if call_level in user_levels:
             call_level = user_levels[call_level]
 
-        if 'view_level' in info:
-            view_level = info['view_level']
-        else:
-            view_level = call_level
-
+        view_level = info.get('view_level', call_level)
         if view_level in user_levels:
             view_level = user_levels[view_level]
 
         channel_whitelist = info.get('channel_whitelist', [])
+        bound = info.get('bound', True)
 
-        commands[info['name'][0]] = Command(call=call, description=description, call_level=call_level,
+        commands[info['name'][0]] = cmd_class(call=call, description=description, call_level=call_level,
                                             view_level=view_level, channel_whitelist=channel_whitelist,
-                                            json=info)
+                                            json=info, bound=bound)
 
         for command in info['name'][1:]:
-            commands[command] = Command(call=call, description=description, call_level=call_level,
+            commands[command] = cmd_class(call=call, description=description, call_level=call_level,
                                         view_level=view_level, channel_whitelist=channel_whitelist,
-                                        json=info, alias=info['name'][0])
+                                        json=info, alias=info['name'][0], bound=bound)
 
         return commands
-
-
-class Command:
-    """Goshubot command storage."""
-    def __init__(self, base_info=None, **kwargs):
-        # defaults
-        self.alias = False
-        self.channel_whitelist = []
-
-        # all other actual data
-        if base_info:
-            self.call = base_info[0]
-            self.description = base_info[1]
-            if len(base_info) > 2:
-                self.call_level = base_info[2]
-            else:
-                self.call_level = USER_LEVEL_NOPRIVS
-
-            if len(base_info) > 3:
-                self.view_level = base_info[3]
-            else:
-                self.view_level = self.call_level
-
-        if kwargs:
-            for key in kwargs:
-                setattr(self, key, kwargs[key])
-
-        if isinstance(self.description, str):
-            self.description = [self.description]
-
-
-class UserCommand:
-    """Command from a client."""
-
-    def __init__(self, command, arguments):
-        self.command = command
-        self.arguments = arguments
-
-
-# command splitting for modules
-def cmd_split(in_str):
-    if len(in_str.split()) > 1:
-        do, args = in_str.split(' ', 1)
-    else:
-        do = in_str
-        args = ''
-
-    do = do.lower()
-
-    return do, args
-
-
-def std_ignore_command(self, event, do, args):
-    """Provides the standard 'ignore' command."""
-    if do == 'list':
-        target_list = ', '.join(self.config.get('ignored', []))
-        if not target_list:
-            target_list = 'None'
-
-        msg = 'Ignored targets: {}'.format(target_list)
-        self.bot.irc.msg(event, msg, 'private')
-
-    elif do == 'add':
-        targets = args.lower().split()
-
-        if 'ignored' not in self.config:
-            self.config['ignored'] = []
-
-        for target in targets:
-            if target not in self.config['ignored']:
-                self.config['ignored'].append(target)
-
-        self.save_config()
-
-        msg = 'All given targets are now ignored'
-        self.bot.irc.msg(event, msg, 'private')
-
-    elif do == 'del':
-        targets = args.lower().split()
-
-        if 'ignored' not in self.config:
-            self.config['ignored'] = []
-
-        for target in targets:
-            if target in self.config['ignored']:
-                self.config['ignored'].remove(target)
-
-        self.save_config()
-
-        msg = 'All given targets are no longer ignored'
-        self.bot.irc.msg(event, msg, 'private')

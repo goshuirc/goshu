@@ -8,36 +8,19 @@
 
 import re
 
-from gbot.modules import Module, cmd_split, std_ignore_command
+from gbot.modules import Module
 from gbot.libs.girclib import unescape
 from gbot.libs.helper import get_url, format_extract, JsonHandler
 from gbot.users import USER_LEVEL_ADMIN
 
 
 class link(Module):
+    standard_admin_commands = ['ignore']
 
     def __init__(self, bot):
         Module.__init__(self, bot)
         self.links = []
         self.json_handlers.append(JsonHandler(self, self.dynamic_path, attr='links', ext='lnk', yaml=True))
-
-    def cmd_link(self, event, command, usercommand):
-        """Provides useful link-handling functions.
-
-        @usage ignore list
-        @usage ignore add <target>
-        @usage ignore del <target>
-        @call_level admin
-        """
-        if not usercommand.arguments:
-            return
-
-        do, args = cmd_split(usercommand.arguments)
-
-        if do == 'ignore':
-            do, args = cmd_split(args)
-
-            std_ignore_command(self, event, do, args)
 
     def link_listener(self, event):
         """Listens for links for which we can provide info
