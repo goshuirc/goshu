@@ -15,6 +15,8 @@ from .libs.helper import JsonHandler, add_path
 from .libs.girclib import NickMask, is_channel
 from .users import user_levels, USER_LEVEL_NOPRIVS
 
+LISTENER_STANDARD_PRIORITY = 0
+
 
 def extract_mod_info_from_docstring(docstring, name, handler):
     """Extracts module info from the given docstring.
@@ -27,7 +29,13 @@ def extract_mod_info_from_docstring(docstring, name, handler):
         name: Original name
         handler: Handler function
     """
-    if len(docstring.split('\n')) < 2:
+    if name:
+        info_type = 'command'
+    elif name is None:
+        info_type = 'listener'
+
+    # command
+    if info_type == 'command' and len(docstring.split('\n')) < 2:
         return {
             name: {
                 'name': [name],
@@ -37,12 +45,17 @@ def extract_mod_info_from_docstring(docstring, name, handler):
         }
 
     # extract info
-    info = {
-        'name': [name],
-        'aliases': {},
-        'call': handler,
-        'description': [docstring.split('\n')[0].strip()]
-    }
+    if info_type == 'command':
+        info = {
+            'name': [name],
+            'aliases': {},
+            'call': handler,
+            'description': [docstring.split('\n')[0].strip()]
+        }
+    elif info_type == 'listener':
+        info = {
+            'call': handler,
+        }
 
     for line in docstring.split('\n'):
         if line.lstrip().startswith('@'):
@@ -70,8 +83,30 @@ def extract_mod_info_from_docstring(docstring, name, handler):
                 else:
                     info[name].append(val)
 
+            elif name == 'listen':
+                values = val.split()
+
+                inline = False
+                if 'inline' in values:
+                    inline = True
+                    values.remove('inline')
+                info['inline'] = inline
+
+                if len(values) > 2:
+                    direction, event_type, priority = values
+                else:
+                    direction, event_type = values
+                    priority = LISTENER_STANDARD_PRIORITY
+
+                info['priority'] = int(priority)
+
+                info['direction'] = direction
+                info['event_type'] = event_type
             else:
                 info[name] = val
+
+    if info_type == 'listener':
+        return info
 
     if info.get('usage'):
         desc_lines = info.get('description')
@@ -168,6 +203,26 @@ class Module:
                 for cmd_name, cmd_info in info.items():
                     cmd = self.bot.modules.return_command_dict(self, cmd_info)
                     self.static_commands.update(cmd)
+
+            if name.endswith('_listener'):
+                info = extract_mod_info_from_docstring(handler.__doc__, None, handler)
+
+                inline = info['inline']
+                priority = info['priority']
+                direction = info['direction']
+                event_type = info['event_type']
+
+                if direction not in self.events:
+                    self.events[direction] = {}
+                if event_type not in self.events[direction]:
+                    self.events[direction][event_type] = []
+
+                if inline:
+                    listn = (priority, handler, inline)
+                else:
+                    listn = (priority, handler)
+
+                self.events[direction][event_type].append(listn)
 
         self.commands.update(self.static_commands)
 
