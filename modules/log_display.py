@@ -16,8 +16,7 @@ from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import filename_escape
 
 
-# TODO: need to put a_ at the beginning so goshu calls this module first… apparently priority's broken, too
-class a_log_display(Module):
+class log_display(Module):
     """Prints and shows IRC activity, with nice colours!"""
     core = True
 
@@ -25,14 +24,18 @@ class a_log_display(Module):
         Module.__init__(self, bot)
         self.events = {
             '*': {
-                '*': [(-20, self.handler, True)],  # sync
-            }
+                '*': [(-20, self.log_display_listener, True)],  # sync
+            },
         }
         self.nick_colors = {}
         self.logfiles_open = {}
         random.seed()
 
-    def handler(self, event):
+    def log_display_listener(self, event):
+        """Writes messages to screen and log
+
+        @listen * * -20 inline
+        """
         if event.type == 'all_raw_messages':
             return
 
