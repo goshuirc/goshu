@@ -15,7 +15,7 @@ class ctcp_reply(Module):
     def ctcp_listener(self, event):
         """Responds to CTCP messages
 
-        @listen in ctcp -30
+        @listen in ctcp highest
         """
         if event.arguments[0] == 'VERSION':
             message = 'VERSION Goshu:3:https://github.com/DanielOaks/goshu'

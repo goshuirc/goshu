@@ -14,7 +14,7 @@ class accounts(Module):
     def nickserv_listener(self, event):
         """Handles incoming NickServ messages.
 
-        @listen in privmsg -30
+        @listen in privmsg high
         """
         if event.source.split('!')[0].lower() == 'nickserv':
             response = event.arguments[0].lower()

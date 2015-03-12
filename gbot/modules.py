@@ -15,7 +15,23 @@ from .libs.helper import JsonHandler, add_path
 from .libs.girclib import NickMask, is_channel
 from .users import user_levels, USER_LEVEL_NOPRIVS
 
-LISTENER_STANDARD_PRIORITY = 0
+LISTENER_HIGHEST_PRIORITY = -30
+LISTENER_HIGHER_PRIORITY = -20
+LISTENER_HIGH_PRIORITY = -10
+LISTENER_NORMAL_PRIORITY = 0
+LISTENER_LOW_PRIORITY = 10
+LISTENER_LOWER_PRIORITY = 20
+LISTENER_LOWEST_PRIORITY = 30
+
+listener_priorities = {
+    'highest': LISTENER_HIGHEST_PRIORITY,
+    'higher': LISTENER_HIGHER_PRIORITY,
+    'high': LISTENER_HIGH_PRIORITY,
+    'normal': LISTENER_NORMAL_PRIORITY,
+    'low': LISTENER_LOW_PRIORITY,
+    'lower': LISTENER_LOWER_PRIORITY,
+    'lowest': LISTENER_LOWEST_PRIORITY,
+}
 
 
 def extract_mod_info_from_docstring(docstring, name, handler):
@@ -95,9 +111,12 @@ def extract_mod_info_from_docstring(docstring, name, handler):
 
                 if len(values) > 2:
                     direction, event_type, priority = values
+
+                    # let people use the names defined in listener_priorities
+                    priority = listener_priorities.get(priority, priority)
                 else:
                     direction, event_type = values
-                    priority = LISTENER_STANDARD_PRIORITY
+                    priority = LISTENER_NORMAL_PRIORITY
 
                 info['priority'] = int(priority)
 

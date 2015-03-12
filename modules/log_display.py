@@ -29,7 +29,7 @@ class log_display(Module):
     def log_display_listener(self, event):
         """Writes messages to screen and log
 
-        @listen * * -20 inline
+        @listen * * high inline
         """
         if event.type == 'all_raw_messages':
             return
