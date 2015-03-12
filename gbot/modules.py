@@ -53,6 +53,7 @@ def extract_mod_info_from_docstring(docstring, name, handler):
             'description': [docstring.split('\n')[0].strip()]
         }
     elif info_type == 'listener':
+        listeners = []
         info = {
             'call': handler,
         }
@@ -102,11 +103,16 @@ def extract_mod_info_from_docstring(docstring, name, handler):
 
                 info['direction'] = direction
                 info['event_type'] = event_type
+
+                listeners.append(info)
+                info = {
+                    'call': handler,
+                }
             else:
                 info[name] = val
 
     if info_type == 'listener':
-        return info
+        return listeners
 
     if info.get('usage'):
         desc_lines = info.get('description')
@@ -207,22 +213,23 @@ class Module:
             if name.endswith('_listener'):
                 info = extract_mod_info_from_docstring(handler.__doc__, None, handler)
 
-                inline = info['inline']
-                priority = info['priority']
-                direction = info['direction']
-                event_type = info['event_type']
+                for listener in info:
+                    inline = listener['inline']
+                    priority = listener['priority']
+                    direction = listener['direction']
+                    event_type = listener['event_type']
 
-                if direction not in self.events:
-                    self.events[direction] = {}
-                if event_type not in self.events[direction]:
-                    self.events[direction][event_type] = []
+                    if direction not in self.events:
+                        self.events[direction] = {}
+                    if event_type not in self.events[direction]:
+                        self.events[direction][event_type] = []
 
-                if inline:
-                    listn = (priority, handler, inline)
-                else:
-                    listn = (priority, handler)
+                    if inline:
+                        listn = (priority, handler, inline)
+                    else:
+                        listn = (priority, handler)
 
-                self.events[direction][event_type].append(listn)
+                    self.events[direction][event_type].append(listn)
 
         self.commands.update(self.static_commands)
 
