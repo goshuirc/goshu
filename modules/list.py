@@ -10,15 +10,11 @@ class list(Module):
     """Provides help and command listings to users."""
     core = True
 
-    def __init__(self, bot):
-        Module.__init__(self, bot)
-        self.events = {
-            'in': {
-                'privmsg': [(0, self.privmsg)]
-            }
-        }
+    def help_listener(self, event):
+        """Watches for help messages
 
-    def privmsg(self, event):
+        @listen in privmsg
+        """
         if event.arguments[0].lower() in ['help', 'hello', 'hi']:
             response = 'Hello! I am a bot, to view the avaliable commands, please type {prefix}list'.format(prefix=self.bot.settings.store['command_prefix'])
             self.bot.irc.msg(event, response)

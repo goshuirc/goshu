@@ -10,16 +10,11 @@ from gbot.libs.girclib import unescape
 class invite(Module):
     """Handles joining invited channels, and allowing chanops to ask goshu to autojoin their channel!"""
 
-    def __init__(self, bot):
-        Module.__init__(self, bot)
-        self.events = {
-            'in': {
-                'invite': [(0, self.invite)],
-            },
-        }
+    def invite_listener(self, event):
+        """When someone /invites us, join the channel
 
-    def invite(self, event):
-        """When someone /invites us, join the channel."""
+        @listen in invite
+        """
         self.bot.irc.servers[event.server].join(event.arguments[0])
         self.bot.irc.servers[event.server].privmsg(event.arguments[0], 'Thanks for inviting me, {nick}. To keep me in here, use the command:   {pre}addchan'.format(nick=event.source.split('!')[0], pre=self.bot.settings.store['command_prefix']))
 

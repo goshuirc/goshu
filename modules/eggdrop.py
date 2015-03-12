@@ -16,12 +16,6 @@ class eggdrop(Module):
 
     def __init__(self, bot):
         Module.__init__(self, bot)
-        self.events = {
-            'in': {
-                'pubmsg': [(0, self.msg_handler)],
-                'privmsg': [(0, self.msg_handler)],
-            },
-        }
 
         self.db_path = os.path.join('config', 'modules', '{}{}sqlite'.format(filename_escape(self.name), os.extsep))
 
@@ -102,7 +96,12 @@ class eggdrop(Module):
             conn.commit()
             c.close()
 
-    def msg_handler(self, event):
+    def eggdrop_listener(self, event):
+        """Responds to Eggdrop messages
+
+        @listen in privmsg
+        @listen in pubmsg
+        """
         try:
             if self.bot.irc.servers[event.server].info['connection']['nick'] in event.arguments[0].split()[0]:
                 asked = True

@@ -10,6 +10,7 @@ import json
 
 
 class urbandictionary(Module):
+    """Allows access to UrbanDictionary."""
 
     def cmd_ud(self, event, command, usercommand):
         """See UrbanDictionary definition

@@ -22,11 +22,6 @@ class log_display(Module):
 
     def __init__(self, bot):
         Module.__init__(self, bot)
-        self.events = {
-            '*': {
-                '*': [(-20, self.log_display_listener, True)],  # sync
-            },
-        }
         self.nick_colors = {}
         self.logfiles_open = {}
         random.seed()

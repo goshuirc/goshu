@@ -12,15 +12,11 @@ class ctcp_reply(Module):
     """Provides basic CTCP replies."""
     core = True
 
-    def __init__(self, bot):
-        Module.__init__(self, bot)
-        self.events = {
-            'in': {
-                'ctcp': [(-30, self.ctcp_reply)],
-            },
-        }
+    def ctcp_listener(self, event):
+        """Responds to CTCP messages
 
-    def ctcp_reply(self, event):
+        @listen in ctcp -30
+        """
         if event.arguments[0] == 'VERSION':
             message = 'VERSION Goshu:3:https://github.com/DanielOaks/goshu'
 

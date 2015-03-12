@@ -11,15 +11,11 @@ class accounts(Module):
     """Handles goshu accounts, including registration, access levels, and login."""
     core = True
 
-    def __init__(self, bot):
-        Module.__init__(self, bot)
-        self.events = {
-            'in': {
-                'privnotice': [(-30, self.nickserv_listener)],
-            },
-        }
-
     def nickserv_listener(self, event):
+        """Handles incoming NickServ messages.
+
+        @listen in privmsg -30
+        """
         if event.source.split('!')[0].lower() == 'nickserv':
             response = event.arguments[0].lower()
             sresponse = response.split()
