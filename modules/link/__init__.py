@@ -18,20 +18,17 @@ class link(Module):
 
     def __init__(self, bot):
         Module.__init__(self, bot)
-        self.events = {
-            'commands': {
-                'link': [self.link_handle, ['ignore list --- ignore add <target> --- ignore del <target> --- Ignore targets'], USER_LEVEL_ADMIN],
-            },
-            'in': {
-                'pubmsg': [(0, self.link)],
-                'privmsg': [(0, self.link)],
-            },
-        }
         self.links = []
         self.json_handlers.append(JsonHandler(self, self.dynamic_path, attr='links', ext='lnk', yaml=True))
 
-    def link_handle(self, event, command, usercommand):
-        """Provide useful link-handling functions."""
+    def cmd_link(self, event, command, usercommand):
+        """Provides useful link-handling functions.
+
+        @usage ignore list
+        @usage ignore add <target>
+        @usage ignore del <target>
+        @call_level admin
+        """
         if not usercommand.arguments:
             return
 
@@ -42,7 +39,12 @@ class link(Module):
 
             std_ignore_command(self, event, do, args)
 
-    def link(self, event):
+    def link_listener(self, event):
+        """Listens for links for which we can provide info
+
+        @listen pubmsg
+        @listen privmsg
+        """
         if self.is_ignored(event.from_to):
             return
 
