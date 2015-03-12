@@ -262,6 +262,9 @@ class Modules:
         self.path = path
         add_path(path)
 
+        # event listeners
+        self.listeners = {}
+
         # info lists
         self.core_module_names = []
         self.dcm_module_commands = {}  # dynamic command module command lists
@@ -336,11 +339,26 @@ class Modules:
             if not getattr(module, 'events', None):
                 module.events = {}
 
-            for direction in ['in', 'out', 'commands', '*']:
-                if direction not in module.events:
-                    module.events[direction] = {}
+            # add event listeners
+            for direction in ['in', 'out', '*']:
+                for event_name, handlers in module.events.get(direction, {}).items():
+                    for info in handlers:
+                        if len(info) < 3:
+                            priority, handler = info
+                            inline = False
+                        else:
+                            priority, handler, inline = info
 
-            for command in module.events['commands']:
+                        if priority not in self.listeners:
+                            self.listeners[priority] = {}
+                        if direction not in self.listeners[priority]:
+                            self.listeners[priority][direction] = {}
+                        if event_name not in self.listeners[priority][direction]:
+                            self.listeners[priority][direction][event_name] = []
+
+                        self.listeners[priority][direction][event_name].append((handler, inline))
+
+            for command in module.events.get('commands', {}):
                 self.add_command_info(module.name, command)
             module.folder_path = os.path.join('modules', name)
             module.bot = self.bot
@@ -353,6 +371,26 @@ class Modules:
             return False
 
         for modname in self.whole_modules[name]:
+            # remove event listeners
+            for direction in ['in', 'out', '*']:
+                for event_name, handlers in self.modules[modname].events.get(direction, {}).items():
+                    for info in handlers:
+                        if len(info) < 3:
+                            priority, handler = info
+                            inline = False
+                        else:
+                            priority, handler, inline = info
+
+                        self.listeners[priority][direction][event_name].remove((handler, inline))
+
+                        # clear old dicts if not being used anymore
+                        if not self.listeners[priority][direction][event_name]:
+                            del self.listeners[priority][direction][event_name]
+                        if not self.listeners[priority][direction]:
+                            del self.listeners[priority][direction]
+                        if not self.listeners[priority]:
+                            del self.listeners[priority]
+
             self.modules[modname].unload()
             del self.modules[modname]
 
@@ -361,17 +399,22 @@ class Modules:
 
     def handle(self, event):
         called = []
-        for module in sorted(self.modules):
+        for priority in sorted(self.listeners.keys()):
             for search_direction in ['*', event.direction]:
                 for search_type in ['*', event.type]:
-                    if search_type in self.modules[module].events[search_direction]:
-                        for h in self.modules[module].events[search_direction][search_type]:
-                            if h[1] not in called:
-                                called.append(h[1])
-                                if len(h) > 2 and h[2]:
-                                    h[1](event)
-                                else:
-                                    threading.Thread(target=h[1], args=[event]).start()
+                    for handler, inline in self.listeners[priority].get(search_direction, {}).get(search_type, []):
+                        if handler not in called:
+                            called.append(handler)
+
+                            # if inline, handler can change event as it goes through
+                            #   if they return anything that's not None
+                            if inline:
+                                new_event = handler(event)
+                                if new_event is not None:
+                                    event = new_event
+                            else:
+                                threading.Thread(target=handler, args=[event]).start()
+
         if event.type == 'privmsg' or event.type == 'pubmsg' and event.direction == 'in':
             self.handle_command(event)
 
