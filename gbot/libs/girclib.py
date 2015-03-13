@@ -220,7 +220,11 @@ class IRC:
     """Wrapper for irclib's IRC class."""
 
     def __init__(self):
-        self.irc = irc.client.Manifold()
+        # name of the main thing has changed once or twice
+        try:
+            self.irc = irc.client.Reactor()
+        except AttributeError:
+            self.irc = irc.client.Manifold()
 
         self.info_funcs = []  # funcs to call when info updates
 
@@ -493,9 +497,7 @@ class ServerConnection:
         self.irc._handle_event(Event(self.irc, self.name, 'out', 'admin', self.info['connection']['nick'], server))
 
     def cap(self, subcommand, args=''):
-        if ' ' in args.strip():
-            args = ':' + args.strip()
-        self.connection.cap(subcommand, args)
+        self.connection.cap(subcommand, *args.strip().split())
         if args:
             self.irc._handle_event(Event(self.irc, self.name, 'out', 'cap', self.info['connection']['nick'], [subcommand, args]))
         else:
