@@ -237,7 +237,15 @@ class Module:
 
                 for cmd_name, cmd_info in info.items():
                     cmd = self.bot.modules.return_admin_command_dict(self, cmd_info)
-                    self.admin_commands.update(cmd)
+                    if cmd_info.get('global', False):
+                        for cmdn in cmd_name:
+                            cmd[cmdn].module_name = self.name
+
+                            if cmdn not in self.bot.modules.global_admin_commands:
+                                self.bot.modules.global_admin_commands[cmdn] = []
+                            self.bot.modules.global_admin_commands[cmdn].append(cmd[cmdn])
+                    else:
+                        self.admin_commands.update(cmd)
 
             elif name.startswith('cmd_'):
                 name = name.split('_', 1)[-1]
@@ -360,6 +368,7 @@ class Modules:
         self.modules = {}
         self.path = path
         add_path(path)
+        self.global_admin_commands = {}
 
         # event listeners
         self.listeners = {}
@@ -496,6 +505,12 @@ class Modules:
             return False
 
         for modname in self.whole_modules[name]:
+            # remove global listeners
+            for cmd in self.bot.modules.global_admin_commands:
+                for handler in list(self.bot.modules.global_admin_commands[cmd]):
+                    if handler.module_name == self.modules[modname].name:
+                        self.bot.modules.global_admin_commands[cmd].remove(handler)
+
             # remove event listeners
             for direction in ['in', 'out', '*']:
                 for event_name, handlers in self.modules[modname].events.get(direction, {}).items():
@@ -554,11 +569,12 @@ class Modules:
                 return  # empty
 
             command_list = in_string.split(' ', 2)
-            if len(command_list) < 2:
-                return
-
             module_name = command_list[0].lower()
-            command_name = command_list[1].lower()
+
+            if len(command_list) > 1:
+                command_name = command_list[1].lower()
+            else:
+                command_name = ''
 
             if len(command_list) < 3:
                 command_args = ''
@@ -571,20 +587,29 @@ class Modules:
             else:
                 userlevel = USER_LEVEL_NOPRIVS
 
+            # get list of handlers
+            handler_list = []
+
+            if module_name in self.global_admin_commands:
+                for command_info in self.global_admin_commands[module_name]:
+                    handler_list.append(command_info)
             if module_name in self.modules:
                 if command_name in self.modules[module_name].admin_commands:
                     command_info = self.modules[module_name].admin_commands[command_name]
-                    if userlevel >= command_info.call_level:
-                        if command_info.bound:
-                            args = []
-                        else:
-                            args = [self.modules[module_name]]
-                        args += [event, command_info, UserCommand(command_name, command_args)]
+                    handler_list.append(command_info)
 
-                        threading.Thread(target=command_info.call,
-                                         args=args).start()
+            for command_info in handler_list:
+                if userlevel >= command_info.call_level:
+                    if command_info.bound:
+                        args = []
                     else:
-                        self.bot.gui.put_line('        No Privs')
+                        args = [self.modules[module_name]]
+                    args += [event, command_info, UserCommand(command_name, command_args)]
+
+                    threading.Thread(target=command_info.call,
+                                     args=args).start()
+                else:
+                    self.bot.gui.put_line('        No Privs')
 
     def handle_command(self, event):
         if event.arguments[0].startswith(escape(self.bot.settings.store['command_prefix'])):
