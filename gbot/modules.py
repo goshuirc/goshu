@@ -618,7 +618,7 @@ class Modules:
                             source_nick = NickMask(event.source).nick
 
                             current_channel_whitelist = [self.bot.irc.servers[event.server].istring(chan) for chan in command_info.channel_whitelist]
-                            current_user_whitelist = []
+                            current_user_whitelist = command_info.user_whitelist
                             for chan in current_channel_whitelist:
                                 [current_user_whitelist.append(user) for user in self.bot.irc.servers[event.server].get_channel_info(chan)['users']]
 

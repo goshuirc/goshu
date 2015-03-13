@@ -42,8 +42,12 @@ class Command(BaseCommand):
         super().__init__(base_info, **kwargs)
 
         # defaults
-        self.alias = False
-        self.channel_whitelist = []
+        if not hasattr(self, 'alias'):
+            self.alias = False
+        if not hasattr(self, 'user_whitelist'):
+            self.user_whitelist = []
+        if not hasattr(self, 'channel_whitelist'):
+            self.channel_whitelist = []
 
 
 class UserCommand:
