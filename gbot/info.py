@@ -549,7 +549,7 @@ class IrcInfo(InfoStore):
                     "can help prevent disconnections on some networks, but will increase the "
                     "time it takes to automatically reconnect after pinging out."
                     '',
-                    wrap['note']('This is a string like:  "5m14s"  "1h3m12s'),
+                    wrap['note']('This is a string like:  "5m14s"  "1h3m12s"'),
                     '',
                     repeating_prompt,
                 ])

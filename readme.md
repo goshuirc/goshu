@@ -23,7 +23,7 @@ License
 Released under the BSD 2-clause License
 
 ```
-Copyright (c) 2014, Daniel Oaks
+Copyright (c) 2015, Daniel Oaks
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
