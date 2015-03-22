@@ -399,6 +399,10 @@ class ServerConnection:
 
         self.nickserv_format = 'IDENTIFY {ns_pass}'
 
+    @property
+    def features(self):
+        return self.connection.features
+
     # Connection
     def connect(self, address, port, nick, password=None, username=None, ircname=None,
                 localaddress="", localport=0, sslsock=False, ipv6=False, autojoin_channels=[],
@@ -463,8 +467,8 @@ class ServerConnection:
 
     def irc_disconnect(self, message):
         # don't wipe info['connection'] in case we reconnect
-        self.info['channels'] = IDict(std=self.info['server']['isupport']['CASEMAPPING'])
-        self.info['users'] = IDict(std=self.info['server']['isupport']['CASEMAPPING'])
+        self.info['channels'] = IDict(std=self.features.casemapping)
+        self.info['users'] = IDict(std=self.features.casemapping)
 
         self.connected = False
         self.connection.disconnect(message)
@@ -553,7 +557,7 @@ class ServerConnection:
     def istring(self, in_string):
         """Returns an IString without servers' casemapping."""
         new_string = IString(in_string)
-        new_string.set_std(self._istring_casemapping)
+        new_string.set_std(self.features.casemapping)
         return new_string
 
     # Internal book-keeping
@@ -570,42 +574,6 @@ class ServerConnection:
                         self.info['server']['cap'][capability[1:]] = False
                     else:
                         self.info['server']['cap'][capability] = True
-
-        elif event.type == 'featurelist':
-            if 'isupport' not in self.info['server']:
-                self.info['server']['isupport'] = {}
-
-            for feature in event.arguments[:-1]:
-                # negating
-                if feature[0] == '-':
-                    feature = feature[1:]
-                    if feature in self.info['server']['isupport']:
-                        del self.info['server']['isupport'][feature]
-                # setting
-                elif ('=' in feature) and (len(feature.split('=')) > 1):
-                    feature_name, feature_value = feature.split('=')
-
-                    if feature_name == 'PREFIX':  # channel user prefixes
-                        channel_modes, channel_chars = feature_value.split(')')
-                        channel_modes = channel_modes[1:]
-                        self.info['server']['isupport'][feature_name] = [channel_modes, channel_chars]
-
-                    elif feature_name == 'CHANMODES':  # channel mode letters
-                        self.info['server']['isupport'][feature_name] = feature_value.split(',')
-
-                    else:
-                        self.info['server']['isupport'][feature_name] = feature_value
-
-                    # sets up our istring casemapping
-                    if feature_name == 'CASEMAPPING':
-                        self._istring_casemapping = feature_value
-                        # set dict info
-                        self.info['channels'] = IDict(std=feature_value)
-                        self.info['users'] = IDict(std=feature_value)
-                else:
-                    if feature[-1] == '=':
-                        feature = feature[:-1]
-                    self.info['server']['isupport'][feature] = True
 
         elif event.type == 'join' and event.direction == 'in':
             user = NickMask(event.source)
@@ -628,13 +596,13 @@ class ServerConnection:
 
             # merge user list if it already exists, used for heaps of nicks
             if 'users' not in self.get_channel_info(channel):
-                self.get_channel_info(channel)['users'] = IDict(std=self.info['server']['isupport']['CASEMAPPING'])
+                self.get_channel_info(channel)['users'] = IDict(std=self.features.casemapping)
             for user in names_list:
                 # supports multi-prefix
                 # we don't do a check for the cap here because this way supports
                 #   both  +user  and  ~!@+user  just as well, for free!
                 user_privs = ''
-                while user[0] in self.info['server']['isupport']['PREFIX'][1]:
+                while user[0] in self.features.prefix.keys():
                     user_privs += user[0]
                     user = user[1:]
 
@@ -710,7 +678,7 @@ class ServerConnection:
             self.get_channel_info(channel)['created'] = event.arguments[1]
 
         elif event.type in ['mode', 'channelmodeis']:
-            unary_modes = self.info['server']['isupport']['PREFIX'][0] + self.info['server']['isupport']['CHANMODES'][0] + self.info['server']['isupport']['CHANMODES'][1] + self.info['server']['isupport']['CHANMODES'][2]
+            unary_modes = ''.join(self.features.prefix.values()) + self.features.chanmodes[0] + self.features.chanmodes[1] + self.features.chanmodes[2]
 
             if event.type == 'mode':
                 channel = self.istring(event.target).lower()
@@ -724,11 +692,11 @@ class ServerConnection:
             for mode in irc.modes._parse_modes(mode_list, unary_modes):
 
                 # User prefix modes - voice, op, etc
-                if mode[1] in self.info['server']['isupport']['PREFIX'][0]:
+                if mode[1] in self.features.prefix.values():
                     chan_user_info = self.get_channel_info(channel)['users']
                     if mode[2] not in chan_user_info:
                         chan_user_info[mode[2]] = ''
-                    mode_letter, mode_char = mode[1], self.info['server']['isupport']['PREFIX'][1][self.info['server']['isupport']['PREFIX'][0].index(mode[1])]
+                    mode_letter, mode_char = mode[1], {v: k for k, v in self.features.prefix.items()}[mode[1]]
 
                     if mode[0] == '-':
                         if mode_char in self.get_channel_info(channel)['users'][mode[2]]:
@@ -738,7 +706,7 @@ class ServerConnection:
                             self.get_channel_info(channel)['users'][mode[2]] += mode_char
 
                 # List modes
-                if mode[1] in self.info['server']['isupport']['CHANMODES'][0]:
+                if mode[1] in self.features.chanmodes[0]:
                     if mode[0] == '-':
                         if mode[2] in self.get_channel_info(channel)['modes'][mode[1]]:
                             del self.get_channel_info(channel)['modes'][mode[1]][self.get_channel_info(channel)['modes'][mode[1]].index(mode[2])]
@@ -746,7 +714,7 @@ class ServerConnection:
                         self.get_channel_info(channel)['modes'][mode[1]].append(mode[2])
 
                 # Channel modes, paramaters
-                if mode[1] in (self.info['server']['isupport']['CHANMODES'][1] + self.info['server']['isupport']['CHANMODES'][2]):
+                if mode[1] in (self.features.chanmodes[1] + self.features.chanmodes[2]):
                     if mode[0] == '-':
                         if mode[1] in self.get_channel_info(channel)['modes']:
                             del self.get_channel_info(channel)['modes'][mode[1]]
@@ -754,7 +722,7 @@ class ServerConnection:
                         self.get_channel_info(channel)['modes'][mode[1]] = mode[2]
 
                 # Channel modes, no params
-                if mode[1] in self.info['server']['isupport']['CHANMODES'][3]:
+                if mode[1] in self.features.chanmodes[3]:
                     if mode[0] == '-':
                         if mode[1] in self.get_channel_info(channel)['modes']:
                             del self.get_channel_info(channel)['modes'][mode[1]]
@@ -785,10 +753,10 @@ class ServerConnection:
         if channel_name not in self.info['channels']:
             self.info['channels'][channel_name] = {
                 'topic': {},
-                'users': IDict(std=self.info['server']['isupport']['CASEMAPPING']),
+                'users': IDict(std=self.features.casemapping),
                 'modes': {},
             }
-            for mode in self.info['server']['isupport']['CHANMODES'][0]:
+            for mode in self.features.chanmodes[0]:
                 self.info['channels'][channel_name]['modes'][mode] = []
 
     # setting/getting info
@@ -823,7 +791,7 @@ class ServerConnection:
             user_privs: String like '&@+', '&', etc
             required_level: String like 'o', 'h', 'v'
         """
-        privs_we_support = self.info['server']['isupport']['PREFIX']
+        privs_we_support = self.features.prefix
 
         # changing h, q, a to something we can use if necessary
         if required_level not in privs_we_support[0]:
