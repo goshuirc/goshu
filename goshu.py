@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# Goshubot IRC Bot
+# Goshu IRC Bot
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the BSD 2-clause license
 
-# fix for Windows' shitty default cp1252 encoding unicode output errors
+# fix for Windows' bad default cp1252 encoding unicode output errors
 import sys
 if sys.stdout.encoding.lower() != 'utf-8':
     import warnings

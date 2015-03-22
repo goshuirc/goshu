@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-# Goshubot IRC Bot
+#!/usr/bin/env python3
+# Goshu IRC Bot
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the BSD 2-clause license
 

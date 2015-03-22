@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-# Goshubot IRC Bot
+# Goshu IRC Bot
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the BSD 2-clause license
+
 from colorama import Fore, Back, Style
 
 from .info import InfoStore
