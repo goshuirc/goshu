@@ -31,6 +31,10 @@ class BaseCommand:
         if isinstance(self.description, str):
             self.description = [self.description]
 
+        # defaults
+        if not hasattr(self, 'alias'):
+            self.alias = False
+
 
 class AdminCommand(BaseCommand):
     standard_command_privs = USER_LEVEL_ADMIN
@@ -42,8 +46,6 @@ class Command(BaseCommand):
         super().__init__(base_info, **kwargs)
 
         # defaults
-        if not hasattr(self, 'alias'):
-            self.alias = False
         if not hasattr(self, 'user_whitelist'):
             self.user_whitelist = []
         if not hasattr(self, 'channel_whitelist'):
