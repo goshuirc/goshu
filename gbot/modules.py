@@ -571,6 +571,8 @@ class Modules:
             command_list = in_string.split(' ', 2)
             module_name = command_list[0].lower()
 
+            original_command_args = ' '.join(command_list[1:])
+
             if len(command_list) > 1:
                 command_name = command_list[1].lower()
             else:
@@ -592,19 +594,25 @@ class Modules:
 
             if module_name in self.global_admin_commands:
                 for command_info in self.global_admin_commands[module_name]:
-                    handler_list.append(command_info)
+                    handler_list.append((command_info, True))
             if module_name in self.modules:
                 if command_name in self.modules[module_name].admin_commands:
                     command_info = self.modules[module_name].admin_commands[command_name]
-                    handler_list.append(command_info)
+                    handler_list.append((command_info, False))
 
-            for command_info in handler_list:
+            for command_info, is_global in handler_list:
                 if userlevel >= command_info.call_level:
                     if command_info.bound:
                         args = []
                     else:
                         args = [self.modules[module_name]]
-                    args += [event, command_info, UserCommand(command_name, command_args)]
+
+                    if is_global:
+                        usercmd = UserCommand(module_name, original_command_args)
+                    else:
+                        usercmd = UserCommand(command_name, command_args)
+
+                    args += [event, command_info, usercmd]
 
                     threading.Thread(target=command_info.call,
                                      args=args).start()
