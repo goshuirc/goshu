@@ -538,6 +538,11 @@ class Modules:
         return True
 
     def handle(self, event):
+        # add source_account and source_user_level convenience variables for priv/pubmsg
+        if event.type in ('privmsg', 'pubmsg') and event.direction == 'in':
+            event.source_account = self.bot.accounts.account(event.source, event.server)
+            event.source_user_level = self.bot.accounts.access_level(event.source_account)
+
         # call listeners
         called = []
         for priority in sorted(self.listeners.keys()):
@@ -557,7 +562,7 @@ class Modules:
                                 threading.Thread(target=handler, args=[event]).start()
 
         # then handle commands
-        if event.type == 'privmsg' or event.type == 'pubmsg' and event.direction == 'in':
+        if event.type in ('privmsg', 'pubmsg') and event.direction == 'in':
             self.handle_command(event)
         if event.type == 'privmsg' and event.direction == 'in':
             self.handle_admin_command(event)
