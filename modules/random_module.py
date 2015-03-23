@@ -15,7 +15,10 @@ class random_module(Module):  # so named to prevent random lib issues
         random.seed()
 
     def cmd_random(self, event, command, usercommand):
-        """Random selection from phrases separated by a |"""
+        """Random selection from phrases separated by a |
+
+        @usage <first>|<second>|<third>...
+        """
         response = event.source.split('!')[0] + ': '
 
         random_list = usercommand.arguments.split('|')
