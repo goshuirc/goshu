@@ -325,7 +325,8 @@ def json_return(input_json, selector):
 def json_element(input_dict, query, default=None):
     """Runs through a data structure and returns the selected element."""
     for element in query:
-        if element in input_dict:
+        element_selectable = (isinstance(element, int) and isinstance(input_dict, (list, tuple))) or element in input_dict
+        if element_selectable:
             input_dict = input_dict[element]
         else:
             return default
