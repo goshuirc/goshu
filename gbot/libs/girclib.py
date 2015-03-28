@@ -408,6 +408,7 @@ class ServerConnection:
                 localaddress="", localport=0, sslsock=False, ipv6=False, autojoin_channels=[],
                 wait_time=5, nickserv_serv_nick='Nickserv', nickserv_password=None):
         self.connection = self.irc.irc.server()
+        self.connection.features.chanmodes = ['', '', '']
         self.info['connection'] = {
             'address': address,
             'port': port,

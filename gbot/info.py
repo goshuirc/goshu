@@ -414,7 +414,7 @@ class IrcInfo(InfoStore):
             # remove connections
             if modify_connections:
                 current_servers = self.get('servers', {})
-                for name in current_servers:
+                for name in dict(current_servers):
                     server_info = current_servers[name]
                     prompt = wrap['prompt']('Delete Server {name} [{ssl}{host}:{port}] [n]'.format(**{
                         'name': name,
