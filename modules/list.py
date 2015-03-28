@@ -30,6 +30,8 @@ class list(Module):
 
         @global
         @alias help
+        @alias command
+        @alias commands
         """
         cmd_name, args = usercommand.arg_split(1)
 
@@ -100,6 +102,8 @@ class list(Module):
         """List all commands, or info on given command
 
         @alias help
+        @alias command
+        @alias commands
         """
         bot_commands = {}
 
