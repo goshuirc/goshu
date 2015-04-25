@@ -134,8 +134,10 @@ def bytes_to_str(bytes, base=2, precision=0):
     return output
 
 
-def time_metric(secs=60):
+def time_metric(secs=60, mins=0):
     """Returns user-readable string representing given number of seconds."""
+    if mins:
+        secs += (mins * 60)
     time = ''
     for metric_secs, metric_char in [[7 * 24 * 60 * 60, 'w'], [24 * 60 * 60, 'd'], [60 * 60, 'h'], [60, 'm']]:
         if secs > metric_secs:
@@ -288,6 +290,12 @@ def json_return(input_json, selector):
         return selector[1]
     elif selector[0] == 'text.escape':
         return escape(selector[1])
+    elif selector[0] == 'json.lower':
+        if len(selector) > 2:
+            default = selector[2]
+        else:
+            default = ""
+        return str(json_element(input_json, selector[1], default=default)).lower()
     elif selector[0] == 'json.quote_plus':
         if len(selector) > 2:
             default = selector[2]
