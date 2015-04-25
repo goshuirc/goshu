@@ -316,6 +316,45 @@ class Module:
         for json_h in self.json_handlers:
             json_h.reload()
 
+    def get_required_values(self, name):
+        """Get 'required values' for given name."""
+        values = {}
+        for var_name, var_info in self.store.get('required_values', {}).get(name, {}).items():
+            key = ['apis', name, var_name]
+            var_value = self.store.get(key)
+            values[var_name] = var_value
+        return values
+
+    def _parse_required_value(self, base_name, name, info):
+        """Parse required value and put it into our store."""
+        if not self.store.has_key('required_values'):
+            self.store.set('required_values', {})
+
+        var_key = ['required_values', base_name, name]
+
+        var_type = info.get('type', 'str')
+        if 'type' in info:
+            del info['type']
+
+        if var_type == 'str':
+            var_type = str
+        elif var_type == 'int':
+            var_type = int
+        elif var_type == 'float':
+            var_type = float
+        elif var_type == 'bool':
+            var_type = bool
+        else:
+            raise Exception('key type not in list:', var_type)
+
+        prompt = info.get('prompt', name)
+        if 'prompt' in info:
+            del info['prompt']
+        if isinstance(prompt, str):
+            prompt = prompt.rstrip() + ' '
+
+        self.store.add_key(var_type, var_key, prompt, **info)
+
     def _json_command_callback(self, new_json):
         """Update our command dictionary.
         Mixes new json dynamic commands with our static ones.
@@ -323,12 +362,16 @@ class Module:
         # assemble new json dict into actual commands dict
         new_commands = {}
         disabled_commands = self.bot.settings.get('dynamic_commands_disabled', {}).get(self.name.lower(), [])
-        for key in new_json:
+        for key, info in new_json.items():
             if key in disabled_commands:
                 continue
 
-            single_command_dict = self.bot.modules.return_command_dict(self, new_json[key])
+            single_command_dict = self.bot.modules.return_command_dict(self, info)
             new_commands.update(single_command_dict)
+
+            for var_name, var_info in info.get('required_values', {}).items():
+                base_command_name = info['name'][0]
+                self._parse_required_value(base_command_name, var_name, var_info)
 
         # merge new dynamic commands with static ones
         commands = getattr(self, 'static_commands', {}).copy()
