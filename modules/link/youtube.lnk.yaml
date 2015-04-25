@@ -7,7 +7,7 @@
     "response_dict": {
         "title": ["json", ["items", 0, "snippet", "title"]],
         "author": ["json", ["items", 0, "snippet", "channelTitle"]],
-        "length": ["json.lower", ["items", 0, "contentDetails", "duration"]],
+        "length": !!python/name:link.youtube_lnk.length ,
     },
     "required_values": {
         "api_key": {

@@ -320,7 +320,7 @@ class Module:
         """Get 'required values' for given name."""
         values = {}
         for var_name, var_info in self.store.get('required_values', {}).get(name, {}).items():
-            key = ['apis', name, var_name]
+            key = ('required_values', name, var_name)
             var_value = self.store.get(key)
             values[var_name] = var_value
         return values
