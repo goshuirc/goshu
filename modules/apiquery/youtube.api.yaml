@@ -1,18 +1,18 @@
 {
     "display_name": "You@c5Tube@c",
     "description": "<query> --- stupid videos and all that fun stuff",
-    "url": "https://gdata.youtube.com/feeds/api/videos?alt=jsonc&v=2&max-results=1&q={escaped_query}",
+    "url": "https://www.googleapis.com/youtube/v3/search?part=id,snippet&key={api_key}&q={escaped_query}",
     "format": "json",
-    "response": "@c2@b{title}@r by @c3@b{author}@r [{length}] [{category}] [@c3+{likes}@r,@c4-{dislikes}@r,{comments}c,{views}v]   http://youtu.be/{id}",
+    "response": "@c2@b{title}@r by @c3@b{author}@r   http://youtu.be/{id}",
     "response_dict": {
-        "title":    ["json", ["data", "items", 0, "title"]],
-        "author":   ["json", ["data", "items", 0, "uploader"]],
-        "length":   !!python/name:apiquery.youtube_lnk.length ,
-        "category": ["json", ["data", "items", 0, "category"]],
-        "likes":    ["json.num.metric", ["data", "items", 0, "likeCount"]],
-        "dislikes": !!python/name:apiquery.youtube_lnk.dislikes ,
-        "comments": ["json.num.metric", ["data", "items", 0, "commentCount"]],
-        "views":    ["json.num.metric", ["data", "items", 0, "viewCount"]],
-        "id":       ["json", ["data", "items", 0, "id"]]
+        "title": ["json", ["items", 0, "snippet", "title"]],
+        "author": ["json", ["items", 0, "snippet", "channelTitle"]],
+        "id": ["json", ["items", 0, "id", "videoId"]],
+    },
+    "required_values": {
+        "api_key": {
+            "prompt": "YouTube API Key:",
+            "type": "str",
+        }
     }
 }
