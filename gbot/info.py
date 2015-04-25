@@ -62,7 +62,6 @@ class InfoStore():
             base = self.store
             for key_part in key[:-1]:
                 if key_part not in base:
-                    print('fail')
                     return None, None
                 base = base[key_part]
             key = key[-1]
