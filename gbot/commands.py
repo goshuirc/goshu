@@ -93,12 +93,12 @@ def acmd_ignore(self, event, command, usercommand):
     
     @usage list
     @usage add <target>
-    @usage rem <target>
+    @usage del/rem <target>
     """
     do, args = usercommand.arg_split(1)
 
     if do == 'list':
-        target_list = ' '.join(self.config.get('ignored', []))
+        target_list = ' '.join(self.store.get('ignored', []))
         if not target_list:
             target_list = 'None'
 
@@ -108,29 +108,23 @@ def acmd_ignore(self, event, command, usercommand):
     elif do == 'add':
         targets = args.lower().split()
 
-        if 'ignored' not in self.config:
-            self.config['ignored'] = []
+        self.store.initialize_to('ignored', [])
 
         for target in targets:
-            if target not in self.config['ignored']:
-                self.config['ignored'].append(target)
-
-        self.save_config()
+            if target not in self.store.get('ignored'):
+                self.store.append_to('ignored', target)
 
         msg = 'All given targets are now ignored'
         self.bot.irc.msg(event, msg, 'private')
 
-    elif do == 'rem':
+    elif do in ('del', 'rem'):
         targets = args.lower().split()
 
-        if 'ignored' not in self.config:
-            self.config['ignored'] = []
+        self.store.initialize_to('ignored', [])
 
         for target in targets:
-            if target in self.config['ignored']:
-                self.config['ignored'].remove(target)
-
-        self.save_config()
+            if target in self.store.get('ignored'):
+                self.store.remove_from('ignored', target)
 
         msg = 'All given targets are no longer ignored'
         self.bot.irc.msg(event, msg, 'private')

@@ -15,6 +15,7 @@ from .libs.helper import JsonHandler, add_path
 from .libs.girclib import NickMask, is_channel, escape, unescape
 from .users import user_levels, USER_LEVEL_NOPRIVS, USER_LEVEL_ADMIN
 from .commands import AdminCommand, Command, UserCommand, cmd_split, standard_admin_commands
+from .info import InfoStore
 
 LISTENER_HIGHEST_PRIORITY = -30
 LISTENER_HIGHER_PRIORITY = -20
@@ -198,6 +199,7 @@ class Module:
     #   Goshu to operate
     core = False
     standard_admin_commands = []
+    custom_store = None
 
     def __init__(self, bot):
         self.bot = bot
@@ -219,8 +221,11 @@ class Module:
         self.json_handlers = []
         self.dynamic_commands = {}
 
-        self.config = {}
-        self.config_filename = os.sep.join(['config', 'modules', '{}.json'.format(self.name)])
+        self.store_filename = os.sep.join(['config', 'modules', '{}.json'.format(self.name)])
+        if self.custom_store:
+            self.store = self.custom_store(self.bot, self.store_filename)
+        else:
+            self.store = InfoStore(self.bot, self.store_filename)
 
         # load commands into our events dictionary
         self.events = {
@@ -293,33 +298,12 @@ class Module:
 
         self.commands.update(self.static_commands)
 
-        self.load_config()
-
-    def load_config(self, path=None):
-        """Load config from our config file."""
-        if path is None:
-            path = self.config_filename
-
-        try:
-            with open(path, 'r', encoding='utf-8') as config_file:
-                self.config = json.loads(config_file.read())
-        except FileNotFoundError:
-            self.config = {}
-
-    def save_config(self, path=None):
-        """Save config to our config file."""
-        if path is None:
-            path = self.config_filename
-
-        with open(path, 'w', encoding='utf-8') as config_file:
-            config_file.write(json_dumps(self.config, sort_keys=True, indent=4))
-
     def is_ignored(self, target):
         """Whether the target is ignored in our config."""
         if is_channel(target):
-            return target.lower() in self.config.get('ignored', [])
+            return target.lower() in self.store.get('ignored', [])
         else:
-            return NickMask(target).nick.lower() in self.config.get('ignored', [])
+            return NickMask(target).nick.lower() in self.store.get('ignored', [])
 
     def combined(self, event, command, usercommand):
         ...
@@ -715,11 +699,12 @@ class Modules:
 
         commands[info['name'][0]] = cmd_class(call=call, description=description, call_level=call_level,
                                             view_level=view_level, channel_whitelist=channel_whitelist,
-                                            json=info, bound=bound)
+                                            json=info, bound=bound, base_name=info['name'][0])
 
         for command in info['name'][1:]:
             commands[command] = cmd_class(call=call, description=description, call_level=call_level,
                                         view_level=view_level, channel_whitelist=channel_whitelist,
-                                        json=info, alias=info['name'][0], bound=bound)
+                                        json=info, bound=bound, base_name=info['name'][0],
+                                        alias=info['name'][0])
 
         return commands
