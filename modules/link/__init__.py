@@ -20,7 +20,15 @@ class link(Module):
     def __init__(self, bot):
         Module.__init__(self, bot)
         self.links = []
-        self.json_handlers.append(JsonHandler(self, self.dynamic_path, attr='links', ext='lnk', yaml=True))
+        self.json_handlers.append(JsonHandler(self, self.dynamic_path,
+                                              attr='links', ext='lnk', yaml=True,
+                                              callback_name='_link_json_callback'))
+
+    def _link_json_callback(self, new_json):
+        for key, info in new_json.items():
+            for var_name, var_info in info.get('required_values', {}).items():
+                base_name = info['name'][0]
+                self._parse_required_value(base_name, var_name, var_info)
 
     def link_listener(self, event):
         """Listens for links for which we can provide info
@@ -45,6 +53,7 @@ class link(Module):
 
                     match_index = 1
                     complete_dict = {}
+                    complete_dict.update(self.get_required_values(provider))
                     for match in matches.groups():
                         if match is not None:
                             complete_dict['regex_{}'.format(match_index)] = match

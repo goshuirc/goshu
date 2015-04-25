@@ -11,7 +11,7 @@
     },
     "required_values": {
         "api_key": {
-            "prompt": "YouTube API Key:",
+            "prompt": "YouTube API Key for 'youtube' command:",
             "type": "str",
         }
     }
