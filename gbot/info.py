@@ -38,6 +38,10 @@ class InfoStore():
 
     def save(self):
         """Save information to our data file."""
+        # only save file if we have data
+        if not self.store:
+            return
+
         with open(self.path, 'w') as info_file:
             info_file.write(json.dumps(self.store, sort_keys=True, indent=4))
 
@@ -52,10 +56,37 @@ class InfoStore():
         """Update our internal store from the given verison, return the new version."""
         raise NotImplementedError('update_store_version must be replaced when subclassed')
 
+    # helper function
+    def _split_base_from_key(self, key):
+        if isinstance(key, (list, tuple)):
+            base = self.store
+            for key_part in key[:-1]:
+                if key_part not in base:
+                    print('fail')
+                    return None, None
+                base = base[key_part]
+            key = key[-1]
+        else:
+            base = self.store
+
+        return base, key
+
+    def _create_base_from_key(self, key):
+        if isinstance(key, (list, tuple)):
+            base = self.store
+            for key_part in key[:-1]:
+                if key_part not in base:
+                    base[key_part] = {}
+                base = base[key_part]
+
     # getting and setting
     def has_key(self, key):
         """Returns True if we have the given key in our store."""
-        return key in self.store
+        base, key = self._split_base_from_key(key)
+        if base is None:
+            return False
+
+        return key in base
 
     def has_all_keys(self, *keys):
         """Returns True if we have all of the given keys in our store."""
@@ -64,20 +95,105 @@ class InfoStore():
                 return False
         return True
 
-    def set(self, key, value):
+    def set(self, key, value, create_base=True):
         """Sets key to value in our store."""
-        self.store[key] = value
+        # find base
+        if isinstance(key, (list, tuple)):
+            base = self.store
+            for key_part in key[:-1]:
+                if key_part not in base:
+                    if create_base:
+                        base[key_part] = {}
+                    else:
+                        raise Exception('key_part not in base: {}'.format(key))
+                base = base[key_part]
+            key = key[-1]
+        else:
+            base = self.store
+
+        base[key] = value
         self.save()
 
     def get(self, key, default=None):
         """Returns value from our store, or default if it doesn't exist."""
-        return self.store.get(key, default)
+        base, key = self._split_base_from_key(key)
+        if base is None:
+            return default
+
+        return base.get(key, default)
 
     def remove(self, key):
         """Remove the given key from our store."""
+        if not self.has_key(key):
+            return
+
+        # find base
+        if isinstance(key, (list, tuple)):
+            base = self.store
+            for key_part in key[:-1]:
+                if key_part not in base:
+                    if create_base:
+                        base[key_part] = {}
+                    else:
+                        raise Exception('key_part not in base: {}'.format(key))
+                base = base[key_part]
+            key = key[-1]
+        else:
+            base = self.store
+
+        try:
+            del base[key]
+        except KeyError:
+            pass
+
+        self.save()
+
+    def initialize_to(self, key, value):
+        """If key is not in our store, set it to value."""
         if self.has_key(key):
-            del self.store[key]
-            self.save()
+            return
+
+        self.set(key, value)
+
+    def append_to(self, key, value):
+        """Append a value to a list in our store."""
+        # find base
+        if isinstance(key, (list, tuple)):
+            base = self.store
+            for key_part in key[:-1]:
+                if key_part not in base:
+                    if create_base:
+                        base[key_part] = {}
+                    else:
+                        raise Exception('key_part not in base: {}'.format(key))
+                base = base[key_part]
+            key = key[-1]
+        else:
+            base = self.store
+
+        base[key].append(value)
+
+        self.save()
+
+    def remove_from(self, key, value):
+        """Remove a value from a list in our store."""
+        # find base
+        if isinstance(key, (list, tuple)):
+            base = self.store
+            for key_part in key[:-1]:
+                if key_part not in base:
+                    if create_base:
+                        base[key_part] = {}
+                    else:
+                        raise Exception('key_part not in base: {}'.format(key))
+                base = base[key_part]
+            key = key[-1]
+        else:
+            base = self.store
+
+        base[key].remove(value)
+
+        self.save()
 
     # complex junk
     def add_key(self, value_type, key, prompt, repeating_prompt=None, confirm_prompt=None, 
