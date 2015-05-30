@@ -13,6 +13,20 @@ class IRC(girclib.IRC):
         girclib.IRC.__init__(self)
         self.bot = bot
 
+        self.add_handler('in', 'kick', self._handle_kick)
+
+    def _handle_kick(self, event):
+        user_nick = self.servers[event.server].istring(event.arguments[0]).lower()
+        our_nick = self.servers[event.server].istring(self.servers[event.server].info['connection']['nick']).lower()
+        channel = event.target.lower()
+
+        if user_nick == our_nick:
+            try:
+                self.bot.info.store['servers'][self.servers[event.server].info['name']]['autojoin_channels'].remove(channel)
+                self.bot.info.save()
+            except:
+                pass
+
     def connect_info(self, info, settings):
         default_nick = info.get('default_nick', None)
         server_dict = info.get('servers', {})
