@@ -132,7 +132,8 @@ class log_display(Module):
                 targets.append(event.target)
             output += '@c3-@c  @b* '
             output += event.source.split('!')[0] + '@b '
-            output += event.arguments[0]
+            if len(event.arguments):
+                output += event.arguments[0]
 
         elif event.type in ['umode', ]:
             output += 'Mode change '
