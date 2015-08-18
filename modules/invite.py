@@ -31,15 +31,13 @@ class invite(Module):
             self.bot.irc.msg(event, 'Sorry, you need to be a channel operator to do this')
             return
 
-        if 'autojoin_channels' not in self.bot.info.get(event.server, {}):
-            server_dict = self.bot.info.get(event.server, {})
-            server_dict['autojoin_channels'] = []
-            self.bot.info.set(event.server, server_dict)
+        if 'autojoin_channels' not in self.bot.info.store['servers'].get(event.server, {}):
+            self.bot.info.store['servers'][event.server]['autojoin_channels'] = []
 
-        if unescape(event.target.lower()) not in self.bot.info.get(event.server, {})['autojoin_channels']:
-            server_dict = self.bot.info.get(event.server, {})
+        if unescape(event.target.lower()) not in self.bot.info.store['servers'].get(event.server, {})['autojoin_channels']:
+            server_dict = self.bot.info.store['servers'].get(event.server, {})
             server_dict['autojoin_channels'].append(unescape(event.target.lower()))
-            self.bot.info.set(event.server, server_dict)
+            self.bot.info.store['servers'][event.server] = server_dict
             self.bot.info.save()
 
         self.bot.irc.msg(event, 'Added this channel to my autojoin list! To remove:  {pre}remchan'.format(pre=self.bot.settings.store['command_prefix']), 'public')
@@ -57,15 +55,15 @@ class invite(Module):
             self.bot.irc.msg(event, 'Sorry, you need to be a channel operator to do this')
             return
 
-        if 'autojoin_channels' not in self.bot.info.get(event.server, {}):
-            server_dict = self.bot.info.get(event.server, {})
+        if 'autojoin_channels' not in self.bot.info.store['servers'].get(event.server, {}):
+            server_dict = self.bot.info.store['servers'].get(event.server, {})
             server_dict['autojoin_channels'] = []
-            self.bot.info.set(event.server, server_dict)
+            self.bot.info.store['servers'][event.server] = server_dict
 
-        if unescape(event.target.lower()) in self.bot.info.get(event.server, {})['autojoin_channels']:
-            server_dict = self.bot.info.get(event.server, {})
+        if unescape(event.target.lower()) in self.bot.info.store['servers'].get(event.server, {})['autojoin_channels']:
+            server_dict = self.bot.info.store['servers'].get(event.server, {})
             server_dict['autojoin_channels'].remove(unescape(event.target.lower()))
-            self.bot.info.set(event.server, server_dict)
+            self.bot.info.store['servers'][event.server] = server_dict
             self.bot.info.save()
 
         self.bot.irc.msg(event, 'Removed this channel from my autojoin list! To readd:  {pre}addchan'.format(pre=self.bot.settings.store['command_prefix']), 'public')

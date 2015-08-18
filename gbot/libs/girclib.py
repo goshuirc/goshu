@@ -241,6 +241,7 @@ class IRC:
         self.add_handler('in', 'ping', self._handle_ping, -42)
         self.add_handler('in', 'cap', self._handle_cap)
         self.add_handler('in', 'welcome', self._handle_startup)
+        self.add_handler('in', 'featurelist', self._handle_features)
 
         self.running = True
         self.shutdown_message = 'Goodbye'
@@ -356,6 +357,19 @@ class IRC:
             if self.servers[event.server]._first_cap:
                 self.servers[event.server].cap('END')
 
+    def _handle_features(self, event):
+        args = event.arguments
+        target, features, msg = args[:1], args[1:-1], args[-1:]
+
+        for feature in features:
+            name, sep, value = feature.partition('=')
+
+            if not sep or not value:
+                continue
+
+            if name.lower() == 'prefix':
+                self.servers[event.server].prefix_order = value.split('(')[1].split(')')[0]
+
 # ping timeouts
 timeout_check_interval = {
     'minutes': 3,
@@ -398,6 +412,7 @@ class ServerConnection:
         self.timeout_length = timeout_length
 
         self.nickserv_format = 'IDENTIFY {ns_pass}'
+        self.prefix_order = 'ov'
 
     @property
     def features(self):
@@ -792,10 +807,10 @@ class ServerConnection:
             user_privs: String like '&@+', '&', etc
             required_level: String like 'o', 'h', 'v'
         """
-        privs_we_support = self.features.prefix
+        mode_to_prefix = {v: k for k, v in self.features.prefix.items()}
 
         # changing h, q, a to something we can use if necessary
-        if required_level not in privs_we_support[0]:
+        if required_level not in self.prefix_order:
             conversion_dict = {
                 'h': 'o',
                 'a': 'o',
@@ -807,8 +822,8 @@ class ServerConnection:
                 return False
 
         # get list of levels we can use
-        index = privs_we_support[0].index(required_level)
-        acceptable_prefixes = privs_we_support[1][:index + 1]
+        index = self.prefix_order.index(required_level)
+        acceptable_prefixes = [mode_to_prefix[x] for x in self.prefix_order[:index + 1]]
 
         for prefix in user_privs:
             if prefix in acceptable_prefixes:
