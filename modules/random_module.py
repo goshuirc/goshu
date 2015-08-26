@@ -19,7 +19,7 @@ class random_module(Module):  # so named to prevent random lib issues
 
         @usage <first>|<second>|<third>...
         """
-        response = event.source.split('!')[0] + ': '
+        response = event['source'].nick + ': '
 
         random_list = usercommand.arguments.split('|')
         random_num = random.randint(1, len(random_list)) - 1
@@ -27,4 +27,4 @@ class random_module(Module):  # so named to prevent random lib issues
         response += random_list[random_num].strip()
 
         if random_list[random_num].strip() != '':
-            self.bot.irc.msg(event, response, 'public')
+            event['from_to'].msg(response)

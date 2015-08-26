@@ -3,8 +3,9 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the BSD 2-clause license
 
+from girc.formatting import escape, unescape
+
 from gbot.modules import Module
-from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import html_unescape
 import json
 import urllib.request, urllib.parse, urllib.error
@@ -20,9 +21,9 @@ class google(Module):
         @alias g
         @usage <query>
         """
-        response = '*** @c12G@c4o@c8o@c12g@c3l@c4e@c: {}'.format(self.google_result_search(usercommand.arguments))
+        response = '*** $c12G$c4o$c8o$c12g$c3l$c4e$c: {}'.format(self.google_result_search(usercommand.arguments))
 
-        self.bot.irc.msg(event, response, 'public')
+        event['from_to'].msg(response)
 
     def combined(self, event, command, usercommand):
         query = ''
@@ -37,7 +38,7 @@ class google(Module):
         response = '*** ' + name + ': '
         response += self.google_result_search(query)
 
-        self.bot.irc.msg(event, response, 'public')
+        event['from_to'].msg(response)
 
     def google_result_search(self, query):
         url = 'https://ajax.googleapis.com/ajax/services/search/web?v=1.0&'

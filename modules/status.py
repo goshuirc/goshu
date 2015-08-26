@@ -22,8 +22,8 @@ class status(Module):
             server_info += self.bot.irc.servers[server].info['name'] + ': '
             server_info += 'Connected to ' + str(len(self.bot.irc.servers[server].info['channels'])) + ' channels'
             server_info += ', '
-            server_info += 'I can see ' + str(len(self.bot.irc.servers[server].info['users'])) + ' users  ;  '
+            server_info += str(len(self.bot.irc.servers[server].info['users'])) + ' users online ;  '
 
         response = '*** Status:  ' + server_info[:-5]
 
-        self.bot.irc.msg(event, response, 'public')
+        event['source'].msg(response)

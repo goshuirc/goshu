@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Goshu IRC Bot
-# written by Daniel Oaks <daniel@danieloaks.net>
+# written by Daniel Oaks <daniel$danieloaks.net>
 # licensed under the BSD 2-clause license
 
 from time import strftime, localtime
@@ -8,11 +8,11 @@ import random
 import os
 import datetime
 
+from girc.formatting import escape, unescape
 import colorama
 colorama.init()
 
 from gbot.modules import Module
-from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import filename_escape
 
 
@@ -29,19 +29,19 @@ class log_display(Module):
     def log_display_listener(self, event):
         """Writes messages to screen and log
 
-        @listen * * high inline
+        $listen * * high inline
         """
         if event.type == 'all_raw_messages':
             return
 
         # > 15:26:43
-        output = '@c14'
+        output = '$c14'
         output += strftime("%H:%M:%S", localtime())
 
         # > -rizon-
-        output += ' @c12-@c'
+        output += ' $c12-$c'
         output += event.server
-        output += '@c12-@c '
+        output += '$c12-$c '
 
         targets = ['all']
 
@@ -60,15 +60,15 @@ class log_display(Module):
 
         elif event.type in ['privnotice', '439', ]:
             targets.append(event.source.split('!')[0])
-            output += '@c14-'
-            output += '@c13' + event.source.split('!')[0]
+            output += '$c14-'
+            output += '$c13' + event.source.split('!')[0]
             try:
-                output += '@c14('
-                output += '@c13' + escape(event.source.split('!')[1])
-                output += '@c14)'
+                output += '$c14('
+                output += '$c13' + escape(event.source.split('!')[1])
+                output += '$c14)'
             except IndexError:
                 output = output[:-1]
-            output += '-@c '
+            output += '-$c '
             output += event.arguments[0]
 
         elif event.type in ['cannotsendtochan', '408', ]:
@@ -76,18 +76,18 @@ class log_display(Module):
             msg = escape(event.arguments[1])
             targets.append(chan)
 
-            output += '@c3-@c'
+            output += '$c3-$c'
             output += escape(chan)
-            output += '@c3- '
-            output += '@r@b** @c4Message Rejected@r: '
+            output += '$c3- '
+            output += '$r$b** $c4Message Rejected$r: '
             output += msg
 
         elif event.type in ['pubmsg', ]:
             targets.append(event.target)
-            output += '@c3-@c'
+            output += '$c3-$c'
             output += escape(event.target)
-            output += '@c3- '
-            output += '@c14<@c'
+            output += '$c3- '
+            output += '$c14<$c'
             try:
                 selected_mode = ''
                 server = self.bot.irc.servers[event.server]
@@ -105,55 +105,55 @@ class log_display(Module):
             except:
                 output += ' '
             output += self.nick_color(event.source.split('!')[0])
-            output += '@c14>@c '
+            output += '$c14>$c '
             output += hide_pw_if_necessary(event.arguments[0], self.bot.settings.store['command_prefix'])
 
         elif event.type in ['privmsg', ]:
-            output += '@c3-@c'
+            output += '$c3-$c'
             if event.direction == 'in':
                 output += escape(event.source.split('!')[0])
                 targets.append(event.source.split('!')[0])
             else:
                 output += event.target
                 targets.append(event.target)
-            output += '@c3- '
-            output += '@c14<@c'
+            output += '$c3- '
+            output += '$c14<$c'
             output += self.nick_color(event.source.split('!')[0])
-            output += '@c14>@c '
+            output += '$c14>$c '
             output += hide_pw_if_necessary(event.arguments[0], self.bot.settings.store['command_prefix'])
 
         elif event.type in ['action', ]:
-            output += '@c3-@c'
+            output += '$c3-$c'
             if event.direction == 'in':
                 output += event.from_to
                 targets.append(event.from_to)
             else:
                 output += event.target
                 targets.append(event.target)
-            output += '@c3-@c  @b* '
-            output += event.source.split('!')[0] + '@b '
+            output += '$c3-$c  $b* '
+            output += event.source.split('!')[0] + '$b '
             if len(event.arguments):
                 output += event.arguments[0]
 
         elif event.type in ['umode', ]:
             output += 'Mode change '
-            output += '@c14[@c'
+            output += '$c14[$c'
             output += event.arguments[0]
-            output += '@c14]@c'
+            output += '$c14]$c'
             output += ' for user '
             output += event.target
 
         elif event.type in ['mode', ]:
             targets.append(event.target)
-            output += '@c6-@c!@c6-@c '
+            output += '$c6-$c!$c6-$c '
             output += 'mode/'
-            output += '@c10' + event.target + ' '
-            output += '@c14[@c'
+            output += '$c10' + event.target + ' '
+            output += '$c14[$c'
             for arg in event.arguments:
                 output += arg + ' '
             output = output[:-1]  # strip last space
-            output += '@c14]@c'
-            output += ' by @b'
+            output += '$c14]$c'
+            output += ' by $b'
             output += event.source.split('!')[0]
 
         elif event.type in ['channelmodeis', ]:
@@ -161,12 +161,12 @@ class log_display(Module):
             modes = escape(' '.join(event.arguments[1:]))
 
             targets.append(chan)
-            output += '@c6-@c!@c6-@c '
+            output += '$c6-$c!$c6-$c '
             output += 'modes:'
-            output += '@c10' + chan + ' '
-            output += '@c14[@c'
+            output += '$c10' + chan + ' '
+            output += '$c14[$c'
             output += modes
-            output += '@c14]@c'
+            output += '$c14]$c'
 
         elif event.type in ['channelcreate', ]:
             chan = escape(event.arguments[0])
@@ -178,10 +178,10 @@ class log_display(Module):
                 return  # malformed
 
             targets.append(chan)
-            output += '@c6-@c!@c6-@c '
+            output += '$c6-$c!$c6-$c '
             output += 'times:'
-            output += '@c10' + chan + '@c '
-            output += 'Channel created @b'
+            output += '$c10' + chan + '$c '
+            output += 'Channel created $b'
             output += created_ts.strftime('%a, %d %b %Y %H:%M:%S')
 
         elif event.type in ['namreply', ]:
@@ -189,23 +189,23 @@ class log_display(Module):
             nicks = escape(event.arguments[2])
 
             targets.append(chan)
-            output += '@c6-@c!@c6-@c '
+            output += '$c6-$c!$c6-$c '
             output += 'nicks:'
-            output += '@c10' + chan + ' '
-            output += '@c14[@c'
+            output += '$c10' + chan + ' '
+            output += '$c14[$c'
             output += nicks
-            output += '@c14]@c'
+            output += '$c14]$c'
 
         elif event.type in ['endofnames', ]:
             chan = escape(event.arguments[0])
             user_dict = self.bot.irc.servers[event.server].get_channel_info(chan)['users']
 
             targets.append(chan)
-            output += '@c6-@c!@c6-@c '
+            output += '$c6-$c!$c6-$c '
             output += 'stats:'
-            output += '@c10' + chan + '@c: '
+            output += '$c10' + chan + '$c: '
             output += '{} nick{} '.format(len(user_dict), 's' if len(user_dict) > 1 else '')
-            output += '@c3(@c'
+            output += '$c3($c'
 
             normal_users = 0
             voiced_users = 0
@@ -214,7 +214,7 @@ class log_display(Module):
 
             for user in user_dict:
                 # todo: populate and work from ISUPPORT lists
-                if '@' in user_dict[user] or '!' in user_dict[user] or '&' in user_dict[user] or '~' in user_dict[user]:
+                if '$' in user_dict[user] or '!' in user_dict[user] or '&' in user_dict[user] or '~' in user_dict[user]:
                     op_users += 1
                 elif '%' in user_dict[user]:
                     halfop_users += 1
@@ -226,64 +226,64 @@ class log_display(Module):
             priv_lists = []
 
             if op_users:
-                priv_lists.append('@b{}@r ops'.format(op_users))
+                priv_lists.append('$b{}$r ops'.format(op_users))
             if halfop_users:
-                priv_lists.append('@b{}@r halfops'.format(halfop_users))
+                priv_lists.append('$b{}$r halfops'.format(halfop_users))
             if voiced_users:
-                priv_lists.append('@b{}@r voices'.format(voiced_users))
+                priv_lists.append('$b{}$r voices'.format(voiced_users))
             if normal_users:
-                priv_lists.append('@b{}@r normals'.format(normal_users))
+                priv_lists.append('$b{}$r normals'.format(normal_users))
 
             output += ', '.join(priv_lists)
 
-            output += '@c3)@c'
+            output += '$c3)$c'
 
         elif event.type in ['kick', ]:
             targets.append(escape(event.target))
-            output += '@c6-@c!@c6-@c10 '
+            output += '$c6-$c!$c6-$c10 '
             output += event.arguments[0]
-            output += '@c was kicked from '
+            output += '$c was kicked from '
             output += escape(event.target)
             output += ' by '
             output += event.source.split('!')[0]
-            output += ' @c14[@c'
+            output += ' $c14[$c'
             output += event.arguments[1]
-            output += '@c14]@c'
+            output += '$c14]$c'
 
         elif event.type in ['join', ]:
             # we get an in event for joining chans, so ignore out
             if event.direction == 'out':
                 return
             targets.append(event.target)
-            output += '@c6-@c!@c6-@b@c10 '
+            output += '$c6-$c!$c6-$b$c10 '
             output += event.source.split('!')[0]
-            output += '@b @c14[@c10'
+            output += '$b $c14[$c10'
             output += escape(event.source.split('!')[1])
-            output += '@c14]@c '
-            output += 'has joined @b'
+            output += '$c14]$c '
+            output += 'has joined $b'
             output += escape(event.target)
 
         elif event.type in ['nick', ]:
-            output += '@c6-@c!@c6-@c10 '
+            output += '$c6-$c!$c6-$c10 '
             output += event.source.split('!')[0]
-            output += '@c is now known as @c10'
+            output += '$c is now known as $c10'
             output += str(event.target)
 
         elif event.type in ['currenttopic', ]:
             targets.append(event.arguments[0])
-            output += '@c6-@c!@c6-@c10 Topic for @c10'
+            output += '$c6-$c!$c6-$c10 Topic for $c10'
             output += event.arguments[0]
-            output += '@c: '
+            output += '$c: '
             output += event.arguments[1]
 
         elif event.type in ['quit', ]:
-            output += '@c6-@c!@c6-@c10 '
+            output += '$c6-$c!$c6-$c10 '
             output += event.source.split('!')[0]
-            output += ' @c14[@c'
+            output += ' $c14[$c'
             output += escape(event.source.split('!')[1])
-            output += '@c14]@c has quit @c14[@c'
+            output += '$c14]$c has quit $c14[$c'
             output += event.arguments[0]
-            output += '@c14]@c'
+            output += '$c14]$c'
 
         elif event.type in ['ctcp', ] and event.arguments[0] == 'ACTION':
             return
@@ -310,7 +310,7 @@ class log_display(Module):
         # debugmsg = [event.direction, event.type, event.source, event.target, event.arguments]
         # self.bot.gui.put_line(escape(str(debugmsg)))
 
-        self.bot.gui.put_line(display_unescape(output + '@r'))  # +@r because that means reset
+        self.bot.gui.put_line(display_unescape(output + '$r'))  # +$r because that means reset
         self.log(output, event.server, targets)
 
     def log(self, output, server='global', targets=['global']):
@@ -326,10 +326,10 @@ class log_display(Module):
             path = 'logs/{}.{}.log'.format(server_escape, target)
 
             if target not in self.logfiles_open or not os.path.exists(path):
-                output = '@c14 Logfile Opened - ' + strftime('%A %B %d, %H:%M:%S %Y', localtime()) + '\n' + output
+                output = '$c14 Logfile Opened - ' + strftime('%A %B %d, %H:%M:%S %Y', localtime()) + '\n' + output
                 self.logfiles_open[target] = strftime('%A %B %d', localtime())
             elif self.logfiles_open[target] != strftime('%A %B %d', localtime()):
-                output = '@c14 New Day - ' + strftime('%A %B %d, %H:%M:%S %Y', localtime()) + '\n' + output
+                output = '$c14 New Day - ' + strftime('%A %B %d, %H:%M:%S %Y', localtime()) + '\n' + output
                 self.logfiles_open[target] = strftime('%A %B %d', localtime())
 
             outfile = open(path.lower(), 'a', encoding='utf-8')
@@ -340,7 +340,7 @@ class log_display(Module):
         nick = nickhost.split('!')[0]
         if nick not in self.nick_colors:
             self.nick_colors[nick] = random.randint(2, 13)
-        return '@c' + str(self.nick_colors[nick]) + nick
+        return '$c' + str(self.nick_colors[nick]) + nick
 
 
 def hide_pw_if_necessary(msg, command_char="'"):
@@ -361,15 +361,15 @@ def hide_pw_if_necessary(msg, command_char="'"):
     return ' '.join(msg_parts)
 
 
-# TODO: this function needs to support @{@} format
+# TODO: this function needs to support ${$} format
 def display_unescape(in_str):
-    in_str = in_str.replace('@{@}', '@@')
+    in_str = in_str.replace('${$}', '$$')
     output = ''
     while in_str != '':
-        if in_str[0] == '@':
-            if len(in_str) > 1 and in_str[1] == '@':
+        if in_str[0] == '$':
+            if len(in_str) > 1 and in_str[1] == '$':
                 in_str = in_str[2:]
-                output += '@'
+                output += '$'
             elif len(in_str) > 1 and in_str[1] == 'c':
                 fore = ''
                 back = ''

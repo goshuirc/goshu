@@ -5,8 +5,9 @@
 
 import urllib.parse
 
+from girc.formatting import unescape
+
 from gbot.modules import Module
-from gbot.libs.girclib import unescape
 from gbot.libs.helper import get_url, format_extract
 
 
@@ -17,14 +18,18 @@ class apiquery(Module):
             usercommand.arguments = ' '
 
         values = self.get_required_values(command.base_name)
-        url = command.json['url'].format(escaped_query=urllib.parse.quote_plus(unescape(usercommand.arguments)), **values)
+        values.update({
+            'escaped_query': urllib.parse.quote_plus(unescape(usercommand.arguments))
+        })
+
+        url = command.json['url'].format(**values)
         r = get_url(url)
 
         if isinstance(r, str):
-            self.bot.irc.msg(event, unescape('*** {}: {}'.format(command.json['display_name'], r)), 'public')
+            event['from_to'].msg(unescape('*** {}: {}'.format(command.json['display_name'], r)))
             return
 
         # parsing
         tex = r.text
         response = format_extract(command.json, tex, fail='No results')
-        self.bot.irc.msg(event, response, 'public')
+        event['from_to'].msg(response)

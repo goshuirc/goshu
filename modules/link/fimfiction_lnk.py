@@ -18,7 +18,7 @@ def categories(format_json, input_json):
     for key in sorted(input_json['story']['categories']):
         if input_json['story']['categories'][key]:
             if key[:2] in category_output:
-                output.append('@c{colour}{category}@r'.format(colour=category_output[key[:2]],
+                output.append('$c{colour}{category}$r'.format(colour=category_output[key[:2]],
                                                               category=key))
             else:
                 output.append(key)

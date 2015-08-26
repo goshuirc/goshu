@@ -43,6 +43,7 @@ class AdminCommand(BaseCommand):
 
 class Command(BaseCommand):
     """Actual module command."""
+
     def __init__(self, base_info=None, **kwargs):
         super().__init__(base_info, **kwargs)
 
@@ -90,7 +91,7 @@ def cmd_split(in_str):
 # standard commands
 def acmd_ignore(self, event, command, usercommand):
     """Lets admins manage a list of 'ignored' targets
-    
+
     @usage list
     @usage add <target>
     @usage del/rem <target>

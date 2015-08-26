@@ -90,12 +90,12 @@ class dice(Module):
                 for li2 in li1:
                     result += int(li2)
 
-            output = event.source.split('!')[0] + ': '
+            output = event['source'].nick + ': '
             output += iline + '    =    ' + str(result)
             if len(out_dice_line.split(',')) < 13:
                 output += '    =    ' + out_dice_line[:-2]
 
-            self.bot.irc.msg(event, output, 'public')
+            event['from_to'].msg(output)
 
         except:
             output_lines = ['DICE SYNTAX: {}d <dice>'.format(self.bot.settings.store['prefix']),
@@ -105,4 +105,4 @@ class dice(Module):
             for i in range(0, len(output_lines)):
                 output = output_lines[i]
 
-                self.bot.irc.msg(event, output)
+                event['source'].msg(output)

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # Goshu IRC Bot
-# written by Daniel Oaks <daniel@danieloaks.net>
+# written by Daniel Oaks <daniel$danieloaks.net>
 # licensed under the BSD 2-clause license
 
 import os
 import json
 import random
 
+from girc.formatting import unescape
+
 from gbot.modules import Module
-from gbot.libs.girclib import unescape
-from gbot.users import USER_LEVEL_ADMIN
 
 
 class responses_module(Module):
@@ -21,11 +21,11 @@ class responses_module(Module):
 
         random.seed()
 
-        # @s means source, the nick of whoever did the command
-        # @t means target, either whoever they write afterwards, or the current self nick
-        # note: @S and @T represent allcaps versions of @s and @t
-        # @f at the start means: ignore the standard pre / post lines
-        # @m at the start means: send this line as a /me rather than a /msg
+        # $s means source, the nick of whoever did the command
+        # $t means target, either whoever they write afterwards, or the current self nick
+        # note: $S and $T represent allcaps versions of $s and $t
+        # $f at the start means: ignore the standard pre / post lines
+        # $m at the start means: send this line as a /me rather than a /msg
 
     def acmd_create(self, event, command, usercommand):
         """Create new responses skeletons dynamically
@@ -35,14 +35,14 @@ class responses_module(Module):
         cmd_name, args = usercommand.arg_split(1)
 
         if not cmd_name:
-            self.bot.irc.msg(event, 'You must give me a name for the response you want to create')
+            event['source'].msg('You must give me a name for the response you want to create')
             return
 
         filename = os.path.join(self.dynamic_path, cmd_name.lower())
         filename += '.res.json'
 
         if os.path.exists(filename):
-            self.bot.irc.msg(event, 'That module already exists, ignoring')
+            event['source'].msg('That module already exists, ignoring')
             return
 
         new_response_dict = {
@@ -51,32 +51,33 @@ class responses_module(Module):
             'view_level': 10,
             'channel_whitelist': '#example',
             '1': [
-                '@s sent me a message!'
+                '$s sent me a message!'
             ],
             '1pre': '',
             '1post': '',
             '2': [
-                '@s wants me to talk to @t!'
+                '$s wants me to talk to $t!'
             ],
             '2pre': '',
             '2post': '',
         }
 
         with open(filename, 'w') as module_file:
-            module_file.write('{}\n'.format(json.dumps(new_response_dict, sort_keys=True, indent=4)))
+            module_file.write('{}\n'.format(json.dumps(new_response_dict,
+                                                       sort_keys=True, indent=4)))
 
-        self.bot.irc.msg(event, 'New responses file created in {}'.format(filename))
-        self.bot.irc.msg(event, 'By default this responses file will not be accessible by ordinary users,'
-                                ' and will be channel-restricted, so you must modify it on-disk to do'
-                                ' what you want!')
+        event['source'].msg('New responses file created in {}'.format(filename))
+        event['source'].msg('By default this responses file will not be accessible by ordinary users,'
+                            ' and will be channel-restricted, so you must modify it on-disk to do'
+                            ' what you want!')
 
     def combined(self, event, command, usercommand):
-        if self.is_ignored(event.from_to):
+        if self.is_ignored(event['from_to']):
             return
 
-        source = event.source.split('!')[0]
+        source = event['source'].nick
         if usercommand.arguments.strip() == '':
-            target = self.bot.irc.servers[event.server].info['connection']['nick']
+            target = event['server'].nick
             num = '1'
         else:
             target = usercommand.arguments.strip()
@@ -110,7 +111,7 @@ class responses_module(Module):
         random.shuffle(response_list)
         response = response_list[response_num]
 
-        if response[0:2] == '@f':
+        if response[0:2] == '$f':
             pre = ''
             post = ''
             response = response[2:]
@@ -121,7 +122,11 @@ class responses_module(Module):
             output.append(pre + line + post)
 
         for line in output:
-            line = unescape(line)
+            use_action = False
+            if line[:2] == '$m':
+                line = line[2:]
+                use_action = True
+
             line = unescape(line, {
                 's': source,
                 'S': source.upper(),
@@ -131,21 +136,20 @@ class responses_module(Module):
                 'randomchannelnick': [random_channel_nick, [self.bot, event]]
             })
 
-            if line[0:2] == '@m':
-                self.bot.irc.action(event, line[2:].strip(), 'public')
+            if use_action:
+                event['from_to'].me(line.strip())
             else:
-                self.bot.irc.msg(event, line, 'public')
+                event['from_to'].msg(line)
 
 
-def random_channel_nick(arg_list):
-    bot, event = arg_list
-
+def random_channel_nick(bot, event):
     try:
-        user_list = list(bot.irc.servers[event.server].info['channels'][event.from_to]['users'].keys())
+        user_list = list(event['from_to'].users.keys())
         user_num = random.randint(1, len(user_list)) - 1
         if len(user_list) > 1:
-            while user_list[user_num] == event.source.split('!')[0]:
+            while user_list[user_num] == event['source'].nick:
                 user_num = random.randint(1, len(user_list)) - 1
         return user_list[user_num]
+
     except:
-        return event.source.split('!')[0]
+        return event['source'].nick

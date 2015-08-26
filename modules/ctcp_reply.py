@@ -4,8 +4,8 @@
 # licensed under the BSD 2-clause license
 
 from time import strftime, localtime
+
 from gbot.modules import Module
-from gbot.libs.girclib import NickMask
 
 
 class ctcp_reply(Module):
@@ -17,34 +17,37 @@ class ctcp_reply(Module):
 
         @listen in ctcp highest
         """
-        if event.arguments[0] == 'VERSION':
-            message = 'VERSION Goshu:3:https://github.com/DanielOaks/goshu'
+        if event['ctcp_verb'] == 'version':
+            ver = 'Goshu:3:https://github.com/DanielOaks/goshu'
 
             # tell them owner nick(s) if one is online
-            runner_level, online_runners = self.bot.accounts.online_bot_runners(event.server)
+            server_name = event['server'].name
+            runner_level, online_runners = self.bot.accounts.online_bot_runners(server_name)
             if online_runners:
                 trailing_s = 's' if len(online_runners) > 1 else ''
-                runner_msg = "Hi, I'm an IRC bot! Online Contact{}:  {}".format(trailing_s, ' '.join(online_runners))
-                self.bot.irc.msg(event, runner_msg, 'private')
+                runner_msg = ("Hi, I'm an IRC bot! Online Contact{}:  "
+                              "{}".format(trailing_s, ' '.join(online_runners)))
+                event['source'].msg(runner_msg)
 
-            self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, message)
+            event['source'].ctcp_reply('VERISON', ver)
 
-        elif event.arguments[0] == 'USERINFO':
+        elif event['ctcp_verb'] == 'userinfo':
             userinfostring = None
             # userinfostring = "Please don't kline me, I'll play nice!"
             if userinfostring:
-                self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'USERINFO :{}'.format(userinfostring))
+                event['source'].ctcp_reply('USERINFO', userinfostring)
 
-        elif event.arguments[0] == 'CLIENTINFO':
-            self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'CLIENTINFO :Understood CTCP Pairs: CLIENTINFO, ERRMSG, PING, TIME, USERINFO, VERSION')
+        elif event['ctcp_verb'] == 'clientinfo':
+            understood = ['CLIENTINFO', 'ERRMSG', 'PING', 'TIME', 'USERINFO', 'VERSION']
+            msg = 'Understood CTCP Pairs: {}'.format(','.join(understood))
+            event['source'].ctcp_reply('CLIENTINFO', msg)
 
-        elif event.arguments[0] == 'ERRMSG':
-            # self.bot.irc.servers[event.server].ctcp_reply(nm_to_n(event.source, 'ERRMSG '+event.arguments()[1]+':ERRMSG echo, no error has occured') #could be bad, errmsg-storm, anyone?
+        elif event['ctcp_verb'] == 'errmsg':
+            # event['source'].ctcp_reply(nm_to_n(event.source, 'ERRMSG '+event.arguments()[1]+':ERRMSG echo, no error has occured') #could be bad, errmsg-storm, anyone?
             pass
 
-        elif event.arguments[0] == 'TIME':
-            self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'TIME {}'.format(strftime("%a %b %d, %H:%M:%S %Y", localtime())))
+        elif event['ctcp_verb'] == 'time':
+            event['source'].ctcp_reply('TIME', strftime('%a %b %d, %H:%M:%S %Y', localtime()))
 
-        elif event.arguments[0] == 'PING':
-            if len(event.arguments) > 1:
-                self.bot.irc.servers[event.server].ctcp_reply(NickMask(event.source).nick, 'PING ' + event.arguments[1])
+        elif event['ctcp_verb'] == 'ping':
+            event['source'].ctcp_reply('PING', event.ctcp_text)

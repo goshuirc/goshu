@@ -5,13 +5,9 @@
 
 import hashlib
 import json
-import codecs
-import os
 
-from colorama import Fore, Back, Style
-
-from .libs import girclib
 from .libs.helper import timedelta_to_string, string_to_timedelta
+from .irc import timeout_check_interval, timeout_length
 
 
 class InfoStore():
@@ -639,7 +635,7 @@ class IrcInfo(InfoStore):
                     if chan.lower() not in new_connection['autojoin_channels']:
                         new_connection['autojoin_channels'].append(chan.lower())
 
-                default_timeout = timedelta_to_string(girclib.timeout_check_interval)
+                default_timeout = timedelta_to_string(timeout_check_interval)
                 repeating_prompt = wrap['prompt']('Timeout Check Interval: [{}]'.format(default_timeout))
                 prompt = '\n'.join([
                     '',
@@ -654,7 +650,7 @@ class IrcInfo(InfoStore):
                 timeout_check = self.bot.gui.get_string(prompt, repeating_prompt=repeating_prompt, default=default_timeout, validate=string_to_timedelta)
                 new_connection['timeout_check_interval'] = string_to_timedelta(timeout_check)
 
-                default_timeout = timedelta_to_string(girclib.timeout_check_interval)
+                default_timeout = timedelta_to_string(timeout_length)
                 repeating_prompt = wrap['prompt']('Timeout Length: [{}]'.format(default_timeout))
                 prompt = '\n'.join([
                     '',

@@ -3,7 +3,7 @@
     "description": "<query> --- github repo search", 
     "url": "https://api.github.com/legacy/repos/search/{escaped_query}", 
     "format": "json", 
-    "response": "https://github.com/@c3@b{author}@r/@c2@b{name}@r --- {description}",
+    "response": "https://github.com/$c3$b{author}$r/$c2$b{name}$r --- {description}",
     "response_dict": {
         "name":        ["json", ["repositories", 0, "name"]], 
         "author":      ["json", ["repositories", 0, "username"]], 

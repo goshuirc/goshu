@@ -3,7 +3,7 @@
     "description": "<query> --- torrent search", 
     "url": "https://www.tokyotosho.info/search.php?terms={escaped_query}&type=0&size_min=&size_max=&username=", 
     "format": "xml", 
-    "response": "@c2@b{title}@r   http://tokyotosho.info/{id}",
+    "response": "$c2$b{title}$r   http://tokyotosho.info/{id}",
     "response_dict": {
         "title": ["jquery", "#main .listing tr:nth-child(2) .description:top"], 
         "id":    ["jquery.attr", "#main .listing tr:nth-child(2) .web a:last-child", "href"]

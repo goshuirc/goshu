@@ -23,7 +23,7 @@ class modules(Module):
 
         if do == 'reload':
             if len(usercommand.arguments.split()) < 2:
-                self.bot.irc.msg(event, "Reloading @ball@b modules' JSON dicts")
+                event['source'].msg("Reloading @ball@b modules' JSON dicts")
                 modules = True
             else:
                 modules = usercommand.arguments.lower().split(' ', 1)[1].split()
@@ -34,7 +34,8 @@ class modules(Module):
                     reloaded_module_names.append(module_name)
                     self.bot.modules.modules[module_name].reload_json()
 
-            self.bot.irc.msg(event, 'Reloaded JSON dicts for modules: {}'.format(', '.join(sorted(reloaded_module_names))))
+            event['source'].msg('Reloaded JSON dicts for modules: {}'
+                                ''.format(', '.join(sorted(reloaded_module_names))))
 
     def cmd_module(self, event, command, usercommand):
         """Load/Unload/Reload module specified by <name>
@@ -52,7 +53,7 @@ class modules(Module):
 
         if do == 'list':
             response = 'Loaded modules: ' + ', '.join(sorted(list(self.bot.modules.whole_modules.keys())))
-            self.bot.irc.msg(event, response)
+            event['source'].msg(response)
             additional_modules = []
             for path in self.bot.modules.paths:
                 modules = self.bot.modules.modules_from_path(path)
@@ -61,7 +62,7 @@ class modules(Module):
                         additional_modules.append(module)
             if len(additional_modules) > 0:
                 response = 'Additional avaliable modules: ' + ', '.join(sorted(additional_modules))
-                self.bot.irc.msg(event, response)
+                event['source'].msg(response)
 
         elif do in ['load', 'unload', 'reload']:
             if len(usercommand.arguments.split()) < 2:
@@ -85,6 +86,6 @@ class modules(Module):
                     fail.append(module)
             action = do[0].upper() + do[1:]
             if succeed:
-                self.bot.irc.msg(event, action + 'ed: ' + ', '.join(sorted(succeed)))
+                event['source'].msg(action + 'ed: ' + ', '.join(sorted(succeed)))
             if fail:
-                self.bot.irc.msg(event, action + ' Failed: ' + ', '.join(sorted(fail)))
+                event['source'].msg(action + ' Failed: ' + ', '.join(sorted(fail)))

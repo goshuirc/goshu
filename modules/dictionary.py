@@ -3,8 +3,9 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the BSD 2-clause license
 
+from girc.formatting import escape, unescape
+
 from gbot.modules import Module
-from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import filename_escape
 import urllib.request, urllib.parse, urllib.error
 import socket
@@ -71,4 +72,4 @@ class dictionary(Module):
         except IndexError:
             response += 'Definition Not Found'
 
-        self.bot.irc.msg(event, response, 'public')
+        event['from_to'].msg(response)

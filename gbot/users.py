@@ -3,10 +3,10 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the BSD 2-clause license
 
-from colorama import Fore, Back, Style
+from colorama import Style
+from girc.utils import NickMask
 
 from .info import InfoStore
-from .libs import girclib
 
 USER_LEVEL_NOPRIVS = 0
 USER_LEVEL_ADMIN = 5
@@ -60,14 +60,17 @@ class AccountInfo(InfoStore):
             prompt = '\n'.join([
                 wrap['subsection']('Bot Owner Account'),
                 "This account lets you login and control the bot over IRC while it is running. "
-                "Having a Bot Owner account is highly recommended, and it is recommended you set "
-                "it up now, but you may also set one up while the bot is running by using the "
-                " " + Style.BRIGHT + "owner <master_password> " + Style.RESET_ALL + " command.",
+                "Having a Bot Owner account is highly recommended, and it is recommended you "
+                "set it up now, but you may also set one up while the bot is running by using "
+                "the  " + Style.BRIGHT + "owner <master_password> " + Style.RESET_ALL +
+                " command.",
                 '',
                 repeating_prompt,
             ])
 
-            self.add_key(bool, 'setup_bot_owner', prompt, repeating_prompt=repeating_prompt, default=True)
+            self.add_key(bool, 'setup_bot_owner', prompt,
+                         repeating_prompt=repeating_prompt,
+                         default=True)
 
             setup_bot_owner = self.get('setup_bot_owner')
 
@@ -76,18 +79,22 @@ class AccountInfo(InfoStore):
                 prompt = '\n'.join([
                     '',
                     "This is your new bot owner account. You will login to this account with "
-                    "the  " + Style.BRIGHT + "login <account> <password>" + Style.RESET_ALL + "  "
-                    "command once your bot is running."
+                    "the  " + Style.BRIGHT + "login <account> <password>" + Style.RESET_ALL +
+                    "  command once your bot is running."
                     '',
                     repeating_prompt,
                 ])
 
-                account_name = self.bot.gui.get_string(prompt, repeating_prompt=repeating_prompt).lower()
+                account_name = self.bot.gui.get_string(prompt,
+                                                       repeating_prompt=repeating_prompt)
+                account_name = account_name.lower()
 
                 prompt = wrap['prompt']('Account Password:')
                 confirm_prompt = wrap['prompt']('Confirm Account Password:')
 
-                account_password_pt = self.bot.gui.get_string(prompt, confirm_prompt=confirm_prompt, password=True)
+                account_password_pt = self.bot.gui.get_string(prompt,
+                                                              confirm_prompt=confirm_prompt,
+                                                              password=True)
                 account_password = self.encrypt(account_password_pt)
                 del account_password_pt
 
@@ -143,24 +150,34 @@ class AccountInfo(InfoStore):
             self.store['accounts'][name]['password'] = self.encrypt(password)
             self.save()
 
-    def login(self, name, password, server, userstring):
+    def login(self, name, password, server, user):
+        if isinstance(server, str):
+            server = self.bot.irc.servers[server]
+        if hasattr(user, 'nickmask'):
+            user = user.nickmask
+
         if self.is_password(name, password):
-            self.bot.irc.servers[server].create_or_update_user(userstring)
-            user_nick = self.bot.irc.servers[server].istring(girclib.NickMask(userstring).nick)
-            self.bot.irc.servers[server].info['users'][user_nick]['accountinfo'] = {}
-            self.bot.irc.servers[server].info['users'][user_nick]['accountinfo']['name'] = name
-            self.bot.irc.servers[server].info['users'][user_nick]['accountinfo']['userhost'] = girclib.NickMask(userstring).userhost
+            server.info.create_user(user)
+            user_nick = NickMask(user).nick
+            user_obj = server.info.users[user_nick]
+            if user_obj:
+                user_obj.accountinfo = {
+                    'name': name,
+                    'userhost': NickMask(user).userhost
+                }
             return True
         else:
             return False
 
-    def account(self, userstring, server):
-        user_nick = self.bot.irc.servers[server].istring(girclib.NickMask(userstring).nick)
-        if user_nick in self.bot.irc.servers[server].info['users']:
-            if 'accountinfo' in self.bot.irc.servers[server].info['users'][user_nick]:
-                if 'userhost' in self.bot.irc.servers[server].info['users'][user_nick]['accountinfo']:
-                    if self.bot.irc.servers[server].info['users'][user_nick]['accountinfo']['userhost'] == userstring.split('!')[1]:
-                        return self.bot.irc.servers[server].info['users'][user_nick]['accountinfo']['name']
+    def account(self, server, userstring):
+        server = self.bot.irc.get_server(server)
+        user = NickMask(userstring)
+        user_nick = server.istring(user.nick)
+        user_obj = server.info.users[user_nick]
+        if user_obj and hasattr(user_obj, 'account_info'):
+            if 'userhost' in user_obj['accountinfo']:
+                if user_obj['accountinfo']['userhost'] == user.userhost:
+                    return user_obj['accountinfo']['name']
         return None
 
     def set_access_level(self, name, level=USER_LEVEL_NOPRIVS):
@@ -182,14 +199,17 @@ class AccountInfo(InfoStore):
     def online_bot_runners(self, server):
         """Returns a list of the currently online owners, superadmins/admins, or none."""
         privs = {}
-        user_info = dict(self.bot.irc.servers[server].info['users'])
-        for user_nick in user_info:
-            if 'accountinfo' in user_info[user_nick]:
-                access_level = self.access_level(user_info[user_nick]['accountinfo']['name'])
+
+        if isinstance(server, str):
+            server = self.bot.irc.servers[server]
+
+        for user in server.users.values():
+            if hasattr(user, 'accountinfo'):
+                access_level = self.access_level(user.accountinfo['name'])
                 if access_level >= USER_LEVEL_ADMIN:
                     if access_level not in privs:
                         privs[access_level] = []
-                    privs[access_level].append(user_nick)
+                    privs[access_level].append(user.nick)
 
         if privs:
             max_priv_level = sorted(privs)[-1]

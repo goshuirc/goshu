@@ -66,10 +66,10 @@ class eggdrop(Module):
             # database safe
             safe_question = base64.b64encode(question.encode()).decode()
             safe_answer = base64.b64encode(answer.encode()).decode()
-            safe_host = base64.b64encode(event.source.encode()).decode()
+            safe_host = base64.b64encode(event['source'].host).decode()
 
-            safe_approved = "0"
-            useraccount = self.bot.accounts.account(event.source, event.server)
+            safe_approved = '0'
+            useraccount = self.bot.accounts.account(event['server'], event['source'])
             if useraccount:
                 accesslevel = self.bot.accounts.access_level(useraccount)
                 if accesslevel > 4:
@@ -103,17 +103,17 @@ class eggdrop(Module):
         @listen in pubmsg
         """
         try:
-            if self.bot.irc.servers[event.server].info['connection']['nick'] in event.arguments[0].split()[0]:
+            if event['message'].split()[0].startswith(event['server'].nick):
                 asked = True
             else:
                 return
         except IndexError:
             return
         if asked:
-            if len(event.arguments[0].split()) < 2:
+            if len(event['message'].split()) < 2:
                 return
 
-            asked_question = event.arguments[0].split(' ', 1)[1].strip().lower()
+            asked_question = event['message'].split(' ', 1)[1].strip().lower()
             safe_asked_question = base64.b64encode(asked_question.encode()).decode()
 
             # grab values from db
@@ -142,4 +142,4 @@ class eggdrop(Module):
             if answer:
                 safe_answer = base64.b64decode(answer.encode()).decode()
 
-                self.bot.irc.msg(event, safe_answer, 'public')
+                event['from_to'].msg(safe_answer)

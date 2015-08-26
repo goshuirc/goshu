@@ -2,18 +2,69 @@
 # Goshu IRC Bot
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the BSD 2-clause license
+import socket
 
-from .libs import girclib
+import girc
+
+# default ping timeouts
+timeout_check_interval = {
+    'minutes': 3,
+}
+timeout_length = {
+    'minutes': 6,
+}
 
 
-class IRC(girclib.IRC):
+class IRC:
     """Manages goshubot's IRC communications."""
 
     def __init__(self, bot):
-        girclib.IRC.__init__(self)
+        self.r = girc.Reactor()
         self.bot = bot
 
         self.add_handler('in', 'kick', self._handle_kick)
+
+        # debug
+        self.add_handler('in', 'raw', self._handle_raw_in, priority=1)
+        self.add_handler('out', 'raw', self._handle_raw_out, priority=1)
+
+    # debug
+    def _handle_raw_in(self, event):
+        print(event['server'].name, ' ->', girc.formatting.escape(event['data']))
+
+    def _handle_raw_out(self, event):
+        print(event['server'].name, '<- ', girc.formatting.escape(event['data']))
+
+    # add handlers
+    def add_handler(self, direction, verb, child_fn, priority=10):
+        self.r.register_event(direction, verb, child_fn, priority=priority)
+
+    @property
+    def servers(self):
+        return self.r.servers
+
+    def get_server(self, server):
+        """Return a proper server connection."""
+        if isinstance(server, girc.client.ServerConnection):
+            return server
+        elif isinstance(server, girc.types.Server):
+            server_name = server.name
+        elif isinstance(server, str):
+            server_name = server
+        else:
+            raise Exception('`server` must be a server object or a name')
+
+        return self.servers[server_name]
+
+    def run_forever(self):
+        """Run forever."""
+        try:
+            self.r.run_forever()
+        except KeyboardInterrupt:
+            self.r.shutdown('Goodbye')
+            self.r.close()
+        finally:
+            self.r.close()
 
     def _handle_kick(self, event):
         user_nick = self.servers[event.server].istring(event.arguments[0]).lower()
@@ -28,6 +79,7 @@ class IRC(girclib.IRC):
                 pass
 
     def connect_info(self, info, settings):
+        """Set connect info given our info and settings."""
         default_nick = info.get('default_nick', None)
         server_dict = info.get('servers', {})
         for name, server in server_dict.items():
@@ -37,6 +89,7 @@ class IRC(girclib.IRC):
             srv_host = server.get('hostname')
             srv_port = server.get('port')
 
+            # XXX - TODO: - use this
             srv_password = None
             if server.get('connect_password'):
                 srv_password = server.get('connect_password')
@@ -49,6 +102,7 @@ class IRC(girclib.IRC):
             if server.get('srv_realname'):
                 srv_realname = server.get('realname')
 
+            # XXX - TODO: - use this
             local_address = ""
             if server.get('localaddress'):
                 local_address = server.get('localaddress')
@@ -57,42 +111,34 @@ class IRC(girclib.IRC):
             srv_ssl = server.get('ssl', False)
             srv_ipv6 = server.get('ipv6', False)
 
-            wait_time = server.get('vhost_wait', 0)
-            if wait_time:
-                self.bot.gui.put_line('Waiting {} seconds to join channels. This can be changed in the connection configuration.'.format(wait_time))
+            if srv_ipv6:
+                family = socket.AF_INET6
+            else:
+                family = 0
 
             autojoin_channels = []
             if server.get('autojoin_channels'):
                 autojoin_channels = server.get('autojoin_channels')
 
-            timeout_check_interval = server.get('timeout_check_interval', girclib.timeout_check_interval)
-            timeout_length = server.get('timeout_length', girclib.timeout_length)
+            # XXX - TODO: - use these
+            wait_time = server.get('vhost_wait', 0)
+            if wait_time:
+                self.bot.gui.put_line('Waiting {} seconds to join channels. '
+                                      'This can be changed in the connection configuration.'
+                                      ''.format(wait_time))
+
+            srv_timeout_check = server.get('timeout_check_interval', timeout_check_interval)
+            srv_timeout_length = server.get('timeout_length', timeout_length)
 
             # nickserv
             nickserv_serv_nick = server.get('nickserv_serv_nick', 'NickServ')
             nickserv_password = server.get('nickserv_password', None)
 
-            # server creation
-            s = self.server(name, timeout_check_interval=timeout_check_interval, timeout_length=timeout_length)
-            s.connect(srv_host, srv_port, srv_nick, srv_password, srv_username, srv_realname,
-                      local_address, local_port, srv_ssl, srv_ipv6,
-                      autojoin_channels=autojoin_channels, wait_time=wait_time,
-                      nickserv_serv_nick=nickserv_serv_nick, nickserv_password=nickserv_password)
-
-    def action(self, event, message, zone='private'):
-        """Automagically message someone. Zone can be public or private, for preferring channel or user."""
-        target = get_target(event, zone)
-        self.servers[event.server].action(target, message)
-
-    def msg(self, event, message, zone='private', strict=False):
-        """Automagically message someone. Zone can be public, private, or dcc, for preferring channel or user."""
-        target = get_target(event, zone, strict)
-
-        if target is None:
-            return False
-
-        self.servers[event.server].privmsg(target, message)
-        return True
+            # connect
+            self.r.create_server(name, srv_host, srv_port, ssl=srv_ssl, family=family)
+            self.r.set_user_info(name, srv_nick, user=srv_username, real=srv_realname)
+            self.r.join_channels(name, *autojoin_channels)
+            self.r.connect_to(name)
 
 
 def get_target(event, zone, strict=False):

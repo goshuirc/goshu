@@ -25,7 +25,7 @@ import string
 import datetime
 import requests
 
-from gbot.libs.girclib import escape
+from girc.formatting import escape
 
 
 def true_or_false(in_str):

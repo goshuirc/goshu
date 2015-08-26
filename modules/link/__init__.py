@@ -3,15 +3,16 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the BSD 2-clause license
 
-# Quite a lot of this module was taken, with permission, from https://github.com/electronicsrules/megahal
+# Quite a lot of this module was taken, with permission, from
+#   https://github.com/electronicsrules/megahal
 # In particular, the regexes and the display layout. Thanks a bunch, bro!
 
 import re
 
+from girc.formatting import unescape
+
 from gbot.modules import Module
-from gbot.libs.girclib import unescape
 from gbot.libs.helper import get_url, format_extract, JsonHandler
-from gbot.users import USER_LEVEL_ADMIN
 
 
 class link(Module):
@@ -36,10 +37,10 @@ class link(Module):
         @listen pubmsg
         @listen privmsg
         """
-        if self.is_ignored(event.from_to):
+        if self.is_ignored(event['from_to']):
             return
 
-        url_matches = re.search('(?:https?://)(\\S+)', unescape(event.arguments[0]))
+        url_matches = re.search('(?:https?://)(\\S+)', unescape(event['message']))
         if not url_matches:
             return
 
@@ -69,12 +70,12 @@ class link(Module):
                     r = get_url(url)
 
                     if isinstance(r, str):
-                        self.bot.irc.msg(event, unescape('*** {}: {}'.format(self.links[provider]['display_name'], r)), 'public')
+                        event['from_to'].msg('*** {}: {}'.format(self.links[provider]['display_name'], r))
                         return
 
                     # parsing
                     response += format_extract(self.links[provider], r.text, debug=True, fail='*** {}: Failed'.format(self.links[provider]['display_name']))
 
             if response:
-                self.bot.irc.msg(event, response, 'public')
+                event['from_to'].msg(response)
             return  # don't spam us tryna return every title

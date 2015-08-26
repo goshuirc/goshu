@@ -16,14 +16,20 @@ class list(Module):
 
         @listen in privmsg
         """
-        if event.arguments[0].lower() in ['help', 'hello', 'hi']:
-            response = 'Hello! I am a bot, to view the avaliable commands, please type {prefix}list'.format(prefix=self.bot.settings.store.get('command_prefix'))
+        if not len(event['message']):
+            return
+
+        if event['message'].split()[0].lower() in ['help', 'hello', 'hi']:
+            cmd_prefix = self.bot.settings.store.get('command_prefix')
+            response = ('Hello! I am a bot, to view the avaliable commands, please type '
+                        '{prefix}list'.format(prefix=cmd_prefix))
 
             # tell admins how to see acmds too
-            if event.source_user_level > USER_LEVEL_ADMIN:
-                response += ' and {prefix}list'.format(prefix=self.bot.settings.store.get('admin_command_prefix'))
+            if event['source_user_level'] > USER_LEVEL_ADMIN:
+                acmd_prefix = self.bot.settings.store.get('admin_command_prefix')
+                response += ' and {prefix}list'.format(prefix=acmd_prefix)
 
-            self.bot.irc.msg(event, response)
+            event['source'].msg(response)
 
     def acmd_list(self, event, command, usercommand):
         """List all commands, or info on a given admin command
@@ -34,6 +40,7 @@ class list(Module):
         @alias commands
         """
         cmd_name, args = usercommand.arg_split(1)
+        cmd_name = cmd_name.lower()
 
         cmd_line_start = '    '
         cmd_line_limit = 256
@@ -41,7 +48,35 @@ class list(Module):
 
         # getting help on a single acmd / module's acmds
         if cmd_name:
-            self.bot.irc.msg(event, 'listing all acmds for module {}'.format(cmd_name))
+            cmd = self.bot.modules.global_admin_commands.get(cmd_name)
+            if cmd:
+                # skip if this is just an alias for another global acmd
+                any_true_commands = False
+                for handle in cmd:
+                    if not handle.alias:
+                        any_true_commands = True
+                if not any_true_commands:
+                    return
+
+                # skip if user can't see the given global acmd
+                can_see_acmd = False
+                for handle in cmd:
+                    if event['source_user_level'] >= handle.view_level:
+                        can_see_acmd = True
+                if not can_see_acmd:
+                    return
+
+                # XXX - TODO: - add description for acmds
+                # acmd_prefix = self.bot.settings.store['admin_command_prefix']
+                # for help_string in cmd.description:
+                #     response = ('*** Command:  {prefix}{cmd} {desc}'
+                #                 ''.format(prefix=acmd_prefix,
+                #                           cmd=cmd_name,
+                #                           desc=help_string))
+                #     event['source'].msg(response)
+
+            else:
+                event['source'].msg('listing all acmds for module {}'.format(cmd_name))
 
         else:
             output = []
@@ -62,7 +97,7 @@ class list(Module):
                 # skip if user can't see the given global acmd
                 can_see_acmd = False
                 for handle in cmd:
-                    if event.source_user_level >= handle.view_level:
+                    if event['source_user_level'] >= handle.view_level:
                         can_see_acmd = True
                 if not can_see_acmd:
                     continue
@@ -93,10 +128,13 @@ class list(Module):
             output[-1] = output[-1][:- len(cmd_sep)]  # remove last ', '
 
             # write output
-            output.append('Note: to display information on a specific command, use @i{prefix}list <command>@i. eg: @i{prefix}list help'.format(prefix=self.bot.settings.store.get('admin_command_prefix')))
+            acmd_prefix = self.bot.settings.store.get('admin_command_prefix')
+            output.append('Note: to display information on a specific command, use '
+                          '$i{prefix}list <command>$i. eg: $i{prefix}list help'
+                          ''.format(prefix=acmd_prefix))
 
             for line in output:
-                self.bot.irc.msg(event, line)
+                event['source'].msg(line)
 
     def cmd_list(self, event, command, usercommand):
         """List all commands, or info on given command
@@ -114,7 +152,7 @@ class list(Module):
                     continue
                 command = module_commands[name]
 
-                if event.source_user_level >= command.view_level:
+                if event['source_user_level'] >= command.view_level:
                     bot_commands[name] = command
 
         if usercommand.arguments:
@@ -128,10 +166,11 @@ class list(Module):
 
                 # fix help display for single help strings
                 for help_string in command.description:
-                    response = '*** Command:  {prefix}{cmd} {desc}'.format(prefix=self.bot.settings.store['command_prefix'],
-                                                                           cmd=name,
-                                                                           desc=help_string)
-                    self.bot.irc.msg(event, response)
+                    response = ('*** Command:  {prefix}{cmd} {desc}'
+                                ''.format(prefix=self.bot.settings.store['command_prefix'],
+                                          cmd=name,
+                                          desc=help_string))
+                    event['source'].msg(response)
 
         else:
             # list commands
@@ -147,7 +186,9 @@ class list(Module):
                 output[i] += name + ', '
             output[i] = output[i][:-2]  # remove last ', '
 
-            output.append('Note: to display information on a specific command, use @i{prefix}list <command>@i. eg: @i{prefix}list 8ball'.format(prefix=self.bot.settings.store.get('command_prefix')))
+            output.append('Note: to display information on a specific command, use '
+                          '$i{prefix}list <command>$i. eg: $i{prefix}list 8ball'
+                          ''.format(prefix=self.bot.settings.store.get('command_prefix')))
 
             for line in output:
-                self.bot.irc.msg(event, line)
+                event['source'].msg(line)

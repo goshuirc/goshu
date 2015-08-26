@@ -3,14 +3,16 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the BSD 2-clause license
 
-from gbot.modules import Module
-from gbot.libs.girclib import escape, unescape
-from gbot.libs.helper import filename_escape
 import urllib.request, urllib.parse, urllib.error
 import socket
 import json
 import os
+
 import hashlib
+from girc.formatting import escape, unescape
+
+from gbot.modules import Module
+from gbot.libs.helper import filename_escape
 
 
 class danbooru(Module):
@@ -90,11 +92,11 @@ class danbooru(Module):
 
         try:
             return_str = escape(url + '/post/show/' + str(results_json[0]['id']))
-            return_str += '  rating:@b' + results_json[0]['rating'] + '@b'
+            return_str += '  rating:$b' + results_json[0]['rating'] + '$b'
             #if version == 1:
-            #    return_str += '  @c14' + results_json[0]['tags']
+            #    return_str += '  $c14' + results_json[0]['tags']
             #elif version == 2:
-            #    return_str += '  @c14' + results_json[0]['tag_string']
+            #    return_str += '  $c14' + results_json[0]['tag_string']
             return return_str
         except:
             return 'No Results'

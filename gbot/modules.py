@@ -4,17 +4,18 @@
 # licensed under the BSD 2-clause license
 
 import os
-import sys
 import imp
 import json
 import inspect
 import importlib
 import threading
 
+from girc.formatting import escape
+from girc.utils import NickMask
+
 from .libs.helper import JsonHandler, add_path
-from .libs.girclib import NickMask, is_channel, escape, unescape
 from .users import user_levels, USER_LEVEL_NOPRIVS, USER_LEVEL_ADMIN
-from .commands import AdminCommand, Command, UserCommand, cmd_split, standard_admin_commands
+from .commands import AdminCommand, Command, UserCommand, standard_admin_commands
 from .info import InfoStore
 
 LISTENER_HIGHEST_PRIORITY = -30
@@ -300,10 +301,19 @@ class Module:
 
     def is_ignored(self, target):
         """Whether the target is ignored in our config."""
-        if is_channel(target):
-            return target.lower() in self.store.get('ignored', [])
+        if isinstance(target, str):
+            if target[0] == '#':  # XXX - this is crap
+                target = target
+            else:
+                target = NickMask(target).nick
         else:
-            return NickMask(target).nick.lower() in self.store.get('ignored', [])
+            if target.is_user:
+                target = target.nick
+            elif target.is_channel:
+                target = target.name
+
+        # XXX - this lower should be based on server, like '#' check above
+        return target.lower() in self.store.get('ignored', [])
 
     def combined(self, event, command, usercommand):
         ...
@@ -565,16 +575,16 @@ class Modules:
         return True
 
     def handle(self, event):
-        # add source_account and source_user_level convenience variables for priv/pubmsg
-        if event.type in ('privmsg', 'pubmsg') and event.direction == 'in':
-            event.source_account = self.bot.accounts.account(event.source, event.server)
-            event.source_user_level = self.bot.accounts.access_level(event.source_account)
+        # add source_user_level convenience variable for priv/pubmsg
+        if event['verb'] in ('privmsg', 'pubmsg') and event['direction'] == 'in':
+            event['source_account'] = self.bot.accounts.account(event['server'], event['source'])
+            event['source_user_level'] = self.bot.accounts.access_level(event['source_account'])
 
         # call listeners
         called = []
         for priority in sorted(self.listeners.keys()):
-            for search_direction in ['*', event.direction]:
-                for search_type in ['*', event.type]:
+            for search_direction in ['both', event['direction']]:
+                for search_type in ['all', event['verb']]:
                     for handler, inline in self.listeners[priority].get(search_direction, {}).get(search_type, []):
                         if handler not in called:
                             called.append(handler)
@@ -589,14 +599,15 @@ class Modules:
                                 threading.Thread(target=handler, args=[event]).start()
 
         # then handle commands
-        if event.type in ('privmsg', 'pubmsg') and event.direction == 'in':
+        if event['verb'] in ('privmsg', 'pubmsg') and event['direction'] == 'in':
             self.handle_command(event)
-        if event.type == 'privmsg' and event.direction == 'in':
+        if event['verb'] == 'privmsg' and event['direction'] == 'in':
             self.handle_admin_command(event)
 
     def handle_admin_command(self, event):
-        if event.arguments[0].startswith(escape(self.bot.settings.store['admin_command_prefix'])):
-            in_string = event.arguments[0][len(escape(self.bot.settings.store['admin_command_prefix'])):].strip()
+        if event['message'].startswith(escape(self.bot.settings.store['admin_command_prefix'])):
+            admin_prefix_len = len(escape(self.bot.settings.store['admin_command_prefix']))
+            in_string = event['message'][admin_prefix_len:].strip()
             if not in_string:
                 return  # empty
 
@@ -615,7 +626,7 @@ class Modules:
             else:
                 command_args = command_list[2]
 
-            useraccount = self.bot.accounts.account(event.source, event.server)
+            useraccount = self.bot.accounts.account(event['server'], event['source'])
             if useraccount:
                 userlevel = self.bot.accounts.access_level(useraccount)
             else:
@@ -652,8 +663,8 @@ class Modules:
                     self.bot.gui.put_line('        No Privs')
 
     def handle_command(self, event):
-        if event.arguments[0].startswith(escape(self.bot.settings.store['command_prefix'])):
-            in_string = event.arguments[0][len(escape(self.bot.settings.store['command_prefix'])):].strip()
+        if event['message'].startswith(escape(self.bot.settings.store['command_prefix'])):
+            in_string = event['message'][len(escape(self.bot.settings.store['command_prefix'])):].strip()
             if not in_string:
                 return  # empty
 
@@ -665,7 +676,7 @@ class Modules:
             else:
                 command_args = ''
 
-            useraccount = self.bot.accounts.account(event.source, event.server)
+            useraccount = self.bot.accounts.account(event['server'], event['source'])
             if useraccount:
                 userlevel = self.bot.accounts.access_level(useraccount)
             else:
@@ -679,13 +690,13 @@ class Modules:
                         command_info = module_commands[search_command]
                         if userlevel >= command_info.call_level:
                             # for commands restricted by channel, make and check the priv lists
-                            source_chan = event.target
-                            source_nick = NickMask(event.source).nick
+                            source_chan = event['target'].name
+                            source_nick = event['source'].nick
 
-                            current_channel_whitelist = [self.bot.irc.servers[event.server].istring(chan) for chan in command_info.channel_whitelist]
+                            current_channel_whitelist = [event['server'].istring(chan) for chan in command_info.channel_whitelist]
                             current_user_whitelist = command_info.user_whitelist
                             for chan in current_channel_whitelist:
-                                [current_user_whitelist.append(user) for user in self.bot.irc.servers[event.server].get_channel_info(chan)['users']]
+                                [current_user_whitelist.append(user) for user in event['server'].get_channel_info(chan)['users']]
 
                             if source_chan in current_channel_whitelist or source_nick in current_user_whitelist or (not current_channel_whitelist):
                                 if command_info.call not in called:

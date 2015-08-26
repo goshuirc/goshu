@@ -3,8 +3,9 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the BSD 2-clause license
 
+from girc.formatting import escape, unescape
+
 from gbot.modules import Module
-from gbot.libs.girclib import escape, unescape
 import urllib.request, urllib.parse, urllib.error
 import json
 
@@ -33,4 +34,4 @@ class urbandictionary(Module):
 
         response = '*** UrbanDictionary: ' + url_result
 
-        self.bot.irc.msg(event, response)
+        event['source'].msg(response)

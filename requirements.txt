@@ -1,9 +1,8 @@
+PyYAML
 colorama
 http-status
-irc
 nose2
 pyparsing
 pyquery
-PyYAML
 requests
 wolframalpha

@@ -3,7 +3,7 @@
     "description": "<query> --- stupid pictures and all that fun stuff", 
     "url": "http://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&limit=1&tags={escaped_query}", 
     "format": "json", 
-    "response": "http://gelbooru.com/index.php?page=post&s=view&id={id} rating:@b{rating}",
+    "response": "http://gelbooru.com/index.php?page=post&s=view&id={id} rating:$b{rating}",
     "response_dict": {
         "id":     ["json", [0, "id"]], 
         "rating": ["json", [0, "rating"]]

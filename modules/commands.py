@@ -5,7 +5,6 @@
 
 from gbot.modules import Module
 from gbot.libs.helper import split_num
-from gbot.users import USER_LEVEL_ADMIN, USER_LEVEL_SUPERADMIN
 
 
 class commands(Module):
@@ -21,7 +20,7 @@ class commands(Module):
         """
         msg_target, msg_msg = split_num(usercommand.arguments)
 
-        self.bot.irc.servers[event.server].privmsg(msg_target, msg_msg)
+        event['server'].privmsg(msg_target, msg_msg)
 
     def cmd_me(self, event, command, usercommand):
         """Send a /me
@@ -31,7 +30,7 @@ class commands(Module):
         """
         msg_target, msg_msg = split_num(usercommand.arguments)
 
-        self.bot.irc.servers[event.server].action(msg_target, msg_msg)
+        event['server'].action(msg_target, msg_msg)
 
     def cmd_join(self, event, command, usercommand):
         """Join a channel
@@ -41,7 +40,7 @@ class commands(Module):
         """
         channel, key = split_num(usercommand.arguments)
 
-        self.bot.irc.servers[event.server].join(channel, key)
+        event['server'].join(channel, key)
 
     def cmd_part(self, event, command, usercommand):
         """Leave a channel
@@ -51,7 +50,7 @@ class commands(Module):
         """
         channel, reason = split_num(usercommand.arguments)
 
-        self.bot.irc.servers[event.server].part(channel, reason)
+        event['server'].part(channel, reason)
 
     # goshu control
     def cmd_shutdown(self, event, command, usercommand):
@@ -61,4 +60,4 @@ class commands(Module):
         @call_level superadmin
         """
         message = usercommand.arguments
-        self.bot.irc.servers[event.server].shutdown(message)
+        event['server'].shutdown(message)

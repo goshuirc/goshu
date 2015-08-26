@@ -104,9 +104,6 @@ class Bot:
 
     def start(self):
         """Start IRC connections."""
-        self.irc.add_handler('all', 'all', self.modules.handle)
+        self.irc.add_handler('both', 'all', self.modules.handle)
         self.irc.connect_info(self.info, self.settings)
-        try:
-            self.irc.process_forever()
-        except KeyboardInterrupt:
-            self.irc.shutdown('Goodbye')
+        self.irc.run_forever()

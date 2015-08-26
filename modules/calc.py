@@ -3,14 +3,15 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the BSD 2-clause license
 
-from gbot.libs.helper import filename_escape
-import wolframalpha
 import json
 import os
 
-from gbot.modules import Module
-from gbot.libs.girclib import escape
+import wolframalpha
+from girc.formatting import escape
+
+from gbot.libs.helper import filename_escape
 from gbot.libs.nsp import NumericStringParser
+from gbot.modules import Module
 
 
 class calc(Module):
@@ -61,4 +62,4 @@ class calc(Module):
             else:
                 response = fail
 
-        self.bot.irc.msg(event, response, 'public')
+        event['from_to'].msg(response)

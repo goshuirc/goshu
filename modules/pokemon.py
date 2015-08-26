@@ -34,7 +34,7 @@ class pokemon(Module):
                 if mon.number != 0:
                     team.append(mon)
 
-        response = event.source.split('!')[0] + ' finds '
+        response = event['source'].nick + ' finds '
         if len(team) <= 1:
             response += 'a '
 
@@ -46,7 +46,7 @@ class pokemon(Module):
             if team_member.number == 0:
                 self.corrupted = True
 
-        self.bot.irc.msg(event, response, 'public')
+        event['from_to'].msg(response)
 
     def cmd_pokerst(self, event, command, usercommand):
         """Reset a corrupted pokemon save"""
@@ -54,7 +54,7 @@ class pokemon(Module):
             return
 
         self.corrupted = None
-        self.bot.irc.msg(event, 'takes out the cartridge, blows on it, and puts it back in', 'public')
+        event['from_to'].me('takes out the cartridge, blows on it, and puts it back in')
 
 
 class Monster:

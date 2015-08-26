@@ -6,8 +6,6 @@
 from gbot.modules import Module, json_dumps
 import os
 
-from gbot.users import USER_LEVEL_OWNER
-
 
 class info(Module):
     """Provides debugging info to admins when necessary."""
