@@ -27,4 +27,4 @@ If I write a cool module, do I *need* to release it to everyone?
 
 We would love it if you could, or if you would even try to contribute back to the primary Goshu repository so that everyone running the software can get the great new features!
 
-However, you don't need to. Because Goshu is licensed under the `BSD 2-clause license <http://opensource.org/licenses/BSD-2-Clause>`_, you have the flexibility to keep any changes to yourself if you want to.
+However, you don't need to. Because Goshu is licensed under the `ISC license <http://opensource.org/licenses/ISC>`_, you have the flexibility to keep any changes to yourself if you want to.

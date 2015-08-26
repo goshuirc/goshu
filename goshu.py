@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Goshu IRC Bot
 # written by Daniel Oaks <daniel@danieloaks.net>
-# licensed under the BSD 2-clause license
+# licensed under the ISC license
 
 # fix for Windows' bad default cp1252 encoding unicode output errors
 import sys

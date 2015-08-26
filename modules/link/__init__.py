@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Goshu IRC Bot
 # written by Daniel Oaks <daniel@danieloaks.net>
-# licensed under the BSD 2-clause license
+# licensed under the ISC license
 
 # Quite a lot of this module was taken, with permission, from
 #   https://github.com/electronicsrules/megahal
