@@ -50,7 +50,7 @@ class danbooru(Module):
 
         response += self.retrieve_url(command.json['url'], usercommand.arguments, command.json['version'], username, password)
 
-        self.bot.irc.msg(event, response, 'public')
+        event['from_to'].msg(response)
 
     def retrieve_url(self, url, tags, version, username=None, password=None):
         post = {

@@ -14,9 +14,9 @@ class accounts(Module):
     def nickserv_listener(self, event):
         """Handles incoming NickServ messages.
 
-        @listen in privmsg high
+        @listen in notice high
         """
-        if event['source'].nick == 'NickServ':
+        if event['source'].is_user and event['source'].nick == 'NickServ':
             response = event['message'].lower()
             sresponse = response.split()
             if len(sresponse) == 3 and sresponse[1] == 'is':
@@ -32,8 +32,8 @@ class accounts(Module):
         @usage <link/list/del>
         """
         if usercommand.arguments.lower() == 'link':
-            event['server'].privmsg('NickServ', 'INFO {nick}'
-                                                ''.format(nick=event.source.split('!')[0]))
+            event['server'].msg('NickServ', 'INFO {nick}'
+                                            ''.format(nick=event['source'].nick))
 
     def cmd_register(self, event, command, usercommand):
         """Register a bot account
