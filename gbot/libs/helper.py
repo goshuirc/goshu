@@ -2,30 +2,37 @@
 # Goshu IRC Bot
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the ISC license
-
 """extends several builtin functions and provides helper functions
 
 The default Python library is extensive and well-stocked. There are some
 times however, you wish a small task was taken care of for you. This module
-if chock full of little extensions and helper functions I've written while
-writing programs.
-Things like converting bytes to a human-readable string, an easy progress
-meter function---small interesting stuff like that.
+if chock full of little extensions and helper functions I've needed while
+writing Goshu.
 
-Functions:
+Small, interesting, self-contained functions that can probably be reused
+elsewhere.
+"""
 
-split_num() -- /lazy/ wrapper, to stop us bounds-checking when splitting
-is_ok() -- prompt the user for yes/no and returns True/False
-bytes_to_str() -- convert number of bytes to a human-readable format
-filename_escape() -- escapes a filename (slashes removed, etc)
-html_unescape() -- turns any html-escaped characters back to their normal equivalents
-utf8_bom() -- removes the utf8 bom, because open() decides to leave it in"""
-
-import string
+import collections.abc
 import datetime
-import requests
+import imp
+import json
+import os
+import re
+import string
+import sys
+import urllib.parse
 
 from girc.formatting import escape
+from http_status import Status
+import importlib
+from pyquery import PyQuery as pq
+import requests
+import xml.sax.saxutils as saxutils
+import yaml
+
+
+valid_filename_chars = string.ascii_letters + string.digits + '#._- '
 
 
 def true_or_false(in_str):
@@ -50,7 +57,8 @@ def split_num(line, chars=' ', maxsplits=1, empty=''):
     empty -- character to put in place of nothing
 
     Returns:
-    line.split(chars, items); return value is padded until `maxsplits + 1` number of values are present"""
+    line.split(chars, items); return value is padded until `maxsplits + 1` number of values
+    are present"""
     line = line.split(chars, maxsplits)
     while len(line) <= maxsplits:
         line.append(empty)
@@ -63,8 +71,9 @@ def is_ok(func, prompt, blank='', clearline=False):
 
     Arguments:
     prompt -- Prompt for the user
-    blank -- If True, a blank response will return True, ditto for False, the default '' will not accept
-             blank responses and ask until the user gives an appropriate response
+    blank -- If True, a blank response will return True, ditto for False, the default ''
+             will not accept blank responses and ask until the user gives an appropriate
+             response
 
     Returns:
     True if user accepts, False if user does not"""
@@ -139,7 +148,10 @@ def time_metric(secs=60, mins=0):
     if mins:
         secs += (mins * 60)
     time = ''
-    for metric_secs, metric_char in [[7 * 24 * 60 * 60, 'w'], [24 * 60 * 60, 'd'], [60 * 60, 'h'], [60, 'm']]:
+    for metric_secs, metric_char in [[7 * 24 * 60 * 60, 'w'],
+                                     [24 * 60 * 60, 'd'],
+                                     [60 * 60, 'h'],
+                                     [60, 'm']]:
         if secs > metric_secs:
             time += '{}{}'.format(int(secs / metric_secs), metric_char)
             secs -= int(secs / metric_secs) * metric_secs
@@ -181,8 +193,6 @@ def metric(num, metric_list=[[10 ** 9, 'B'], [10 ** 6, 'M'], [10 ** 3, 'k']], ad
 
     return output
 
-from http_status import Status
-
 
 def get_url(url, **kwargs):
     """Gets a url, handles all the icky requests stuff."""
@@ -193,9 +203,11 @@ def get_url(url, **kwargs):
         r.status = Status(r.status_code)
 
         if not r.ok:
-            return 'HTTP Error - {code} {name} - {description}'.format(code=r.status.code,
-                                                                       name=r.status.name,
-                                                                       description=r.status.description)
+            return 'HTTP Error - {code} {name} - {description}'.format(**{
+                'code': r.status.code,
+                'name': r.status.name,
+                'description': r.status.description
+            })
 
     except requests.exceptions.Timeout:
         return 'Connection timed out'
@@ -204,10 +216,6 @@ def get_url(url, **kwargs):
         return '{}'.format(x.__class__.__name__)
 
     return r
-
-from pyquery import PyQuery as pq
-import urllib.parse
-import collections.abc
 
 
 def format_extract(format_json, input_element, format=None, debug=False, fail='Failure'):
@@ -225,7 +233,9 @@ def format_extract(format_json, input_element, format=None, debug=False, fail='F
         input_element = json.loads(input_element)
         retrieve = json_return
     elif format == 'xml':
-        input_element = input_element.replace(' xmlns:', ' xmlnamespace:').replace(' xmlns=', ' xmlnamespace=')
+        # ignore xml namespaces
+        input_element = input_element.replace(' xmlns:', ' xmlnamespace:')
+        input_element = input_element.replace(' xmlns=', ' xmlnamespace=')
         retrieve = xml_return
 
     # format extraction - format kwargs
@@ -236,14 +246,16 @@ def format_extract(format_json, input_element, format=None, debug=False, fail='F
             try:
                 if isinstance(format_json['response_dict'][name], collections.abc.Callable):
                     try:
-                        format_dict[name] = format_json['response_dict'][name](format_json, input_element)
+                        format_dict[name] = format_json['response_dict'][name](format_json,
+                                                                               input_element)
                     except BaseException as x:
                         if debug:
                             return 'Unknown failure: {}'.format(x)
                         else:
                             return 'Code error'
                 else:
-                    format_dict[name] = retrieve(input_element, format_json['response_dict'][name])
+                    format_dict[name] = retrieve(input_element,
+                                                 format_json['response_dict'][name])
 
                 if format_dict[name] is None:
                     return fail
@@ -301,7 +313,8 @@ def json_return(input_json, selector):
             default = selector[2]
         else:
             default = ""
-        return urllib.parse.quote_plus(str(json_element(input_json, selector[1], default=default)))
+        return urllib.parse.quote_plus(str(json_element(input_json, selector[1],
+                                                        default=default)))
     elif selector[0] == 'json.num.metric':
         if len(selector) > 2:
             default = selector[2]
@@ -313,7 +326,8 @@ def json_return(input_json, selector):
             default = selector[2]
         else:
             default = 0
-        return datetime.datetime.fromtimestamp(json_element(input_json, selector[1], default=default)).strftime(selector[2])
+        ts = json_element(input_json, selector[1], default=default)
+        return datetime.datetime.fromtimestamp(ts).strftime(selector[2])
     elif selector[0] == 'json.dict.returntrue':
         keys = []
         json_dict = json_element(input_json, selector[1])
@@ -333,15 +347,15 @@ def json_return(input_json, selector):
 def json_element(input_dict, query, default=None):
     """Runs through a data structure and returns the selected element."""
     for element in query:
-        element_selectable = (isinstance(element, int) and isinstance(input_dict, (list, tuple))) or element in input_dict
-        if element_selectable:
+        is_list_index = isinstance(element, int) and isinstance(input_dict, (list, tuple))
+        if is_list_index or element in input_dict:
             input_dict = input_dict[element]
         else:
             return default
     return input_dict
 
 
-def filename_escape(unsafe, replace_char='_', valid_chars=string.ascii_letters + string.digits + '#._- '):
+def filename_escape(unsafe, replace_char='_', valid_chars=valid_filename_chars):
     """Escapes a string to provide a safe local filename
 
 Arguments:
@@ -362,9 +376,6 @@ Safe local filename string
         else:
             safe += replace_char
     return safe
-
-
-import xml.sax.saxutils as saxutils
 
 _unescape_map = {
     '&#39;': "'",
@@ -387,17 +398,10 @@ def utf8_bom(input):
     return output
 
 
-import os
-import imp
-import json
-import yaml
-import importlib
-
-
 class JsonHandler:
     def __init__(self, base, folder, attr=None, callback_name=None, ext=None, yaml=False):
         if ext:
-            self.pattern = ['*.{}.yaml'.format(ext), '*.{}.json'.format(ext), '*_{}.py'.format(ext)]
+            self.pattern = [x.format(ext) for x in ['*.{}.yaml', '*.{}.json', '*_{}.py']]
         else:
             self.pattern = ['*.yaml', '*.json', '*.py']
         self.base = base
@@ -492,8 +496,6 @@ class JsonHandler:
 
 
 # timedelta functions
-import re
-
 _td_str_map = [
     ('d', 'days'),
     ('h', 'hours'),
@@ -532,10 +534,8 @@ def string_to_timedelta(td_string):
             delta[td] = val
     return delta
 
+
 # path
-import sys
-
-
 def add_path(path):
     if path not in sys.path:
         sys.path.insert(0, path)
