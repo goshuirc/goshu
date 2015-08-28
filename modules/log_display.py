@@ -34,19 +34,13 @@ class log_display(Module):
         @listen both raw highest inline
         """
         if event['verb'] == 'raw':
-            print('RARWARAWREJO SORJG SOJG sdgsDGSDg')
             output = event['server'].name
             if event['direction'] == 'in':
                 output += '  -> '
             else:
                 output += ' <-  '
             output += event['raw']
-            print(output)
             return
-
-        # from pprint import pprint
-        # pprint(event)
-        # return
 
         # > 15:26:43
         output = '$c14'
@@ -69,7 +63,6 @@ class log_display(Module):
 
         elif event['verb'] == 'user':
             output += 'Your user info is: '
-            print('paramra', event['params'])
             output += escape(' '.join([x if x else '' for x in event['params']]))
 
         elif event['verb'] in ['privnotice', ]:
@@ -165,7 +158,6 @@ class log_display(Module):
 
             elif event['direction'] == 'out':
                 output += 'CTCP reply to $b'
-                print('YOLO', event['target'], event['params'])
                 output += escape(event['target'].nick)
                 output += '$b: $b'
                 output += escape(event['ctcp_verb'].upper())
