@@ -67,13 +67,13 @@ class IRC:
             self.r.close()
 
     def _handle_kick(self, event):
-        user_nick = self.servers[event.server].istring(event.arguments[0]).lower()
-        our_nick = self.servers[event.server].istring(self.servers[event.server].info['connection']['nick']).lower()
-        channel = event.target.lower()
+        user_nick = event['server'].istring(event['params'][0]).lower()
+        our_nick = event['server'].nick.lower()
+        channel = event['channel'].lower()
 
         if user_nick == our_nick:
             try:
-                self.bot.info.store['servers'][self.servers[event.server].info['name']]['autojoin_channels'].remove(channel)
+                self.bot.info.store['servers'][event['server'].name]['autojoin_channels'].remove(channel)
                 self.bot.info.save()
             except:
                 pass
@@ -96,11 +96,11 @@ class IRC:
 
             srv_username = None
             if server.get('connect_username'):
-                srv_username = server.get('connect_username')
+                srv_username = server.get('connect_username', '*')
 
             srv_realname = None
             if server.get('srv_realname'):
-                srv_realname = server.get('realname')
+                srv_realname = server.get('connect_realname', '*')
 
             # XXX - TODO: - use this
             local_address = ""
@@ -139,29 +139,3 @@ class IRC:
             self.r.set_user_info(name, srv_nick, user=srv_username, real=srv_realname)
             self.r.join_channels(name, *autojoin_channels)
             self.r.connect_to(name)
-
-
-def get_target(event, zone, strict=False):
-    """Return the target to msg/action given the event and zone.
-
-    If dcc is requested but not avaliable and not strict, simply go to private instead.
-    If dcc is not avaliable and strict, do not send and feturn False."""
-    # sanity check
-    if zone not in ['public', 'private', 'dcc']:
-        return None
-
-    if zone is 'public':
-        target = event.from_to
-    elif zone is 'dcc':
-        # skip to below for now, will handle actual dcc later
-        if strict:
-            return None
-        else:
-            zone = 'private'
-
-    if zone is 'private':
-        if girclib.is_channel(event.source):
-            target = event.source
-        else:
-            target = event.source.split('!')[0]
-    return target

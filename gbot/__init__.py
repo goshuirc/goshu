@@ -5,10 +5,9 @@
 
 import os
 
-from colorama import init, Fore, Back, Style
+from colorama import init, Fore, Style
 
 from . import gui, info, irc, modules, users
-from .libs import log
 
 # section wrapping functions
 # start colorama wrapping
@@ -49,9 +48,9 @@ def _success_wrap(name):
 # Goshu
 class Bot:
     """Brings all of goshubot together in a nice happy class."""
+
     def __init__(self, config_path='config', modules_path='modules', debug=False):
         self.debug = debug
-        self.logger = log.Logger
 
         self._prompt_wraps = {
             'section': _section_wrap,
@@ -100,7 +99,6 @@ class Bot:
 
         # load modules
         self.modules.load_init()
-
 
     def start(self):
         """Start IRC connections."""

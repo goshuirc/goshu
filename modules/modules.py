@@ -4,7 +4,7 @@
 # licensed under the ISC license
 
 from gbot.modules import Module
-from gbot.users import USER_LEVEL_ADMIN
+
 
 class modules(Module):
     """Handles loading and unloading modules and their internal JSON dicts"""

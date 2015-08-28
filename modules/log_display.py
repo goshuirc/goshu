@@ -10,10 +10,11 @@ import datetime
 
 from girc.formatting import escape, unescape
 import colorama
-colorama.init()
 
 from gbot.modules import Module
 from gbot.libs.helper import filename_escape
+
+colorama.init()
 
 
 class log_display(Module):
@@ -29,51 +30,69 @@ class log_display(Module):
     def log_display_listener(self, event):
         """Writes messages to screen and log
 
-        $listen * * high inline
+        @listen both all highest inline
+        @listen both raw highest inline
         """
-        if event.type == 'all_raw_messages':
+        if event['verb'] == 'raw':
+            print('RARWARAWREJO SORJG SOJG sdgsDGSDg')
+            output = event['server'].name
+            if event['direction'] == 'in':
+                output += '  -> '
+            else:
+                output += ' <-  '
+            output += event['raw']
+            print(output)
             return
+
+        # from pprint import pprint
+        # pprint(event)
+        # return
 
         # > 15:26:43
         output = '$c14'
-        output += strftime("%H:%M:%S", localtime())
+        output += strftime('%H:%M:%S', localtime())
 
         # > -rizon-
         output += ' $c12-$c'
-        output += event.server
+        output += event['server'].name
         output += '$c12-$c '
 
         targets = ['all']
 
-        if event.type == '':
+        if event['verb'] == '':
             ...
 
-        elif event.type in ['welcome', 'yourhost', 'created', 'myinfo',
-                            'featurelist', 'luserclient', 'luserop',
-                            'luserchannels', 'luserme', 'n_local',
-                            'n_global', 'luserconns', 'luserunknown',
-                            'motdstart', 'endofmotd', '042', 'nomotd']:
-            output += escape(' '.join(event.arguments))
+        elif event['verb'] in ['welcome', 'yourhost', 'features', 'created', 'myinfo',
+                               'yourid', 'luserclient', 'luserop', 'luserchannels',
+                               'luserme', 'localusers', 'globalusers', 'motd', 'nomotd']:
+            output += escape(' '.join(event['params'][1:]))
 
-        elif event.type in ['motd', ]:
-            output += ' '.join(event.arguments)
+        elif event['verb'] == 'user':
+            output += 'Your user info is: '
+            print('paramra', event['params'])
+            output += escape(' '.join([x if x else '' for x in event['params']]))
 
-        elif event.type in ['privnotice', '439', ]:
-            targets.append(event.source.split('!')[0])
+        elif event['verb'] in ['privnotice', ]:
+            targets.append(event['source'].name)
             output += '$c14-'
-            output += '$c13' + event.source.split('!')[0]
+            output += '$c13' + event['source'].name
             try:
-                output += '$c14('
-                output += '$c13' + escape(event.source.split('!')[1])
+                output += '$c14($c13'
+                if event['source'].is_user:
+                    output += escape(event['source'].userhost)
+                elif event['source'].is_server:
+                    output += 'server'
+                else:
+                    output += 'unknown'
                 output += '$c14)'
             except IndexError:
                 output = output[:-1]
             output += '-$c '
-            output += event.arguments[0]
+            output += event['message']
 
-        elif event.type in ['cannotsendtochan', '408', ]:
-            chan = escape(event.arguments[0])
-            msg = escape(event.arguments[1])
+        elif event['verb'] in ['cannotsendtochan', ]:
+            chan = escape(event['channel'].name)
+            msg = event['reason']
             targets.append(chan)
 
             output += '$c3-$c'
@@ -82,111 +101,129 @@ class log_display(Module):
             output += '$r$b** $c4Message Rejected$r: '
             output += msg
 
-        elif event.type in ['pubmsg', ]:
-            targets.append(event.target)
+        elif event['verb'] in ['nosuchservice', ]:
+            service = escape(event['target'].nick)
+            msg = event['message']
+            targets.append(service)
+
             output += '$c3-$c'
-            output += escape(event.target)
+            output += escape(service)
+            output += '$c3- '
+            output += '$r$b** $c4'
+            output += msg
+
+        elif event['verb'] in ['pubmsg', ]:
+            targets.append(event['target'].name)
+            output += '$c3-$c'
+            output += escape(event['target'].name)
             output += '$c3- '
             output += '$c14<$c'
-            try:
-                selected_mode = ''
-                server = self.bot.irc.servers[event.server]
-                channel = server.istring(event.target)
-                user_nick = server.istring(event.source.split('!')[0])
 
-                for mode in server.info['server']['isupport']['PREFIX'][1]:
-                    if mode in server.get_channel_info(channel)['users'][user_nick]:
-                        output += escape(mode)
-                        selected_mode = mode
-                        break
+            selected_mode = ''
+            user_nick = event['source'].nick
 
-                if not selected_mode:
-                    output += ' '
-            except:
+            selected_mode = event['target'].prefixes[user_nick][-1]
+
+            if selected_mode:
+                output += escape(selected_mode)
+            else:
                 output += ' '
-            output += self.nick_color(event.source.split('!')[0])
-            output += '$c14>$c '
-            output += hide_pw_if_necessary(event.arguments[0], self.bot.settings.store['command_prefix'])
 
-        elif event.type in ['privmsg', ]:
+            if not selected_mode:
+                output += ' '
+
+            output += self.nick_color(event['source'].nick)
+            output += '$c14>$c '
+            output += hide_pw_if_necessary(event['message'],
+                                           self.bot.settings.store['command_prefix'])
+
+        elif event['verb'] in ['privmsg', ]:
             output += '$c3-$c'
-            if event.direction == 'in':
-                output += escape(event.source.split('!')[0])
-                targets.append(event.source.split('!')[0])
+            if event['direction'] == 'in':
+                output += escape(event['source'].nick)
+                targets.append(event['source'].nick)
             else:
                 output += event.target
                 targets.append(event.target)
             output += '$c3- '
             output += '$c14<$c'
-            output += self.nick_color(event.source.split('!')[0])
+            output += self.nick_color(event['source'].nick)
             output += '$c14>$c '
-            output += hide_pw_if_necessary(event.arguments[0], self.bot.settings.store['command_prefix'])
+            output += hide_pw_if_necessary(event['message'],
+                                           self.bot.settings.store['command_prefix'])
 
-        elif event.type in ['action', ]:
+        elif event['verb'] in ['action', ]:
             output += '$c3-$c'
-            if event.direction == 'in':
-                output += event.from_to
-                targets.append(event.from_to)
+            if event['direction'] == 'in':
+                output += event['from_to'].name
+                targets.append(event['from_to'].name)
             else:
-                output += event.target
-                targets.append(event.target)
-            output += '$c3-$c  $b* '
-            output += event.source.split('!')[0] + '$b '
-            if len(event.arguments):
-                output += event.arguments[0]
+                output += event['target'].name
+                targets.append(event['target'].name)
 
-        elif event.type in ['umode', ]:
+            output += '$c3-$c  $b* '
+            output += event['source'].nick + '$b '
+            if len(event['message']):
+                output += event['message']
+
+        elif event['verb'] == 'umode':
+            # we only care about incoming modes
+            if event['direction'] == 'out':
+                return
+
             output += 'Mode change '
             output += '$c14[$c'
-            output += event.arguments[0]
+            output += event['modestring']
             output += '$c14]$c'
             output += ' for user '
-            output += event.target
+            output += event['target'].name
 
-        elif event.type in ['mode', ]:
-            targets.append(event.target)
+        elif event['verb'] == 'cmode':
+            # we only care about incoming modes
+            if event['direction'] == 'out':
+                return
+
+            targets.append(event['target'].name)
             output += '$c6-$c!$c6-$c '
             output += 'mode/'
-            output += '$c10' + event.target + ' '
+            output += '$c10' + event['target'].name + ' '
             output += '$c14[$c'
-            for arg in event.arguments:
-                output += arg + ' '
-            output = output[:-1]  # strip last space
+            output += ' '.join(event['params'])
             output += '$c14]$c'
             output += ' by $b'
-            output += event.source.split('!')[0]
+            output += event['source'].nick
 
-        elif event.type in ['channelmodeis', ]:
-            chan = escape(event.arguments[0])
-            modes = escape(' '.join(event.arguments[1:]))
+        elif event['verb'] in ['cmodeis', ]:
+            chan = escape(event['channel'].name)
 
             targets.append(chan)
             output += '$c6-$c!$c6-$c '
             output += 'modes:'
             output += '$c10' + chan + ' '
             output += '$c14[$c'
-            output += modes
+            output += event['modestring']
             output += '$c14]$c'
 
-        elif event.type in ['channelcreate', ]:
-            chan = escape(event.arguments[0])
-            timestamp = escape(event.arguments[1])
+        elif event['verb'] in ['chancreatetime', ]:
+            chan = escape(event['channel'].name)
+            timestamp = escape(event['timestamp'])
 
             try:
                 created_ts = datetime.datetime.fromtimestamp(int(timestamp))
+                created_ts = created_ts.strftime('%a, %d %b %Y %H:%M:%S')
             except:
-                return  # malformed
+                created_ts = '$r$b$c[red]MALFORMED TS:$r [' + timestamp + '$r]'
 
             targets.append(chan)
             output += '$c6-$c!$c6-$c '
             output += 'times:'
             output += '$c10' + chan + '$c '
             output += 'Channel created $b'
-            output += created_ts.strftime('%a, %d %b %Y %H:%M:%S')
+            output += created_ts
 
-        elif event.type in ['namreply', ]:
-            chan = escape(event.arguments[1])
-            nicks = escape(event.arguments[2])
+        elif event['verb'] in ['namreply', ]:
+            chan = escape(event['channel'].name)
+            nicks = escape(event.get('names'))
 
             targets.append(chan)
             output += '$c6-$c!$c6-$c '
@@ -196,9 +233,9 @@ class log_display(Module):
             output += nicks
             output += '$c14]$c'
 
-        elif event.type in ['endofnames', ]:
-            chan = escape(event.arguments[0])
-            user_dict = self.bot.irc.servers[event.server].get_channel_info(chan)['users']
+        elif event['verb'] in ['endofnames', ]:
+            chan = escape(event['channel'].name)
+            user_dict = event['channel'].prefixes
 
             targets.append(chan)
             output += '$c6-$c!$c6-$c '
@@ -213,7 +250,7 @@ class log_display(Module):
             op_users = 0
 
             for user in user_dict:
-                # todo: populate and work from ISUPPORT lists
+                # XXX - TODO: - fix to work with isupport
                 if '$' in user_dict[user] or '!' in user_dict[user] or '&' in user_dict[user] or '~' in user_dict[user]:
                     op_users += 1
                 elif '%' in user_dict[user]:
@@ -238,80 +275,93 @@ class log_display(Module):
 
             output += '$c3)$c'
 
-        elif event.type in ['kick', ]:
-            targets.append(escape(event.target))
+        elif event['verb'] in ['kick', ]:
+            targets.append(escape(event['channel'].name))
             output += '$c6-$c!$c6-$c10 '
-            output += event.arguments[0]
+            output += event['user'].nickmask,
             output += '$c was kicked from '
-            output += escape(event.target)
+            output += escape(event['target'].name)
             output += ' by '
-            output += event.source.split('!')[0]
+            output += event['source'].nick
             output += ' $c14[$c'
-            output += event.arguments[1]
+            output += event['message']
             output += '$c14]$c'
 
-        elif event.type in ['join', ]:
+        elif event['verb'] in ['join', ]:
             # we get an in event for joining chans, so ignore out
-            if event.direction == 'out':
+            if event['direction'] == 'out':
                 return
-            targets.append(event.target)
+            [targets.append(escape(chan.name)) for chan in event['channels']]
             output += '$c6-$c!$c6-$b$c10 '
-            output += event.source.split('!')[0]
+            output += event['source'].nick
             output += '$b $c14[$c10'
-            output += escape(event.source.split('!')[1])
+            output += escape(event['source'].userhost)
             output += '$c14]$c '
             output += 'has joined $b'
-            output += escape(event.target)
+            output += ', '.join([escape(chan.name) for chan in event['channels']])
 
-        elif event.type in ['nick', ]:
+        elif event['verb'] in ['nick', ]:
             output += '$c6-$c!$c6-$c10 '
-            output += event.source.split('!')[0]
-            output += '$c is now known as $c10'
-            output += str(event.target)
+            if event['source'] is None:
+                output += '$cYou are now known as $c10'
+            else:
+                output += event['source'].nick
+                output += '$c is now known as $c10'
+            output += event['new_nick']
 
-        elif event.type in ['currenttopic', ]:
-            targets.append(event.arguments[0])
+        elif event['verb'] in ['topic', ]:
+            targets.append(escape(event['channel'].name))
             output += '$c6-$c!$c6-$c10 Topic for $c10'
-            output += event.arguments[0]
+            output += event['channel'].name
             output += '$c: '
-            output += event.arguments[1]
+            output += event['topic']
 
-        elif event.type in ['quit', ]:
+        elif event['verb'] in ['quit', ]:
             output += '$c6-$c!$c6-$c10 '
-            output += event.source.split('!')[0]
+            output += event['source'].nick
             output += ' $c14[$c'
-            output += escape(event.source.split('!')[1])
+            output += escape(event['source'].userhost)
             output += '$c14]$c has quit $c14[$c'
-            output += event.arguments[0]
+            output += event['message']
             output += '$c14]$c'
 
-        elif event.type in ['ctcp', ] and event.arguments[0] == 'ACTION':
+        elif event['verb'] in ['ping', 'pong', ]:
             return
 
-        elif event.type in ['ping', 'pong', ]:
-            return
+        elif event['verb'] in ['cap', ]:
+            if event['direction'] == 'in':
+                subcmd = event['params'][1].upper()
 
-        elif event.type in ['cap', ]:
-            if event.direction == 'out':
-                if event.target[0].upper() == 'REQ':
-                    output += 'IRCv3 CAP Requested by Client: {}'.format(' '.join(event.target[1:]))
+                if subcmd == 'LS':
+                    output += 'Capabilities Supported by Server: {}'.format(event['params'][2])
+                elif subcmd == 'ACK':
+                    output += 'Capabilities Enabled by Server: {}'.format(event['params'][2])
+
+            elif event['direction'] == 'out':
+                subcmd = event['params'][0].upper()
+                if subcmd == 'REQ':
+                    output += 'Capabilities Requested by Client: {}'.format(event['params'][1])
+                elif subcmd == 'END':
+                    output += 'Capability Negotiation Ended by Client'
+                elif subcmd == 'LS':
+                    output += 'Requesting Server Capabilities'
+                    if event['params']:
+                        output += ' ('
+                        output += ' '.join(event['params'][1:])
+                        output += ')'
                 else:
-                    return  # end, so ignore
-
-            if event.direction == 'in':
-                if event.arguments[0].upper() == 'ACK':
-                    output += 'IRCv3 CAP Enabled by Server: {}'.format(' '.join(event.arguments[1:]))
+                    return  # ignore
 
         else:
             targets.append('tofix')
-            output += str(event.direction) + ' ' + str(event.type) + ' ' + escape(str(event.source)) + ' ' + escape(str(event.target)) + ' ' + escape(str(event.arguments))
+            output += str(event['direction']) + ' ' + str(event['verb']) + ' ' + escape(str(event['source'])) + ' ' + escape(str(event.get('target'))) + ' ' + escape(str(event['params']))
 
         # # TODO: make this a bool debug option
-        # debugmsg = [event.direction, event.type, event.source, event.target, event.arguments]
+        # debugmsg = [event['direction'], event['verb'], event.source, event.target, event.arguments]
         # self.bot.gui.put_line(escape(str(debugmsg)))
 
         self.bot.gui.put_line(display_unescape(output + '$r'))  # +$r because that means reset
-        self.log(output, event.server, targets)
+        self.log(output, event['server'].name, targets)
 
     def log(self, output, server='global', targets=['global']):
         server_escape = filename_escape(server)

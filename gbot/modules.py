@@ -511,7 +511,7 @@ class Modules:
                 module.events = {}
 
             # add event listeners
-            for direction in ['in', 'out', '*']:
+            for direction in ['in', 'out', 'both']:
                 for event_name, handlers in module.events.get(direction, {}).items():
                     for info in handlers:
                         if len(info) < 3:
@@ -549,7 +549,7 @@ class Modules:
                         self.bot.modules.global_admin_commands[cmd].remove(handler)
 
             # remove event listeners
-            for direction in ['in', 'out', '*']:
+            for direction in ['both', 'in', 'out']:
                 for event_name, handlers in self.modules[modname].events.get(direction, {}).items():
                     for info in handlers:
                         if len(info) < 3:
