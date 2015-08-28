@@ -137,14 +137,49 @@ class log_display(Module):
             output += hide_pw_if_necessary(event['message'],
                                            self.bot.settings.store['command_prefix'])
 
+        elif event['verb'] == 'ctcp':
+            if event['direction'] == 'in':
+                output += 'CTCP requested by $b'
+                output += escape(event['source'].nick)
+                output += '$b: $b'
+                output += escape(event['ctcp_verb'].upper())
+                output += '$b '
+                output += event['ctcp_text']
+
+            elif event['direction'] == 'out':
+                output += 'CTCP query to $b'
+                output += escape(event['target'].nick)
+                output += '$b: $b'
+                output += escape(event['ctcp_verb'].upper())
+                output += '$b '
+                output += event['ctcp_text']
+
+        elif event['verb'] == 'ctcp_reply':
+            if event['direction'] == 'in':
+                output += 'CTCP reply from $b'
+                output += escape(event['source'].nick)
+                output += '$b: $b'
+                output += escape(event['ctcp_verb'].upper())
+                output += '$b '
+                output += event['ctcp_text']
+
+            elif event['direction'] == 'out':
+                output += 'CTCP reply to $b'
+                print('YOLO', event['target'], event['params'])
+                output += escape(event['target'].nick)
+                output += '$b: $b'
+                output += escape(event['ctcp_verb'].upper())
+                output += '$b '
+                output += event['ctcp_text']
+
         elif event['verb'] in ['privmsg', ]:
             output += '$c3-$c'
             if event['direction'] == 'in':
                 output += escape(event['source'].nick)
-                targets.append(event['source'].nick)
+                targets.append(escape(event['source'].nick))
             else:
-                output += event.target
-                targets.append(event.target)
+                output += escape(event['target'].nick)
+                targets.append(escape(event['target'].nick))
             output += '$c3- '
             output += '$c14<$c'
             output += self.nick_color(event['source'].nick)
