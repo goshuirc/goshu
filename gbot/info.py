@@ -127,6 +127,7 @@ class InfoStore():
             base = self.store
             for key_part in key[:-1]:
                 if key_part not in base:
+                    # XXX - TODO: - wtf to do here?
                     if create_base:
                         base[key_part] = {}
                     else:
@@ -157,6 +158,7 @@ class InfoStore():
             base = self.store
             for key_part in key[:-1]:
                 if key_part not in base:
+                    # XXX - TODO: - wtf to do here?
                     if create_base:
                         base[key_part] = {}
                     else:
@@ -177,6 +179,7 @@ class InfoStore():
             base = self.store
             for key_part in key[:-1]:
                 if key_part not in base:
+                    # XXX - TODO: - wtf to do here?
                     if create_base:
                         base[key_part] = {}
                     else:
@@ -191,7 +194,7 @@ class InfoStore():
         self.save()
 
     # complex junk
-    def add_key(self, value_type, key, prompt, repeating_prompt=None, confirm_prompt=None, 
+    def add_key(self, value_type, key, prompt, repeating_prompt=None, confirm_prompt=None,
                 default=None, allow_none=False, blank_allowed=False, password=False,
                 encrypted=False):
         """Adds given key to our store, and requests it if not yet defined.
@@ -218,7 +221,11 @@ class InfoStore():
             if default is not None:
                 blank_allowed = True
 
-            value = self.bot.gui.get_string(prompt, repeating_prompt=repeating_prompt, confirm_prompt=confirm_prompt, blank_allowed=blank_allowed, password=password)
+            value = self.bot.gui.get_string(prompt,
+                                            repeating_prompt=repeating_prompt,
+                                            confirm_prompt=confirm_prompt,
+                                            blank_allowed=blank_allowed,
+                                            password=password)
 
             if default is not None and value.strip() == '':
                 value = default
@@ -226,11 +233,22 @@ class InfoStore():
             if encrypted:
                 value = self.encrypt(value)
         elif value_type == float:
-            value = self.bot.gui.get_number(prompt, repeating_prompt=repeating_prompt, default=default, password=password)
+            value = self.bot.gui.get_number(prompt,
+                                            repeating_prompt=repeating_prompt,
+                                            default=default,
+                                            password=password)
         elif value_type == int:
-            value = self.bot.gui.get_number(prompt, repeating_prompt=repeating_prompt, default=default, force_int=True, password=password)
+            value = self.bot.gui.get_number(prompt,
+                                            repeating_prompt=repeating_prompt,
+                                            default=default,
+                                            force_int=True,
+                                            password=password)
         elif value_type == bool:
-            value = self.bot.gui.get_bool(prompt, repeating_prompt=repeating_prompt, default=default, allow_none=allow_none, password=password)
+            value = self.bot.gui.get_bool(prompt,
+                                          repeating_prompt=repeating_prompt,
+                                          default=default,
+                                          allow_none=allow_none,
+                                          password=password)
         else:
             raise Exception('Unknown value_type {} in InfoStore[{}]'.format(value_type, self))
 
@@ -293,7 +311,9 @@ class BotSettings(InfoStore):
             '',
             repeating_prompt,
         ])
-        self.add_key(bool, 'load_all_core_modules', prompt, repeating_prompt=repeating_prompt, default=True)
+        self.add_key(bool, 'load_all_core_modules', prompt,
+                     repeating_prompt=repeating_prompt,
+                     default=True)
 
         if not self.get('load_all_core_modules'):
             enabled = self.get('core_modules_enabled', [])
@@ -324,15 +344,17 @@ class BotSettings(InfoStore):
             "your own module, instead simply creating a simple JSON file to do so.",
             '',
             wrap['note']("Disabling this will prevent Youtube, Google, Gelbooru, Wikipedia, "
-                "and the standard 'responses' commands."),
+                         "and the standard 'responses' commands."),
             wrap['note']("If you want to disable just specific commands, you'll be able to "
-                "run through and disable them one-by-one instead in a moment."),
+                         "run through and disable them one-by-one instead in a moment."),
             '',
             "You should leave this enabled unless you know what you're doing.",
             '',
             repeating_prompt,
         ])
-        self.add_key(bool, 'load_all_dynamic_command_modules', prompt, repeating_prompt=repeating_prompt, default=True)
+        self.add_key(bool, 'load_all_dynamic_command_modules', prompt,
+                     repeating_prompt=repeating_prompt,
+                     default=True)
 
         if not self.get('load_all_dynamic_command_modules'):
             enabled = self.get('dynamic_command_modules_enabled', [])
@@ -341,7 +363,8 @@ class BotSettings(InfoStore):
             for module in self.bot.modules.dcm_module_commands:
                 module_slug = module.lower()
                 if module_slug not in enabled and module_slug not in disabled:
-                    prompt = wrap['prompt']('Load dynamic command module {}: [y]'.format(module))
+                    prompt = wrap['prompt']('Load dynamic command module {}: [y]'
+                                            ''.format(module))
                     enable_module = self.bot.gui.get_bool(prompt, default=True)
 
                     if enable_module:
@@ -354,7 +377,7 @@ class BotSettings(InfoStore):
             self.set('dynamic_command_modules_disabled', disabled)
 
         repeating_prompt = wrap['prompt']('Run through existing dynamic commands one-by-one '
-            'and approve / disable them? [no]')
+                                          'and approve / disable them? [no]')
         prompt = '\n'.join([
             wrap['subsection']('Dynamic Commands'),
             "Dynamic commands are specific commands, such as 'gel for searching Gelbooru, "
@@ -364,13 +387,15 @@ class BotSettings(InfoStore):
             "prefer for your own channel / network.",
             '',
             wrap['note']("Enabling this means you will be asked about newly-added dynamic "
-                "commands every time the bot is started."),
+                         "commands every time the bot is started."),
             wrap['note']("You may also disable commands while the bot is running through the "
-                "  'module commands   command."),
+                         "  'module commands   command."),
             '',
             repeating_prompt,
         ])
-        self.add_key(bool, 'confirm_all_dynamic_commands', prompt, repeating_prompt=repeating_prompt, default=False)
+        self.add_key(bool, 'confirm_all_dynamic_commands', prompt,
+                     repeating_prompt=repeating_prompt,
+                     default=False)
 
         if self.get('confirm_all_dynamic_commands'):
             enabled = self.get('dynamic_commands_enabled', {})
@@ -384,9 +409,11 @@ class BotSettings(InfoStore):
                 if module_slug not in disabled:
                     disabled[module_slug] = []
 
-                if self.get('load_all_dynamic_command_modules') or module_slug in self.get('dynamic_command_modules_enabled'):
+                if self.get('load_all_dynamic_command_modules') or (
+                        module_slug in self.get('dynamic_command_modules_enabled')):
                     for command in self.bot.modules.dcm_module_commands[module]:
-                        prompt = wrap['prompt']('Load command {}:{} : [y]'.format(module, command))
+                        prompt = wrap['prompt']('Load command {}:{} : [y]'
+                                                ''.format(module, command))
                         enable_command = self.bot.gui.get_bool(prompt, default=True)
 
                         if enable_command:
@@ -416,28 +443,32 @@ class BotSettings(InfoStore):
             "The recommended (and default) command prefix is ' , as this is not widely-"
             "spread, should not cause any conflicts, and is simple to type.",
             '',
-            wrap['note'](". is commonly the services (ChanServ) default command prefix, so we "
-                "do not recommend using it."),
+            wrap['note']("[.] is a very commonly-used command prefix, so we "
+                         "do not recommend using it."),
             '',
             repeating_prompt,
         ])
-        self.add_key(str, 'command_prefix', prompt, repeating_prompt=repeating_prompt, default="'")
+        self.add_key(str, 'command_prefix', prompt,
+                     repeating_prompt=repeating_prompt,
+                     default="'")
 
         repeating_prompt = wrap['prompt']("Admin Command prefix: [@]")
         prompt = '\n'.join([
             wrap['subsection']('Admin Command Prefix'),
-            "In Goshu, admin commands are used to modify specific modules' settings and provide "
-            "a way to let you access module-specific administrative functions.",
+            "In Goshu, admin commands are used to modify specific modules' settings and "
+            "provide a way to let you access module-specific administrative functions.",
             '',
-            "Your users will not be seeing this, and admin commands can only be used via a message "
-            "directly to your bot (not to a channel the bot is in).",
+            "Your users will not be seeing this, and admin commands can only be used via a "
+            "message directly to your bot (not to a channel the bot is in).",
             '',
-            "The recommended (and default) admin command prefix is @ for admin, as it is simple to "
-            "remember and will not cause any conflicts.",
+            "The recommended (and default) admin command prefix is @ for admin, as it is "
+            "simple to remember and will not cause any conflicts.",
             '',
             repeating_prompt,
         ])
-        self.add_key(str, 'admin_command_prefix', prompt, repeating_prompt=repeating_prompt, default="@")
+        self.add_key(str, 'admin_command_prefix', prompt,
+                     repeating_prompt=repeating_prompt,
+                     default="@")
 
         repeating_prompt = wrap['prompt']('Master Bot Password:')
         confirm_prompt = wrap['prompt']('Confirm Master Bot Password:')
@@ -446,11 +477,17 @@ class BotSettings(InfoStore):
             "This password controls master access to the bot, and anyone with this password "
             "can access ANY function, run ANY command, and have complete control over your bot."
             '',
-            "Needless to say, try to make it something long, difficult to guess, and memorable.",
+            "Needless to say, try to make it something long and difficult to guess. "
+            "Feel free to write it down, unless those pesky IRC hackers are going to get into "
+            "your notebook.",
             '',
             repeating_prompt,
         ])
-        self.add_key(str, 'master_bot_password', prompt, repeating_prompt=repeating_prompt, confirm_prompt=confirm_prompt, password=True, encrypted=True)
+        self.add_key(str, 'master_bot_password', prompt,
+                     repeating_prompt=repeating_prompt,
+                     confirm_prompt=confirm_prompt,
+                     password=True,
+                     encrypted=True)
 
         print(wrap['success']('Bot Control'))
 
@@ -470,7 +507,8 @@ class IrcInfo(InfoStore):
             for name, info in self.store.items():
                 info = info.get('connection', {})
                 new_store['servers'][name] = {}
-                new_store['servers'][name]['autojoin_channels'] = info.get('autojoin_channels', [])
+                autojoin_channels = info.get('autojoin_channels', [])
+                new_store['servers'][name]['autojoin_channels'] = autojoin_channels
                 new_store['servers'][name]['hostname'] = info.get('address')
                 new_store['servers'][name]['ipv6'] = info.get('ipv6', False)
                 new_store['servers'][name]['ssl'] = info.get('ssl', False)
@@ -508,8 +546,8 @@ class IrcInfo(InfoStore):
         repeating_prompt = wrap['prompt']('Default Nick:')
         prompt = '\n'.join([
             wrap['subsection']('Default Nick'),
-            "This will be the default nick your bot uses for new networks. You may also set a "
-            "custom nick on each network, this will just be the default choice.",
+            "This will be the default nick your bot uses for new networks. You may also set "
+            "a custom nick on each network, this will just be the default choice.",
             '',
             repeating_prompt,
         ])
@@ -527,12 +565,13 @@ class IrcInfo(InfoStore):
                 current_servers = self.get('servers', {})
                 for name in dict(current_servers):
                     server_info = current_servers[name]
-                    prompt = wrap['prompt']('Delete Server {name} [{ssl}{host}:{port}] [n]'.format(**{
-                        'name': name,
-                        'ssl': '+' if server_info['ssl'] else '',
-                        'host': server_info['hostname'],
-                        'port': server_info['port'],
-                    }))
+                    prompt = wrap['prompt']('Delete Server {name} [{ssl}{host}:{port}] [n]'
+                                            ''.format(**{
+                                                'name': name,
+                                                'ssl': '+' if server_info['ssl'] else '',
+                                                'host': server_info['hostname'],
+                                                'port': server_info['port'],
+                                            }))
                     delete_server = self.bot.gui.get_bool(prompt, default=False)
 
                     if delete_server:
@@ -578,13 +617,16 @@ class IrcInfo(InfoStore):
                     default_port = 6667
 
                 prompt = wrap['prompt']('Port? [{}]'.format(default_port))
-                new_connection['port'] = self.bot.gui.get_number(prompt, force_int=True, default=default_port)
+                new_connection['port'] = self.bot.gui.get_number(prompt,
+                                                                 force_int=True,
+                                                                 default=default_port)
 
                 default_nick = self.get('default_nick')
                 prompt = wrap['prompt']('Nickname: [{}]'.format(default_nick))
                 new_connection['nick'] = self.bot.gui.get_string(prompt, default=default_nick)
 
-                print(wrap['note']('This is the bit of your userhost before the @ sign, eg:    nick!~username@hostname'))
+                print(wrap['note']('This is the bit of your userhost before the @ sign, eg:    '
+                                   'nick!~username@hostname'))
                 prompt = wrap['prompt']('Connect Username:')
                 new_connection['connect_username'] = self.bot.gui.get_string(prompt)
 
@@ -592,35 +634,51 @@ class IrcInfo(InfoStore):
                 prompt = wrap['prompt']('Connect Realname:')
                 new_connection['connect_realname'] = self.bot.gui.get_string(prompt)
 
-                print(wrap['note']('This is not your NickServ password, this is the IRC server connection password.'))
+                print(wrap['note']('This is not your NickServ password, this is the IRC server '
+                                   'connection password.'))
                 prompt = wrap['prompt']('Connect Password:')
                 confirm_prompt = wrap['prompt']('Confirm Connect Password:')
-                new_connection['connect_password'] = self.bot.gui.get_string(prompt, confirm_prompt=confirm_prompt, blank_allowed=True, password=True)
+                connect_password = self.bot.gui.get_string(prompt,
+                                                           confirm_prompt=confirm_prompt,
+                                                           blank_allowed=True,
+                                                           password=True)
+                new_connection['connect_password'] = connect_password
 
-                print(wrap['note']('If you do not have a NickServ password, simply leave this empty'))
+                print(wrap['note']('If you do not have a NickServ password, simply leave '
+                                   'this empty'))
                 prompt = wrap['prompt']('NickServ Password:')
                 confirm_prompt = wrap['prompt']('Confirm NickServ Password:')
-                ns_password = self.bot.gui.get_string(prompt, confirm_prompt=confirm_prompt, blank_allowed=True, password=True)
+                ns_password = self.bot.gui.get_string(prompt,
+                                                      confirm_prompt=confirm_prompt,
+                                                      blank_allowed=True,
+                                                      password=True)
                 if ns_password:
                     new_connection['nickserv_password'] = ns_password
 
                     repeating_prompt = wrap['prompt']('NickServ Wait Period in seconds: [10]')
                     prompt = '\n'.join([
-                        "NickServ authentication sometimes takes a number of seconds to complete.",
-                        "Here, you can type in a number of seconds to wait before joining channels "
-                        "to make sure you're properly authenticated with NickServ.",
+                        "NickServ authentication sometimes takes a number of seconds to "
+                        "complete.",
+                        "Here, you can type in a number of seconds to wait before joining "
+                        "channels to make sure you're properly authenticated with NickServ.",
                         '',
-                        "This is commonly used to wait for vhosts to apply, before joining channels, "
-                        "as well as waiting for login so ChanServ-protected channels don't kick you."
+                        "This is commonly used to wait for vhosts to apply, before joining "
+                        "channels, as well as waiting for login so ChanServ-protected channels "
+                        "don't kick you."
                         '',
                         repeating_prompt,
                     ])
-                    new_connection['vhost_wait'] = self.bot.gui.get_number(prompt, repeating_prompt=repeating_prompt, force_int=True, default=10)
+                    vhost_wait = self.bot.gui.get_number(prompt,
+                                                         repeating_prompt=repeating_prompt,
+                                                         force_int=True,
+                                                         default=10)
+                    new_connection['vhost_wait'] = vhost_wait
 
                 repeating_prompt = wrap['prompt']('Channels to autojoin:')
                 prompt = '\n'.join([
                     wrap['subsection']('Channels to Autojoin'),
-                    "In here, you list the channels you want to autojoin when connecting to the network!",
+                    "In here, you list the channels you want to autojoin when connecting to "
+                    "the network!",
                     '',
                     wrap['note']('Separate the channels by spaces, eg:  #a #b #chat #ret'),
                     '',
@@ -636,7 +694,8 @@ class IrcInfo(InfoStore):
                         new_connection['autojoin_channels'].append(chan.lower())
 
                 default_timeout = timedelta_to_string(timeout_check_interval)
-                repeating_prompt = wrap['prompt']('Timeout Check Interval: [{}]'.format(default_timeout))
+                repeating_prompt = wrap['prompt']('Timeout Check Interval: [{}]'
+                                                  ''.format(default_timeout))
                 prompt = '\n'.join([
                     '',
                     wrap['subsection']('Timeout Check Interval').strip(),
@@ -647,11 +706,15 @@ class IrcInfo(InfoStore):
                     '',
                     repeating_prompt,
                 ])
-                timeout_check = self.bot.gui.get_string(prompt, repeating_prompt=repeating_prompt, default=default_timeout, validate=string_to_timedelta)
+                timeout_check = self.bot.gui.get_string(prompt,
+                                                        repeating_prompt=repeating_prompt,
+                                                        default=default_timeout,
+                                                        validate=string_to_timedelta)
                 new_connection['timeout_check_interval'] = string_to_timedelta(timeout_check)
 
                 default_timeout = timedelta_to_string(timeout_length)
-                repeating_prompt = wrap['prompt']('Timeout Length: [{}]'.format(default_timeout))
+                repeating_prompt = wrap['prompt']('Timeout Length: [{}]'
+                                                  ''.format(default_timeout))
                 prompt = '\n'.join([
                     '',
                     wrap['subsection']('Timeout Length').strip(),
@@ -664,9 +727,11 @@ class IrcInfo(InfoStore):
                     '',
                     repeating_prompt,
                 ])
-                timeout_length = self.bot.gui.get_string(prompt, repeating_prompt=repeating_prompt, default=default_timeout, validate=string_to_timedelta)
+                timeout_length = self.bot.gui.get_string(prompt,
+                                                         repeating_prompt=repeating_prompt,
+                                                         default=default_timeout,
+                                                         validate=string_to_timedelta)
                 new_connection['timeout_length'] = string_to_timedelta(timeout_length)
-
 
                 # add new connection to our list
                 new_server_dict = self.get('servers', {})

@@ -73,7 +73,8 @@ class IRC:
 
         if user_nick == our_nick:
             try:
-                self.bot.info.store['servers'][event['server'].name]['autojoin_channels'].remove(channel)
+                server_name = event['server'].name
+                self.bot.info.store['servers'][server_name]['autojoin_channels'].remove(channel)
                 self.bot.info.save()
             except:
                 pass

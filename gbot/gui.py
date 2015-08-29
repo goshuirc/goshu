@@ -46,8 +46,9 @@ class GuiManager:
             val1 = fn(prompt)
             val2 = fn(confirm_prompt)
 
-            while (val1 != val2 or (val1.strip() == '' and not blank_allowed and default is None)
-                   or (validate and not validate(val1))):
+            while (val1 != val2 or
+                    (val1.strip() == '' and not blank_allowed and default is None)
+                    or (validate and not validate(val1))):
                 val1 = fn(repeating_prompt)
                 val2 = fn(confirm_prompt)
 
@@ -64,12 +65,14 @@ class GuiManager:
                 if default is not None:
                     output_value = default
                 else:
-                    while output_value.strip() == '' or (validate and not validate(output_value)):
+                    while (output_value.strip() == '' or
+                            (validate and not validate(output_value))):
                         output_value = fn(repeating_prompt)
 
         return output_value
 
-    def get_number(self, prompt, repeating_prompt=None, default=None, force_int=False, password=False):
+    def get_number(self, prompt, repeating_prompt=None, default=None, force_int=False,
+                   password=False):
         """Get a number, force_int to force an integer."""
         # parse function, since we repeat it
         def parse_value(val):
@@ -87,8 +90,8 @@ class GuiManager:
                     return ''  # user screwed up, we'll ask for another value
 
         # get initial value
-        value = self.get_string(prompt, repeating_prompt, blank_allowed=True, password=password).strip()
-        value = parse_value(value)
+        value = self.get_string(prompt, repeating_prompt, blank_allowed=True, password=password)
+        value = parse_value(value.strip())
 
         # repeat if required
         while not isinstance(value, (int, float)):
@@ -97,7 +100,8 @@ class GuiManager:
 
         return value
 
-    def get_bool(self, prompt, repeating_prompt=None, default=None, allow_none=False, password=False):
+    def get_bool(self, prompt, repeating_prompt=None, default=None, allow_none=False,
+                 password=False):
         """Get a bool, allow_none to allow None."""
         # parse function, since we repeat it
         def parse_value(val):
@@ -113,12 +117,13 @@ class GuiManager:
                     return val
 
         # get initial value
-        value = self.get_string(prompt, repeating_prompt, blank_allowed=True, password=password).strip()
-        value = parse_value(value)
+        value = self.get_string(prompt, repeating_prompt, blank_allowed=True, password=password)
+        value = parse_value(value.strip())
 
         # repeat if needed
         while value not in (True, False, None):
-            value = self.get_string(repeating_prompt, repeating_prompt, blank_allowed=True, password=password).strip()
-            value = parse_value(value)
+            value = self.get_string(repeating_prompt, repeating_prompt, blank_allowed=True,
+                                    password=password)
+            value = parse_value(value.strip())
 
         return value
