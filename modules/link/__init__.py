@@ -69,12 +69,16 @@ class link(Module):
                     url = self.links[provider]['url'].format(**complete_dict)
                     r = get_url(url)
 
+                    display_name = self.links[provider]['display_name']
+
                     if isinstance(r, str):
-                        event['from_to'].msg('*** {}: {}'.format(self.links[provider]['display_name'], r))
+                        event['from_to'].msg('*** {}: {}'.format(display_name, r))
                         return
 
                     # parsing
-                    response += format_extract(self.links[provider], r.text, debug=True, fail='*** {}: Failed'.format(self.links[provider]['display_name']))
+                    response += format_extract(self.links[provider], r.text,
+                                               debug=True,
+                                               fail='*** {}: Failed'.format(display_name))
 
             if response:
                 event['from_to'].msg(response)

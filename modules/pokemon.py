@@ -39,7 +39,8 @@ class pokemon(Module):
             response += 'a '
 
         for team_member in team:
-            response += 'lvl ' + str(team_member.level) + ' ' + team_member.name + ', '  # + ' (' + pad(str(team_member.number)) + '), '
+            response += 'lvl ' + str(team_member.level) + ' ' + team_member.name + ', '
+            # + ' (' + pad(str(team_member.number)) + '), '
         response = response[:-2]
 
         for team_member in team:

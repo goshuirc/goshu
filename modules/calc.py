@@ -15,7 +15,7 @@ from gbot.modules import Module
 
 
 class calc(Module):
-    """Lets users calculate math, convert figures, and all sorts of fun stuff thanks to W|A!"""
+    """Lets users calculate math, convert figures, and all sorts of fun stuff."""
 
     def __init__(self, bot):
         Module.__init__(self, bot)
@@ -23,14 +23,16 @@ class calc(Module):
         self.parser = NumericStringParser()
         self.wolfram = None
 
-        wolfram_filename = os.sep.join(['config', 'modules', '{}.json'.format(filename_escape(self.name))])
+        config_json_file = '{}.json'.format(filename_escape(self.name))
+        calc_filename = os.sep.join(['config', 'modules', config_json_file])
         try:
-            wolfram_info = json.loads(open(wolfram_filename).read())
+            calc_info = json.loads(open(calc_filename).read())
 
-            self.wolfram_api_key = wolfram_info['key']
-            self.wolfram = wolframalpha.Client(self.wolfram_api_key)
+            self.calc_api_key = calc_info['key']
+            self.wolfram = wolframalpha.Client(self.calc_api_key)
         except:
-            self.bot.gui.put_line('wolfram: Wolfram Alpha app key file error: {}'.format(wolfram_filename))
+            self.bot.gui.put_line('wolfram: Wolfram Alpha app key file error: {}'
+                                  ''.format(calc_filename))
             return
 
     def cmd_calc(self, event, command, usercommand):
@@ -40,7 +42,8 @@ class calc(Module):
         @usage <query>
         """
         try:
-            response = '*** Calc: {}'.format(escape(str(self.parser.eval(usercommand.arguments))))
+            result = str(self.parser.eval(usercommand.arguments))
+            response = '*** Calc: {}'.format(escape(result))
         except:
             fail = '*** Could not evaluate expression.'
 
@@ -49,7 +52,12 @@ class calc(Module):
                     res = self.wolfram.query(usercommand.arguments)
                     if len(res.pods) > 1:
                         answer = res.pods[1].text
-                        answer = answer.encode('unicode-escape').replace(b'\\\\:', b'\u').decode('unicode-escape')  # to fix unicode
+
+                        # fix unicode
+                        answer = answer.encode('unicode-escape')
+                        answer = answer.replace(b'\\\\:', b'\u')
+                        answer = answer.decode('unicode-escape')
+
                         response = '*** W|A: {}'.format(escape(answer))
                     else:
                         response = fail

@@ -24,11 +24,13 @@ class dictionary(Module):
         if usercommand.arguments.strip() == '':
             return
 
-        dict_info_filename = os.sep.join(['config', 'modules', '{}.json'.format(filename_escape(self.name))])
+        config_json = '{}.json'.format(filename_escape(self.name))
+        dict_info_filename = os.sep.join(['config', 'modules', config_json])
         try:
             dictionary_info = json.loads(open(dict_info_filename).read())
         except:
-            self.bot.gui.put_line('dictionary: No Wordnik API key file: {}'.format(dict_info_filename))
+            self.bot.gui.put_line('dictionary: No Wordnik API key file: {}'
+                                  ''.format(dict_info_filename))
             return
 
         url = 'http://api.wordnik.com/v4/word.json/'

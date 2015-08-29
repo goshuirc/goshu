@@ -26,7 +26,8 @@ class apiquery(Module):
         r = get_url(url)
 
         if isinstance(r, str):
-            event['from_to'].msg(unescape('*** {}: {}'.format(command.json['display_name'], r)))
+            display_name = command.json['display_name']
+            event['from_to'].msg(unescape('*** {}: {}'.format(display_name, r)))
             return
 
         # parsing

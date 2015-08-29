@@ -18,14 +18,17 @@ from gbot.libs.helper import filename_escape
 class danbooru(Module):
 
     def combined(self, event, command, usercommand):
-        boorufilename = os.sep.join(['config', 'modules', '{}.json'.format(filename_escape(self.name))])
+        config_name = '{}.json'.format(filename_escape(self.name))
+        boorufilename = os.sep.join(['config', 'modules', config_name])
         try:
             booruaccounts = json.loads(open(boorufilename).read())
         except ValueError:
-            self.bot.gui.put_line('danbooru: Danbooru Account info file error: {}'.format(boorufilename))
+            self.bot.gui.put_line('danbooru: Danbooru Account info file error: {}'
+                                  ''.format(boorufilename))
             return
         except IOError:
-            self.bot.gui.put_line('danbooru: Danbooru Account info file not found, ignoring: {}'.format(boorufilename))
+            self.bot.gui.put_line('danbooru: Danbooru Account info file not found, ignoring: {}'
+                                  ''.format(boorufilename))
             booruaccounts = {}
 
         if 'display_name' in command.json:
@@ -48,20 +51,24 @@ class danbooru(Module):
             username = None
             password = None
 
-        response += self.retrieve_url(command.json['url'], usercommand.arguments, command.json['version'], username, password)
+        response += self.retrieve_url(command.json['url'],
+                                      usercommand.arguments,
+                                      command.json['version'],
+                                      username, password)
 
         event['from_to'].msg(response)
 
     def retrieve_url(self, url, tags, version, username=None, password=None):
         post = {
-            b'limit' : 1,
-            b'tags' : unescape(tags),
+            b'limit': 1,
+            b'tags': unescape(tags),
         }
 
         if username:
             post['login'] = username
 
         if password:
+            # choujin-steiner junk is because that's how danbooru hashes their passwords
             post['password_hash'] = str(hashlib.sha1(b'choujin-steiner--' + password.encode('utf-8') + b'--').hexdigest())
 
         encoded_tags = urllib.parse.urlencode(post)
@@ -93,10 +100,10 @@ class danbooru(Module):
         try:
             return_str = escape(url + '/post/show/' + str(results_json[0]['id']))
             return_str += '  rating:$b' + results_json[0]['rating'] + '$b'
-            #if version == 1:
-            #    return_str += '  $c14' + results_json[0]['tags']
-            #elif version == 2:
-            #    return_str += '  $c14' + results_json[0]['tag_string']
+            # if version == 1:
+            #     return_str += '  $c14' + results_json[0]['tags']
+            # elif version == 2:
+            #     return_str += '  $c14' + results_json[0]['tag_string']
             return return_str
         except:
             return 'No Results'

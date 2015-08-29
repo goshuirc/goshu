@@ -21,7 +21,8 @@ class google(Module):
         @alias g
         @usage <query>
         """
-        response = '*** $c12G$c4o$c8o$c12g$c3l$c4e$c: {}'.format(self.google_result_search(usercommand.arguments))
+        result = self.google_result_search(usercommand.arguments)
+        response = '*** $c12G$c4o$c8o$c12g$c3l$c4e$c: {}'.format(result)
 
         event['from_to'].msg(response)
 
@@ -48,7 +49,8 @@ class google(Module):
             search_results = urllib.request.urlopen(url)
             try:
                 json_result = json.loads(search_results.read().decode('utf-8'))
-                url_result = escape(html_unescape(json_result['responseData']['results'][0]['titleNoFormatting']))
+                html_result = json_result['responseData']['results'][0]['titleNoFormatting']
+                url_result = escape(html_unescape(html_result))
                 url_result += ' -- '
                 url_result += escape(json_result['responseData']['results'][0]['unescapedUrl'])
             except:

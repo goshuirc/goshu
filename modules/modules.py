@@ -52,7 +52,8 @@ class modules(Module):
         do = usercommand.arguments.split()[0].lower()
 
         if do == 'list':
-            response = 'Loaded modules: ' + ', '.join(sorted(list(self.bot.modules.whole_modules.keys())))
+            mods = ', '.join(sorted(list(self.bot.modules.whole_modules.keys())))
+            response = 'Loaded modules: ' + mods
             event['source'].msg(response)
             additional_modules = []
             for path in self.bot.modules.paths:
@@ -61,7 +62,8 @@ class modules(Module):
                     if module not in self.bot.modules.whole_modules:
                         additional_modules.append(module)
             if len(additional_modules) > 0:
-                response = 'Additional avaliable modules: ' + ', '.join(sorted(additional_modules))
+                mods = ', '.join(sorted(additional_modules))
+                response = 'Additional avaliable modules: ' + mods
                 event['source'].msg(response)
 
         elif do in ['load', 'unload', 'reload']:

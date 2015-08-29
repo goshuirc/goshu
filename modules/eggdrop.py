@@ -10,6 +10,10 @@ from gbot.libs.helper import filename_escape
 import sqlite3
 import base64
 
+CREATE_TABLE_SQL = '''
+CREATE TABLE questions (id INTEGER PRIMARY KEY AUTOINCREMENT, question TEXT, answer TEXT, requested TEXT, approved INTEGER)
+'''
+
 
 class eggdrop(Module):
     """Allows for an eggdrop-like response to questions made to goshu."""
@@ -17,7 +21,8 @@ class eggdrop(Module):
     def __init__(self, bot):
         Module.__init__(self, bot)
 
-        self.db_path = os.path.join('config', 'modules', '{}{}sqlite'.format(filename_escape(self.name), os.extsep))
+        db_file = '{}{}sqlite'.format(filename_escape(self.name), os.extsep)
+        self.db_path = os.path.join('config', 'modules', db_file)
 
         db_dir = self.db_path.rsplit(os.sep, 1)[0]
         if not os.path.exists(db_dir):
@@ -29,7 +34,7 @@ class eggdrop(Module):
             c = conn.cursor()
 
             # Create table
-            c.execute('create table questions (id integer primary key autoincrement, question text, answer text, requested text, approved integer)')
+            c.execute(CREATE_TABLE_SQL)
 
             conn.commit()
             c.close()

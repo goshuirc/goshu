@@ -7,7 +7,7 @@ from gbot.modules import Module
 import random
 
 
-class random_module(Module):  # so named to prevent random lib issues
+class random_module(Module):
 
     def __init__(self, bot):
         Module.__init__(self, bot)

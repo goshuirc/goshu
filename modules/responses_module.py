@@ -67,9 +67,9 @@ class responses_module(Module):
                                                        sort_keys=True, indent=4)))
 
         event['source'].msg('New responses file created in {}'.format(filename))
-        event['source'].msg('By default this responses file will not be accessible by ordinary users,'
-                            ' and will be channel-restricted, so you must modify it on-disk to do'
-                            ' what you want!')
+        event['source'].msg('By default this responses file will not be accessible by '
+                            'ordinary users, and will be channel-restricted, so you must '
+                            'modify it on-disk to do what you want!')
 
     def combined(self, event, command, usercommand):
         if self.is_ignored(event['from_to']):

@@ -16,7 +16,8 @@ class info(Module):
 
         @call_level owner
         """
-        pretty_json = json_dumps(self.bot.irc.servers[event.server].info, sort_keys=True, indent=4)
+        pretty_json = json_dumps(self.bot.irc.servers[event.server].info,
+                                 sort_keys=True, indent=4)
 
         info_filename = os.sep.join(['config', 'modules', 'info_dict.json'])
         with open(info_filename, 'w', encoding='utf-8') as info_file:

@@ -41,7 +41,8 @@ class dice(Module):
             for line in oline:
                 if('d' in line):
                     if line.split('d')[0].isdigit():
-                        if len(str(line.split('d')[1])) > 6 or len(str(line.split('d')[0])) > 10:
+                        if (len(str(line.split('d')[1])) > 6 or
+                                len(str(line.split('d')[0])) > 10):
                             raise Exception
                         idice.append(line.split('d'))
                     else:
