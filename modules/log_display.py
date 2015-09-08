@@ -8,7 +8,7 @@ import datetime
 import os
 import random
 
-from girc.formatting import escape, unescape
+from girc.formatting import escape, unescape, colour_name_to_code
 import colorama
 
 from gbot.libs.helper import filename_escape
@@ -462,48 +462,60 @@ def hide_pw_if_necessary(msg, command_char="'"):
     return ' '.join(msg_parts)
 
 
-# TODO: this function needs to support ${$} format
 def display_unescape(in_str):
-    in_str = in_str.replace('${$}', '$$')
     output = ''
     while in_str != '':
         if in_str[0] == '$':
             if len(in_str) > 1 and in_str[1] == '$':
                 in_str = in_str[2:]
                 output += '$'
+            elif len(in_str) > 1 and in_str[1] == '{':
+                arg, in_str = in_str.split('}', 1)
+                output += '!!ARGUMENT{}!!'.format(arg)
             elif len(in_str) > 1 and in_str[1] == 'c':
                 fore = ''
                 back = ''
                 in_str = in_str[2:]
                 in_fore = True
 
-                while True:
-                    if len(in_str) > 0 and in_str[0].isdigit():
-                        digit = in_str[0]
-                        in_str = in_str[1:]
+                if len(in_str) and in_str.startswith('['):
+                    in_str = in_str[1:]
+                    colorstr, in_str = in_str.split(']', 1)
 
-                        if in_fore:
-                            if len(fore) < 2:
-                                fore += digit
-                            else:
-                                in_str = digit + in_str
-                                break
-                        else:
-                            if len(back) < 2:
-                                back += digit
-                            else:
-                                in_str = digit + in_str
-                                break
+                    colors = colorstr.split(',')
 
-                    elif len(in_str) > 0 and in_str[0] == ',':
-                        if in_fore:
+                    if len(colors) and colors[0]:
+                        fore = colour_name_to_code[colors.pop(0)]
+                        if len(colors) and colors[0]:
+                            back = colour_name_to_code[colors.pop(0)]
+                else:
+                    while True:
+                        if len(in_str) > 0 and in_str[0].isdigit():
+                            digit = in_str[0]
                             in_str = in_str[1:]
-                            in_fore = False
+
+                            if in_fore:
+                                if len(fore) < 2:
+                                    fore += digit
+                                else:
+                                    in_str = digit + in_str
+                                    break
+                            else:
+                                if len(back) < 2:
+                                    back += digit
+                                else:
+                                    in_str = digit + in_str
+                                    break
+
+                        elif len(in_str) > 0 and in_str[0] == ',':
+                            if in_fore:
+                                in_str = in_str[1:]
+                                in_fore = False
+                            else:
+                                break
+
                         else:
                             break
-
-                    else:
-                        break
 
                 if fore != '':
                     if int(fore) > 15:
