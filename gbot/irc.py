@@ -85,13 +85,14 @@ class IRC:
         default_nick = info.get('default_nick', None)
         server_dict = info.get('servers', {})
         for name, server in server_dict.items():
+            kwargs = {}
+
             srv_nick = server.get('nick')
             if not srv_nick:
                 srv_nick = default_nick
             srv_host = server.get('hostname')
             srv_port = server.get('port')
 
-            # XXX - TODO: - use this
             srv_password = None
             if server.get('connect_password'):
                 srv_password = server.get('connect_password')
@@ -104,11 +105,13 @@ class IRC:
             if server.get('srv_realname'):
                 srv_realname = server.get('connect_realname', '*')
 
-            # XXX - TODO: - use this
             local_address = ""
             if server.get('localaddress'):
                 local_address = server.get('localaddress')
             local_port = server.get('localport', 0)
+
+            if local_address and local_port:
+                kwargs['local_addr'] = (local_address, local_port)
 
             srv_ssl = server.get('ssl', False)
             srv_ipv6 = server.get('ipv6', False)
@@ -137,7 +140,9 @@ class IRC:
             nickserv_password = server.get('nickserv_password', None)
 
             # connect
-            self.r.create_server(name, srv_host, srv_port, ssl=srv_ssl, family=family)
-            self.r.set_user_info(name, srv_nick, user=srv_username, real=srv_realname)
-            self.r.join_channels(name, *autojoin_channels)
-            self.r.connect_to(name)
+            server = self.r.create_server(name)
+            if srv_password:
+                server.set_connect_password(srv_password)
+            server.set_user_info(srv_nick, user=srv_username, real=srv_realname)
+            server.join_channels(*autojoin_channels)
+            server.connect(srv_host, srv_port, ssl=srv_ssl, family=family, **kwargs)
