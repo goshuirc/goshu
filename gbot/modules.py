@@ -161,10 +161,10 @@ def extract_mod_info_from_docstring(docstring, name, handler):
 
     module_dict = {}
 
-    if len(info['name']) < 2:
+    if len(info['name']):
         names = info['name'][0]
     else:
-        names = tuple(info['name'])
+        names = info['name']
     aliases = info['aliases']
     del info['aliases']
 
@@ -244,7 +244,7 @@ class Module:
                 for cmd_name, cmd_info in info.items():
                     cmd = self.bot.modules.return_admin_command_dict(self, cmd_info)
                     if cmd_info.get('global', False):
-                        for cmdn in cmd_name:
+                        for cmdn in cmd:
                             cmd[cmdn].module_name = self.name
 
                             if cmdn not in self.bot.modules.global_admin_commands:
