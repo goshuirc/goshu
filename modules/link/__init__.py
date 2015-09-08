@@ -11,8 +11,8 @@ import re
 
 from girc.formatting import unescape
 
-from gbot.modules import Module
 from gbot.libs.helper import get_url, format_extract, JsonHandler
+from gbot.modules import Module
 
 
 class link(Module):

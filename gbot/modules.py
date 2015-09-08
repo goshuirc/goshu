@@ -3,20 +3,20 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the ISC license
 
-import os
 import imp
-import json
-import inspect
 import importlib
+import inspect
+import json
+import os
 import threading
 
 from girc.formatting import escape
 from girc.utils import NickMask
 
-from .libs.helper import JsonHandler, add_path
-from .users import user_levels, USER_LEVEL_NOPRIVS, USER_LEVEL_ADMIN
 from .commands import AdminCommand, Command, UserCommand, standard_admin_commands
 from .info import InfoStore
+from .libs.helper import JsonHandler, add_path
+from .users import user_levels, USER_LEVEL_NOPRIVS, USER_LEVEL_ADMIN
 
 LISTENER_HIGHEST_PRIORITY = -30
 LISTENER_HIGHER_PRIORITY = -20

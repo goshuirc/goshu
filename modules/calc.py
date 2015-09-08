@@ -6,8 +6,8 @@
 import json
 import os
 
-import wolframalpha
 from girc.formatting import escape
+import wolframalpha
 
 from gbot.libs.helper import filename_escape
 from gbot.libs.nsp import NumericStringParser

@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 # Goshu IRC Bot
-# written by Daniel Oaks <daniel$danieloaks.net>
+# written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the ISC license
 
 from time import strftime, localtime
-import random
-import os
 import datetime
+import os
+import random
 
 from girc.formatting import escape, unescape
 import colorama
 
-from gbot.modules import Module
 from gbot.libs.helper import filename_escape
+from gbot.modules import Module
 
 colorama.init()
 
@@ -115,18 +115,35 @@ class log_display(Module):
             selected_mode = ''
             user_nick = event['source'].nick
 
-            selected_mode = event['target'].prefixes[user_nick][-1]
-
-            if selected_mode:
+            if len(event['target'].prefixes[user_nick]):
+                selected_mode = event['target'].prefixes[user_nick][0]
                 output += escape(selected_mode)
             else:
                 output += ' '
 
-            if not selected_mode:
+            output += self.nick_color(event['source'].nick)
+            output += '$c14>$c '
+            output += hide_pw_if_necessary(event['message'],
+                                           self.bot.settings.store['command_prefix'])
+
+        elif event['verb'] in ['pubnotice', ]:
+            targets.append(event['target'].name)
+            output += '$c3-$c'
+            output += escape(event['target'].name)
+            output += '$c3- '
+            output += '$c[green]Notice$c -> '
+
+            selected_mode = ''
+            user_nick = event['source'].nick
+
+            if len(event['target'].prefixes[user_nick]):
+                selected_mode = event['target'].prefixes[user_nick][0]
+                output += escape(selected_mode)
+            else:
                 output += ' '
 
             output += self.nick_color(event['source'].nick)
-            output += '$c14>$c '
+            output += '$r: '
             output += hide_pw_if_necessary(event['message'],
                                            self.bot.settings.store['command_prefix'])
 
@@ -218,7 +235,7 @@ class log_display(Module):
             output += ' '.join(event['params'])
             output += '$c14]$c'
             output += ' by $b'
-            output += event['source'].nick
+            output += event['source'].name
 
         elif event['verb'] in ['cmodeis', ]:
             chan = escape(event['channel'].name)
@@ -319,11 +336,11 @@ class log_display(Module):
             if event['direction'] == 'out':
                 return
             [targets.append(escape(chan.name)) for chan in event['channels']]
-            output += '$c6-$c!$c6-$b$c10 '
+            output += '$c6-$c!$c6-$c$b '
             output += event['source'].nick
-            output += '$b $c14[$c10'
+            output += '$b $c14($c10'
             output += escape(event['source'].userhost)
-            output += '$c14]$c '
+            output += '$c14)$c '
             output += 'has joined $b'
             output += ', '.join([escape(chan.name) for chan in event['channels']])
 
@@ -344,13 +361,20 @@ class log_display(Module):
             output += event['topic']
 
         elif event['verb'] in ['quit', ]:
-            output += '$c6-$c!$c6-$c10 '
-            output += event['source'].nick
-            output += ' $c14[$c'
-            output += escape(event['source'].userhost)
-            output += '$c14]$c has quit $c14[$c'
-            output += event['message']
-            output += '$c14]$c'
+            if event['direction'] == 'out':
+                output += '$c6-$c!$c6-$c $b'
+                output += event['server'].nick
+                output += '$r$c[red] quit $c14[$c'
+                output += event['message']
+                output += '$c14]$c'
+            else:
+                output += '$c6-$c!$c6-$c $b'
+                output += event['source'].nick
+                output += ' $r$c14($c10'
+                output += escape(event['source'].userhost)
+                output += '$c14)$c[red] has quit $c14[$c'
+                output += event['message']
+                output += '$c14]$c'
 
         elif event['verb'] in ['ping', 'pong', ]:
             return

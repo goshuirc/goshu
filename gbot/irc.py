@@ -2,6 +2,7 @@
 # Goshu IRC Bot
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the ISC license
+
 import socket
 
 import girc

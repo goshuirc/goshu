@@ -3,13 +3,14 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the ISC license
 
+import json
+import socket
+import urllib.request, urllib.parse, urllib.error
+
 from girc.formatting import escape, unescape
 
-from gbot.modules import Module
 from gbot.libs.helper import html_unescape
-import json
-import urllib.request, urllib.parse, urllib.error
-import socket
+from gbot.modules import Module
 
 
 class google(Module):

@@ -3,8 +3,9 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the ISC license
 
-from gbot.modules import Module
 import random
+
+from gbot.modules import Module
 
 
 class random_module(Module):

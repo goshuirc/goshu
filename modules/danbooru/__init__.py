@@ -3,16 +3,16 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the ISC license
 
-import urllib.request, urllib.parse, urllib.error
-import socket
 import json
 import os
+import socket
+import urllib.request, urllib.parse, urllib.error
 
-import hashlib
 from girc.formatting import escape, unescape
+import hashlib
 
-from gbot.modules import Module
 from gbot.libs.helper import filename_escape
+from gbot.modules import Module
 
 
 class danbooru(Module):

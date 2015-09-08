@@ -3,11 +3,12 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the ISC license
 
+import json
+import urllib.request, urllib.parse, urllib.error
+
 from girc.formatting import escape, unescape
 
 from gbot.modules import Module
-import urllib.request, urllib.parse, urllib.error
-import json
 
 
 class urbandictionary(Module):

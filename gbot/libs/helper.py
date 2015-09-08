@@ -25,8 +25,8 @@ import urllib.parse
 
 from girc.formatting import escape
 from http_status import Status
-import importlib
 from pyquery import PyQuery as pq
+import importlib
 import requests
 import xml.sax.saxutils as saxutils
 import yaml

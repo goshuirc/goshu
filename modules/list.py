@@ -3,8 +3,8 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the ISC license
 
-from gbot.users import USER_LEVEL_ADMIN
 from gbot.modules import Module
+from gbot.users import USER_LEVEL_ADMIN
 
 
 class list(Module):

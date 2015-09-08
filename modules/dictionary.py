@@ -3,14 +3,15 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the ISC license
 
-from girc.formatting import escape, unescape
-
-from gbot.modules import Module
-from gbot.libs.helper import filename_escape
-import urllib.request, urllib.parse, urllib.error
-import socket
 import json
 import os
+import socket
+import urllib.request, urllib.parse, urllib.error
+
+from girc.formatting import escape, unescape
+
+from gbot.libs.helper import filename_escape
+from gbot.modules import Module
 
 
 class dictionary(Module):

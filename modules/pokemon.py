@@ -3,10 +3,11 @@
 # written by Daniel Oaks <daniel@danieloaks.net>
 # licensed under the ISC license
 
-from gbot.modules import Module
-import random
 import json
 import os
+import random
+
+from gbot.modules import Module
 
 
 class pokemon(Module):

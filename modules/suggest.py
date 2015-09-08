@@ -5,8 +5,8 @@
 
 import os
 
-from gbot.modules import Module
 from gbot.libs.helper import filename_escape
+from gbot.modules import Module
 
 
 class suggest(Module):

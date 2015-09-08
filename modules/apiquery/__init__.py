@@ -7,8 +7,8 @@ import urllib.parse
 
 from girc.formatting import unescape
 
-from gbot.modules import Module
 from gbot.libs.helper import get_url, format_extract
+from gbot.modules import Module
 
 
 class apiquery(Module):

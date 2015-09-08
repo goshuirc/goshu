@@ -4,11 +4,11 @@
 # licensed under the ISC license
 
 import os
-
-from gbot.modules import Module
-from gbot.libs.helper import filename_escape
-import sqlite3
 import base64
+import sqlite3
+
+from gbot.libs.helper import filename_escape
+from gbot.modules import Module
 
 CREATE_TABLE_SQL = '''
 CREATE TABLE questions (id INTEGER PRIMARY KEY AUTOINCREMENT, question TEXT, answer TEXT, requested TEXT, approved INTEGER)

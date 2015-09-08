@@ -5,6 +5,8 @@
 
 import sys
 
+# XXX - TODO: - Update to use girc's stuff
+# XXX - TODO: - Update to run over entire log dir at once
 from gbot.libs.girclib import escape, remove_control_codes
 
 if len(sys.argv) < 2:

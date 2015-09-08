@@ -3,8 +3,8 @@
 # written by Daniel Oaks <daniel$danieloaks.net>
 # licensed under the ISC license
 
-import os
 import json
+import os
 import random
 
 from girc.formatting import unescape
