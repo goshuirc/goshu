@@ -101,8 +101,6 @@ class AccountInfo(InfoStore):
                 self.add_account(account_name, account_password)
                 self.set_access_level(account_name, USER_LEVEL_OWNER)
 
-        # TODO: maybe let users create other accounts here too
-
         print(wrap['success']('Accounts'))
 
     def add_account(self, name, password):
