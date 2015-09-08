@@ -7,7 +7,7 @@ from gbot.modules import Module
 from gbot.users import USER_LEVEL_ADMIN
 
 
-class list(Module):
+class list_module(Module):
     """Provides help and command listings to users."""
     core = True
 
