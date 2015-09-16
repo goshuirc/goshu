@@ -55,7 +55,7 @@ class IRC:
         else:
             raise Exception('`server` must be a server object or a name')
 
-        return self.servers[server_name]
+        return self.r.servers[server_name]
 
     def run_forever(self):
         """Run forever."""

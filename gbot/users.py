@@ -198,8 +198,7 @@ class AccountInfo(InfoStore):
         """Returns a list of the currently online owners, superadmins/admins, or none."""
         privs = {}
 
-        if isinstance(server, str):
-            server = self.bot.irc.servers[server]
+        server = self.bot.irc.get_server(server)
 
         for user in server.users.values():
             if hasattr(user, 'accountinfo'):
