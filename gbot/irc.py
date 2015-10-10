@@ -8,10 +8,10 @@ import socket
 import girc
 
 # default ping timeouts
-timeout_check_interval = {
+default_timeout_check_interval = {
     'minutes': 3,
 }
-timeout_length = {
+default_timeout_length = {
     'minutes': 6,
 }
 
@@ -132,8 +132,8 @@ class IRC:
                                       'This can be changed in the connection configuration.'
                                       ''.format(wait_time))
 
-            srv_timeout_check = server.get('timeout_check_interval', timeout_check_interval)
-            srv_timeout_length = server.get('timeout_length', timeout_length)
+            srv_timeout_check = server.get('timeout_check_interval', default_timeout_check_interval)
+            srv_timeout_length = server.get('timeout_length', default_timeout_length)
 
             # nickserv
             nickserv_serv_nick = server.get('nickserv_serv_nick', 'NickServ')
