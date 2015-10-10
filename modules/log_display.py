@@ -490,7 +490,7 @@ def display_unescape(in_str):
                             back = colour_name_to_code[colors.pop(0)]
                 else:
                     while True:
-                        if len(in_str) > 0 and in_str[0].isdigit():
+                        if len(in_str) > 0 and in_str[0] in '1234567890':
                             digit = in_str[0]
                             in_str = in_str[1:]
 
