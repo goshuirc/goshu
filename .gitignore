@@ -113,7 +113,7 @@ target/
 
 
 # goshu3
-config/*
+/config*
 logs/*
 suggestions/*
 /irc/*
