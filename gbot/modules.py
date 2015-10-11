@@ -411,6 +411,7 @@ class Modules:
         self.listeners = {}
 
         # info lists
+        self.all_module_names = []
         self.core_module_names = []
         self.dcm_module_commands = {}  # dynamic command module command lists
 
@@ -421,6 +422,8 @@ class Modules:
         for mod_name in modules:
             loaded_module = self.load(mod_name)
             self.modules[mod_name].load()
+            if mod_name not in self.all_module_names:
+                self.all_module_names.append(mod_name)
             if self.modules[mod_name].core:
                 self.core_module_names.append(mod_name)
             if self.modules[mod_name].dynamic_commands:

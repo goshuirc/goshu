@@ -5,6 +5,7 @@
 
 import hashlib
 import json
+import os
 
 from .libs.helper import timedelta_to_string, string_to_timedelta
 from .irc import default_timeout_check_interval, default_timeout_length
@@ -37,6 +38,11 @@ class InfoStore():
         # only save file if we have data
         if not self.store:
             return
+
+        # ensure info file folder exists
+        folder = os.path.dirname(self.path)
+        if folder and not os.path.exists(folder):
+            os.makedirs(folder)
 
         with open(self.path, 'w') as info_file:
             info_file.write(json.dumps(self.store, sort_keys=True, indent=4))
@@ -298,7 +304,8 @@ class BotSettings(InfoStore):
         #
         print(wrap['section']('Modules'))
 
-        disabled_modules = []
+        enabled_modules = self.get('enabled_modules', [])
+        disabled_modules = self.get('disabled_modules', [])
 
         # core modules
         repeating_prompt = wrap['prompt']('Load all core modules? [yes]')
@@ -316,23 +323,16 @@ class BotSettings(InfoStore):
                      default=True)
 
         if not self.get('load_all_core_modules'):
-            enabled = self.get('core_modules_enabled', [])
-            disabled = self.get('core_modules_disabled', [])
-
             for module in self.bot.modules.core_module_names:
                 module_slug = module.lower()
-                if module_slug not in enabled and module_slug not in disabled:
+                if module_slug not in enabled_modules and module_slug not in disabled_modules:
                     prompt = wrap['prompt']('Load core module {}: [y]'.format(module))
                     enable_module = self.bot.gui.get_bool(prompt, default=True)
 
                     if enable_module:
-                        enabled.append(module_slug)
+                        enabled_modules.append(module_slug)
                     else:
-                        disabled.append(module_slug)
                         disabled_modules.append(module_slug)
-
-            self.set('core_modules_enabled', enabled)
-            self.set('core_modules_disabled', disabled)
 
         # dynamic command modules
         repeating_prompt = wrap['prompt']('Load all dynamic command modules? [yes]')
@@ -357,24 +357,17 @@ class BotSettings(InfoStore):
                      default=True)
 
         if not self.get('load_all_dynamic_command_modules'):
-            enabled = self.get('dynamic_command_modules_enabled', [])
-            disabled = self.get('dynamic_command_modules_disabled', [])
-
-            for module in self.bot.modules.dcm_module_commands:
+            for module in sorted(self.bot.modules.dcm_module_commands):
                 module_slug = module.lower()
-                if module_slug not in enabled and module_slug not in disabled:
+                if module_slug not in enabled_modules and module_slug not in disabled_modules:
                     prompt = wrap['prompt']('Load dynamic command module {}: [y]'
                                             ''.format(module))
                     enable_module = self.bot.gui.get_bool(prompt, default=True)
 
                     if enable_module:
-                        enabled.append(module_slug)
+                        enabled_modules.append(module_slug)
                     else:
-                        disabled.append(module_slug)
                         disabled_modules.append(module_slug)
-
-            self.set('dynamic_command_modules_enabled', enabled)
-            self.set('dynamic_command_modules_disabled', disabled)
 
         repeating_prompt = wrap['prompt']('Run through existing dynamic commands one-by-one '
                                           'and approve / disable them? [no]')
@@ -398,32 +391,75 @@ class BotSettings(InfoStore):
                      default=False)
 
         if self.get('confirm_all_dynamic_commands'):
-            enabled = self.get('dynamic_commands_enabled', {})
-            disabled = self.get('dynamic_commands_disabled', {})
+            enabled_dynamic_cmds = self.get('dynamic_commands_enabled', {})
+            disabled_dynamic_cmds = self.get('dynamic_commands_disabled', {})
 
-            for module in self.bot.modules.dcm_module_commands:
+            for module in sorted(self.bot.modules.dcm_module_commands):
                 module_slug = module.lower()
 
-                if module_slug not in enabled:
-                    enabled[module_slug] = []
-                if module_slug not in disabled:
-                    disabled[module_slug] = []
+                if module_slug not in enabled_dynamic_cmds:
+                    enabled_dynamic_cmds[module_slug] = []
+                if module_slug not in disabled_dynamic_cmds:
+                    disabled_dynamic_cmds[module_slug] = []
 
                 if self.get('load_all_dynamic_command_modules') or (
-                        module_slug in self.get('dynamic_command_modules_enabled')):
-                    for command in self.bot.modules.dcm_module_commands[module]:
+                        module_slug in enabled_modules):
+                    for command in sorted(self.bot.modules.dcm_module_commands[module]):
+                        if (command in enabled_dynamic_cmds[module_slug] or
+                                command in disabled_dynamic_cmds[module_slug]):
+                            continue
                         prompt = wrap['prompt']('Load command {}:{} : [y]'
                                                 ''.format(module, command))
                         enable_command = self.bot.gui.get_bool(prompt, default=True)
 
                         if enable_command:
-                            enabled[module_slug].append(command)
+                            enabled_dynamic_cmds[module_slug].append(command)
                         else:
-                            disabled[module_slug].append(command)
+                            disabled_dynamic_cmds[module_slug].append(command)
 
-            self.set('dynamic_commands_enabled', enabled)
-            self.set('dynamic_commands_disabled', disabled)
+            self.set('dynamic_commands_enabled', enabled_dynamic_cmds)
+            self.set('dynamic_commands_disabled', disabled_dynamic_cmds)
 
+        # other, regular modules
+        other_modules = self.bot.modules.all_module_names
+        for name in self.bot.modules.core_module_names:
+            other_modules.remove(name)
+        for module_name in self.bot.modules.dcm_module_commands:
+            if module_name in other_modules:
+                other_modules.remove(module_name)
+
+        repeating_prompt = wrap['prompt']('Enable all other modules? [yes]')
+        prompt = '\n'.join([
+            wrap['subsection']('Other Modules'),
+            "Automatically enable all other modules, and do so in the future for any added modules?",
+            '',
+            wrap['note']("If this is not enabled, you will be asked which ones you want to enable."),
+            '',
+            repeating_prompt,
+        ])
+        self.add_key(bool, 'enable_all_other_modules', prompt,
+                     repeating_prompt=repeating_prompt,
+                     default=True)
+
+        if self.get('enable_all_other_modules'):
+            for name in other_modules:
+                if name not in enabled_modules and name not in disabled_modules:
+                    enabled_modules.append(name)
+        else:
+            for name in sorted(other_modules):
+                if name in enabled_modules or name in disabled_modules:
+                    continue
+
+                prompt = wrap['prompt']('Load module {}: [y]'
+                                        ''.format(name))
+                enable_module = self.bot.gui.get_bool(prompt, default=True)
+
+                if enable_module:
+                    enabled_modules.append(name)
+                else:
+                    disabled_modules.append(name)
+
+        self.set('enabled_modules', enabled_modules)
         self.set('disabled_modules', disabled_modules)
 
         print(wrap['success']('Modules'))
