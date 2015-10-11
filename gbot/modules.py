@@ -371,7 +371,7 @@ class Module:
         """
         # assemble new json dict into actual commands dict
         new_commands = {}
-        disabled_commands = self.bot.settings.get('dynamic_commands_disabled', {}).get(self.name.lower(), [])
+        disabled_commands = getattr(self.bot, 'settings', {}).get('dynamic_commands_disabled', {}).get(self.name.lower(), [])
         for key, info in new_json.items():
             if key in disabled_commands:
                 continue
@@ -420,6 +420,7 @@ class Modules:
         # load so we can work out which modules are core and which aren't
         for mod_name in modules:
             loaded_module = self.load(mod_name)
+            self.modules[mod_name].load()
             if self.modules[mod_name].core:
                 self.core_module_names.append(mod_name)
             if self.modules[mod_name].dynamic_commands:
