@@ -25,15 +25,25 @@ class calc(Module):
 
         config_json_file = '{}.json'.format(filename_escape(self.name))
         calc_filename = os.sep.join(['config', 'modules', config_json_file])
-        try:
-            calc_info = json.loads(open(calc_filename).read())
+        if os.path.exists(calc_filename):
+            try:
+                calc_info = json.loads(open(calc_filename).read())
 
-            self.calc_api_key = calc_info['key']
-            self.wolfram = wolframalpha.Client(self.calc_api_key)
-        except:
-            self.bot.gui.put_line('wolfram: Wolfram Alpha app key file error: {}'
-                                  ''.format(calc_filename))
-            return
+                self.calc_api_key = calc_info['key']
+            except:
+                self.bot.gui.put_line('wolfram: Wolfram Alpha app key file error: {}'
+                                      ''.format(calc_filename))
+                return
+        else:
+            prompt = 'Wolfram Alpha app key for calc command: '
+            self.calc_api_key = self.bot.gui.get_string(prompt)
+
+            with open(calc_filename, 'w') as calc_file:
+                calc_file.write(json.dumps({
+                    'key': self.calc_api_key,
+                }))
+
+        self.wolfram = wolframalpha.Client(self.calc_api_key)
 
     def cmd_calc(self, event, command, usercommand):
         """Calculate the given input
