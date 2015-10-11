@@ -125,7 +125,6 @@ class IRC:
             if server.get('autojoin_channels'):
                 autojoin_channels = server.get('autojoin_channels')
 
-            # XXX - TODO: - use these
             wait_time = server.get('vhost_wait', 0)
             if wait_time:
                 self.bot.gui.put_line('Waiting {} seconds to join channels. '
@@ -136,7 +135,6 @@ class IRC:
             srv_timeout_length = server.get('timeout_length', default_timeout_length)
 
             # nickserv
-            nickserv_serv_nick = server.get('nickserv_serv_nick', 'NickServ')
             nickserv_password = server.get('nickserv_password', None)
 
             # connect
@@ -144,5 +142,6 @@ class IRC:
             if srv_password:
                 server.set_connect_password(srv_password)
             server.set_user_info(srv_nick, user=srv_username, real=srv_realname)
-            server.join_channels(*autojoin_channels)
+            server.nickserv_identify(nickserv_password)
+            server.join_channels(*autojoin_channels, wait_seconds=wait_time)
             server.connect(srv_host, srv_port, ssl=srv_ssl, family=family, **kwargs)
