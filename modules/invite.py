@@ -16,7 +16,7 @@ class invite(Module):
 
         @listen in invite
         """
-        event['server'].join(event['channel'])
+        event['server'].join_channel(event['channel'])
         event['source'].msg('Thanks for inviting me, {nick}. To keep me in here, '
                             'use the command:   {pre}addchan'
                             ''.format(nick=event.source.split('!')[0],
