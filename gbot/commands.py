@@ -61,13 +61,13 @@ class UserCommand:
         self.command = command
         self.arguments = arguments
 
-    def arg_split(self, splits):
+    def arg_split(self, splits=1, lower=True):
         """Split our arguments i number of times."""
         arg_list = []
         arg_cache = self.arguments
 
         for i in range(splits):
-            new_arg, arg_cache = cmd_split(arg_cache)
+            new_arg, arg_cache = cmd_split(arg_cache, lower=lower)
             arg_list.append(new_arg)
 
         arg_list.append(arg_cache)
@@ -76,14 +76,15 @@ class UserCommand:
 
 
 # command splitting for modules
-def cmd_split(in_str):
+def cmd_split(in_str, lower=True):
     if len(in_str.split()) > 1:
         do, args = in_str.split(' ', 1)
     else:
         do = in_str
         args = ''
 
-    do = do.lower()
+    if lower:
+        do = do.lower()
 
     return do, args
 
