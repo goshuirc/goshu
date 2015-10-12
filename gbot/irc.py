@@ -4,6 +4,7 @@
 # licensed under the ISC license
 
 import socket
+import ssl
 
 import girc
 
@@ -114,6 +115,9 @@ class IRC:
                 kwargs['local_addr'] = (local_address, local_port)
 
             srv_ssl = server.get('ssl', False)
+            if srv_ssl and not server.get('ssl_verify', True):
+                srv_ssl = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+                srv_ssl.verify_mode = ssl.CERT_NONE
             srv_ipv6 = server.get('ipv6', False)
 
             if srv_ipv6:
@@ -142,6 +146,7 @@ class IRC:
             if srv_password:
                 server.set_connect_password(srv_password)
             server.set_user_info(srv_nick, user=srv_username, real=srv_realname)
-            server.nickserv_identify(nickserv_password)
+            if nickserv_password:
+                server.nickserv_identify(nickserv_password)
             server.join_channels(*autojoin_channels, wait_seconds=wait_time)
             server.connect(srv_host, srv_port, ssl=srv_ssl, family=family, **kwargs)

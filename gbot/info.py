@@ -647,6 +647,9 @@ class IrcInfo(InfoStore):
                 prompt = wrap['prompt']('SSL? [y]')
                 new_connection['ssl'] = self.bot.gui.get_bool(prompt, default=True)
 
+                prompt = wrap['prompt']('Verify SSL? [y]')
+                new_connection['ssl_verify'] = self.bot.gui.get_bool(prompt, default=True)
+
                 if new_connection['ssl']:
                     default_port = 6697
                 else:
