@@ -5,9 +5,9 @@
 
 import sys
 
-# XXX - TODO: - Update to use girc's stuff
-# XXX - TODO: - Update to run over entire log dir at once
-from gbot.libs.girclib import escape, remove_control_codes
+# XXX - TODO: - Run over entire log dir at once
+# XXX - TODO: - Output ANSI colour codes instead of IRC colour codes
+from girc.formatting import escape, remove_control_codes
 
 if len(sys.argv) < 2:
     print('USAGE:')
