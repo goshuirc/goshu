@@ -253,7 +253,7 @@ class log_display(Module):
             timestamp = escape(event['timestamp'])
 
             try:
-                created_ts = datetime.datetime.fromtimestamp(int(timestamp))
+                created_ts = datetime.datetime.fromtimestamp(float(timestamp))
                 created_ts = created_ts.strftime('%a, %d %b %Y %H:%M:%S')
             except:
                 created_ts = '$r$b$c[red]MALFORMED TS:$r [' + timestamp + '$r]'
