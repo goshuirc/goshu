@@ -26,17 +26,6 @@ class IRC:
 
         self.add_handler('in', 'kick', self._handle_kick)
 
-        # debug
-        self.add_handler('in', 'raw', self._handle_raw_in, priority=1)
-        self.add_handler('out', 'raw', self._handle_raw_out, priority=1)
-
-    # debug
-    def _handle_raw_in(self, event):
-        print(event['server'].name, ' ->', girc.formatting.escape(event['data']))
-
-    def _handle_raw_out(self, event):
-        print(event['server'].name, '<- ', girc.formatting.escape(event['data']))
-
     # add handlers
     def add_handler(self, direction, verb, child_fn, priority=10):
         self.r.register_event(direction, verb, child_fn, priority=priority)

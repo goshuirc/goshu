@@ -27,6 +27,10 @@ class log_display(Module):
         self.logfiles_open = {}
         random.seed()
 
+        # XXX - debug
+        with open('log.txt', 'a') as log:
+            log.write('\n\n\n')
+
     def log_display_listener(self, event):
         """Writes messages to screen and log
 
@@ -34,12 +38,17 @@ class log_display(Module):
         @listen both raw highest inline
         """
         if event['verb'] == 'raw':
-            output = event['server'].name
+            output = strftime('%Y-%m-%d %H:%M:%S - ', localtime())
+            output += event['server'].name
             if event['direction'] == 'in':
                 output += '  -> '
             else:
                 output += ' <-  '
-            output += event['raw']
+            output += event['data']
+            print(output)
+            with open('log.txt', 'a') as log:
+                log.write(output)
+                log.write('\n')
             return
 
         # drop unnecessary messages
@@ -51,10 +60,10 @@ class log_display(Module):
         # > 15:26:43
         output = '$c14'
         ts = event.get('server_time', localtime())
-        output += strftime('%H:%M:%S', ts)
+        output += strftime('%Y-%m-%d %H:%M:%S ', ts)
 
         # > -rizon-
-        output += ' $c12-$c'
+        output += '$c12-$c'
         output += event['server'].name
         output += '$c12-$c '
 

@@ -118,6 +118,7 @@ logs/*
 suggestions/*
 /irc/*
 /raw_log*
+/log.txt
 
 /modules/responses_module/*/
 
