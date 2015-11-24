@@ -42,9 +42,16 @@ class log_display(Module):
             output += event['raw']
             return
 
+        # drop unnecessary messages
+        if event['verb'] in ['privmsg', 'pubmsg', 'privnotice', 'pubnotice']:
+            if event['direction'] == 'out':
+                if 'echo-message' in event['server'].capabilities.available:
+                    return
+
         # > 15:26:43
         output = '$c14'
-        output += strftime('%H:%M:%S', localtime())
+        ts = event.get('server_time', localtime())
+        output += strftime('%H:%M:%S', ts)
 
         # > -rizon-
         output += ' $c12-$c'
@@ -58,7 +65,8 @@ class log_display(Module):
 
         elif event['verb'] in ['welcome', 'yourhost', 'features', 'created', 'myinfo',
                                'yourid', 'luserclient', 'luserop', 'luserchannels',
-                               'luserme', 'localusers', 'globalusers', 'motd', 'nomotd']:
+                               'luserme', 'localusers', 'globalusers', 'motd', 'nomotd',
+                               'motdstart', 'endofmotd']:
             output += escape(' '.join(event['params'][1:]))
 
         elif event['verb'] == 'user':
@@ -183,12 +191,8 @@ class log_display(Module):
 
         elif event['verb'] in ['privmsg', ]:
             output += '$c3-$c'
-            if event['direction'] == 'in':
-                output += escape(event['source'].nick)
-                targets.append(escape(event['source'].nick))
-            else:
-                output += escape(event['target'].nick)
-                targets.append(escape(event['target'].nick))
+            output += escape(event['from_to'].nick)
+            targets.append(escape(event['from_to'].nick))
             output += '$c3- '
             output += '$c14<$c'
             output += self.nick_color(event['source'].nick)
@@ -387,6 +391,10 @@ class log_display(Module):
                     output += 'Capabilities Supported by Server: {}'.format(event['params'][2])
                 elif subcmd == 'ACK':
                     output += 'Capabilities Enabled by Server: {}'.format(event['params'][2])
+                elif subcmd == 'NAK':
+                    output += 'Capabilities Rejected by Server: {}'.format(event['params'][2])
+                else:
+                    return  # ignore
 
             elif event['direction'] == 'out':
                 subcmd = event['params'][0].upper()
