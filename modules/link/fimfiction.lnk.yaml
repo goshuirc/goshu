@@ -1,7 +1,7 @@
 {
     "display_name": "FimFiction",
-    "match": "^(?:[^.]+\\.)?fimfiction\\.net\\/story\\/(\\d+)",
-    "url": "http://fimfiction.net/api/story.php?story={regex_1}",
+    "match": "^(?P<url>(?:[^.]+\\.)?fimfiction\\.net\\/story\\/(?P<story_id>\\d+))",
+    "url": "http://fimfiction.net/api/story.php?story={story_id}",
     "format": "json",
     "response": "$c12$b{title}$r by $c3$b{author}$r [$c6{rating};{status};{chapters}c;{words}w;{views}v$r] [$c6$b{time}$r] [$c3+{likes}$c4-{dislikes}$r] [{categories}]",
     "response_dict": {
