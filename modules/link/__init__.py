@@ -48,7 +48,6 @@ class link(Module):
             response = ''
             for provider in self.links:
                 matches = re.match(self.links[provider]['match'], url)
-                print('INIT:', [provider, self.links[provider]['match'], matches, url])
                 if matches:
                     # response = '*** {}: '.format(self.links[provider]['display_name'])
                     response = ''
@@ -79,7 +78,6 @@ class link(Module):
                 for url in url_matches.groups():
                     for provider in self.links:
                         matches = re.match(self.links[provider]['match'], url)
-                        print('PROV:', [provider, self.links[provider]['match'], matches, url])
                         if matches:
                             response = response.replace(url, '[REDACTED]')
 
