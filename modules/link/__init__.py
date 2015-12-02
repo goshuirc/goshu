@@ -9,7 +9,7 @@
 import re
 
 from gbot.modules import Module
-from gbot.libs.girclib import unescape
+from gbot.libs.girclib import escape, unescape
 from gbot.libs.helper import get_url, format_extract, JsonHandler
 from gbot.users import USER_LEVEL_ADMIN
 
@@ -51,22 +51,14 @@ class link(Module):
                     # response = '*** {}: '.format(self.links[provider]['display_name'])
                     response = ''
 
-                    match_index = 1
                     complete_dict = {}
                     complete_dict.update(self.get_required_values(provider))
-                    for match in matches.groups():
-                        if match is not None:
-                            complete_dict['regex_{}'.format(match_index)] = match
-                            match_index += 1
-
-                    match_dict = matches.groupdict()
-                    for match in match_dict:
-                        if match_dict[match] is not None:
-                            complete_dict['regex_{}'.format(match)] = match_dict[match]
+                    for key, value in matches.groupdict().items():
+                        complete_dict[key] = escape(value)
 
                     # getting the actual file itself
-                    url = self.links[provider]['url'].format(**complete_dict)
-                    r = get_url(url)
+                    api_url = self.links[provider]['url'].format(**complete_dict)
+                    r = get_url(api_url)
 
                     if isinstance(r, str):
                         self.bot.irc.msg(event, unescape('*** {}: {}'.format(self.links[provider]['display_name'], r)), 'public')
@@ -74,6 +66,15 @@ class link(Module):
 
                     # parsing
                     response += format_extract(self.links[provider], r.text, debug=True, fail='*** {}: Failed'.format(self.links[provider]['display_name']))
+
+            # remove urls from our response
+            url_matches = re.search('(?:https?://)(\\S+)', response)
+            if url_matches:
+                for url in url_matches.groups():
+                    for provider in self.links:
+                        matches = re.match(self.links[provider]['match'], url)
+                        if matches:
+                            response = response.replace(url, '[REDACTED]')
 
             if response:
                 self.bot.irc.msg(event, response, 'public')
