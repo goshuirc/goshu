@@ -1,6 +1,7 @@
 {
     "display_name": "You$c5Tube$c",
     "match": "^(?P<url>(?:www\\.|m\\.)?(?:(?:youtube\\.com/(?:watch)?(?:[?&][a-z]+=[a-z_]+)?(?:[?&]v=))|(?:youtu\\.be\\/))(?P<video_id>[a-zA-Z0-9-_]+))",
+    "cooldown": "video_id",
     "url": "https://www.googleapis.com/youtube/v3/videos?part=id,snippet,contentDetails&key={api_key}&id={video_id}",
     "format": "json",
     "response": "$c12$b{title}$r by $c3$b{author}$r [{length}]",
