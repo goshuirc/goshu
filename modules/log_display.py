@@ -52,10 +52,8 @@ class log_display(Module):
             return
 
         # drop unnecessary messages
-        if event['verb'] in ['privmsg', 'pubmsg', 'privnotice', 'pubnotice']:
-            if event['direction'] == 'out':
-                if 'echo-message' in event['server'].capabilities.available:
-                    return
+        if event.get('will_be_echod'):
+            return
 
         # > 15:26:43
         output = '$c14'
