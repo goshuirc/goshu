@@ -364,12 +364,21 @@ class log_display(Module):
                 output += '$c is now known as $c10'
             output += event['new_nick']
 
-        elif event['verb'] in ['topic', ]:
+        elif event['verb'] == 'topic' and event['direction'] == 'in':
             targets.append(escape(event['channel'].name))
-            output += '$c6-$c!$c6-$c10 Topic for $c10'
+            output += '$c6-$c!$c6-$c topic:$c10'
             output += event['channel'].name
-            output += '$c: '
+            output += '$c[grey] [$r'
             output += event['topic']
+            output += '$c[grey]]'
+
+        elif event['verb'] == 'notopic':
+            targets.append(escape(event['channel'].name))
+            output += '$c6-$c!$c6-$c notopic:$c10'
+            output += event['channel'].name
+            output += '$c[grey] [$r'
+            output += event['reason']
+            output += '$c[grey]]'
 
         elif event['verb'] in ['quit', ]:
             if event['direction'] == 'out':
