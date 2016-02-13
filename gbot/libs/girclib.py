@@ -847,11 +847,15 @@ class Event:
             self.arguments = []
         if direction == 'in':
             if target == irc.servers[server].info['connection']['nick']:
-                self.from_to = str(source).split('!')[0]
+                self.from_to = str(source)
             else:
-                self.from_to = str(target).split('!')[0]
+                self.from_to = str(target)
         else:
-            self.from_to = str(target).split('!')[0]
+            self.from_to = str(target)
+        # split nick from rest of the source
+        chantypes = getattr(irc.servers[server].features, 'chantypes', '#')
+        if self.from_to[0] not in chantypes:
+            self.from_to = self.from_to.split('!')[0]
 
 
 # String escaping/unescaping
