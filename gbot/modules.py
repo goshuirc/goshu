@@ -82,11 +82,12 @@ def extract_mod_info_from_docstring(docstring, name, handler):
             line_info = line.lstrip().lstrip('@').split(' ', 1)
 
             if len(line_info) < 2:
-                name = line_info[0].lower()
+                name = line_info[0].casefold()
                 val = True
             else:
                 name, val = line_info
-                name = name.lower()
+                name = name.casefold()
+            name = name.replace('-', '_')
 
             if name == 'alias':
                 if '---' in val:
@@ -96,6 +97,11 @@ def extract_mod_info_from_docstring(docstring, name, handler):
                     info['aliases'][alias_name] = alias_desc
                 else:
                     info['name'].append(val.strip().lower())
+
+            elif name in ['channel_mode_restriction', 'chanrestrict', 'chan_restrict']:
+                if val == True:
+                    val = 'h'
+                info['channel_mode_restriction'] = val
 
             elif name in ['usage', 'description']:
                 if name not in info:
@@ -697,6 +703,10 @@ class Modules:
                             source_chan = event['target'].name
                             source_nick = event['source'].nick
 
+                            if (event['from_to'].is_channel and command_info.channel_mode_restriction and
+                                    not event['from_to'].has_privs(source_nick, lowest_mode=command_info.channel_mode_restriction)):
+                                continue
+
                             current_channel_whitelist = [event['server'].istring(chan) for chan in command_info.channel_whitelist]
                             current_user_whitelist = command_info.user_whitelist
                             for chan in current_channel_whitelist:
@@ -752,17 +762,19 @@ class Modules:
         if view_level in user_levels:
             view_level = user_levels[view_level]
 
+        chanmode = info.get('channel_mode_restriction', None)
         channel_whitelist = info.get('channel_whitelist', [])
         bound = info.get('bound', True)
 
         commands[info['name'][0]] = cmd_class(call=call, description=description, call_level=call_level,
                                             view_level=view_level, channel_whitelist=channel_whitelist,
-                                            json=info, bound=bound, base_name=info['name'][0])
+                                            json=info, bound=bound, base_name=info['name'][0],
+                                            channel_mode_restriction=chanmode)
 
         for command in info['name'][1:]:
             commands[command] = cmd_class(call=call, description=description, call_level=call_level,
                                         view_level=view_level, channel_whitelist=channel_whitelist,
                                         json=info, bound=bound, base_name=info['name'][0],
-                                        alias=info['name'][0])
+                                        alias=info['name'][0], channel_mode_restriction=chanmode)
 
         return commands

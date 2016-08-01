@@ -52,6 +52,8 @@ class Command(BaseCommand):
             self.user_whitelist = []
         if not hasattr(self, 'channel_whitelist'):
             self.channel_whitelist = []
+        if not hasattr(self, 'channel_mode_restriction'):
+            self.channel_mode_restriction = None
 
 
 class UserCommand:
