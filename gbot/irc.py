@@ -53,9 +53,8 @@ class IRC:
             self.r.run_forever()
         except KeyboardInterrupt:
             self.r.shutdown('Goodbye')
-            self.r.close()
         finally:
-            self.r.close()
+            self.r.shutdown('Goodbye')
 
     def _handle_kick(self, event):
         user_nick = event['server'].istring(event['params'][0]).lower()
