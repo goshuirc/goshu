@@ -703,8 +703,9 @@ class Modules:
                             source_chan = event['target'].name
                             source_nick = event['source'].nick
 
-                            if (event['from_to'].is_channel and command_info.channel_mode_restriction and
-                                    not event['from_to'].has_privs(source_nick, lowest_mode=command_info.channel_mode_restriction)):
+                            # if channel_mode_restriction exists, only allow the command to be run in channels
+                            if command_info.channel_mode_restriction and (event['from_to'].is_user or
+                                    (event['from_to'].is_channel and event['from_to'].has_privs(source_nick, lowest_mode=command_info.channel_mode_restriction))):
                                 continue
 
                             current_channel_whitelist = [event['server'].istring(chan) for chan in command_info.channel_whitelist]
