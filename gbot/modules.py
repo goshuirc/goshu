@@ -341,7 +341,7 @@ class Module:
             values[var_name] = var_value
         return values
 
-    def _parse_required_value(self, base_name, name, info):
+    def parse_required_value(self, base_name, name, info):
         """Parse required value and put it into our store."""
         if not self.store.has_key('required_values'):
             self.store.set('required_values', {})
@@ -387,7 +387,7 @@ class Module:
 
             for var_name, var_info in info.get('required_values', {}).items():
                 base_command_name = info['name'][0]
-                self._parse_required_value(base_command_name, var_name, var_info)
+                self.parse_required_value(base_command_name, var_name, var_info)
 
         # merge new dynamic commands with static ones
         commands = getattr(self, 'static_commands', {}).copy()

@@ -52,7 +52,7 @@ class link(Module):
         for key, info in new_json.items():
             for var_name, var_info in info.get('required_values', {}).items():
                 base_name = info['name'][0]
-                self._parse_required_value(base_name, var_name, var_info)
+                self.parse_required_value(base_name, var_name, var_info)
 
     def link_listener(self, event):
         """Listens for links for which we can provide info
