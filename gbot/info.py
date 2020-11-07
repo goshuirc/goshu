@@ -25,7 +25,7 @@ class InfoStore():
     def load(self):
         """Load information from our data file."""
         try:
-            with open(self.path, 'r') as info_file:
+            with open(self.path, 'r', encoding='utf-8') as info_file:
                 self.store = json.loads(info_file.read())
                 current_version = self.store.get('store_version', 1)
                 while current_version < self.version:
@@ -44,7 +44,7 @@ class InfoStore():
         if folder and not os.path.exists(folder):
             os.makedirs(folder)
 
-        with open(self.path, 'w') as info_file:
+        with open(self.path, 'w', encoding='utf-8') as info_file:
             info_file.write(json.dumps(self.store, sort_keys=True, indent=4))
 
     # version updating

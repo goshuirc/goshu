@@ -21,7 +21,7 @@ class danbooru(Module):
         config_name = '{}.json'.format(filename_escape(self.name))
         boorufilename = os.sep.join(['config', 'modules', config_name])
         try:
-            booruaccounts = json.loads(open(boorufilename).read())
+            booruaccounts = json.loads(open(boorufilename, encoding='utf-8').read())
         except ValueError:
             self.bot.gui.put_line('danbooru: Danbooru Account info file error: {}'
                                   ''.format(boorufilename))

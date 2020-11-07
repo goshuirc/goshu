@@ -62,7 +62,7 @@ class responses_module(Module):
             '2post': '',
         }
 
-        with open(filename, 'w') as module_file:
+        with open(filename, 'w', encoding='utf-8') as module_file:
             module_file.write('{}\n'.format(json.dumps(new_response_dict,
                                                        sort_keys=True, indent=4)))
 

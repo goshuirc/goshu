@@ -27,7 +27,7 @@ class calc(Module):
         calc_filename = os.sep.join(['config', 'modules', config_json_file])
         if os.path.exists(calc_filename):
             try:
-                calc_info = json.loads(open(calc_filename).read())
+                calc_info = json.loads(open(calc_filename, encoding='utf-8').read())
 
                 self.calc_api_key = calc_info['key']
             except:
@@ -38,7 +38,7 @@ class calc(Module):
             prompt = 'Wolfram Alpha app key for calc command: '
             self.calc_api_key = self.bot.gui.get_string(prompt)
 
-            with open(calc_filename, 'w') as calc_file:
+            with open(calc_filename, 'w', encoding='utf-8') as calc_file:
                 calc_file.write(json.dumps({
                     'key': self.calc_api_key,
                 }))

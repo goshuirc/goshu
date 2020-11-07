@@ -70,13 +70,13 @@ class Monster:
 
     def generate(self, corrupted=False, path='', files=['', '']):
         if corrupted:
-            poke_list = json.loads(open(path + files[1]).read())
+            poke_list = json.loads(open(path + files[1], encoding='utf-8').read())
             self.number = random.randint(0, len(poke_list) - 1)
             self.name = poke_list[self.number]
             self.level = str(random.randint(1, 100000))
 
         else:
-            poke_list = json.loads(open(path + files[0]).read())
+            poke_list = json.loads(open(path + files[0], encoding='utf-8').read())
             self.number = random.randint(0, len(poke_list) - 1)
             self.name = poke_list[self.number]
             self.level = str(random.randint(1, 100))

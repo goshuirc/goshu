@@ -28,7 +28,7 @@ class dictionary(Module):
         config_json = '{}.json'.format(filename_escape(self.name))
         dict_info_filename = os.sep.join(['config', 'modules', config_json])
         try:
-            dictionary_info = json.loads(open(dict_info_filename).read())
+            dictionary_info = json.loads(open(dict_info_filename, encoding='utf-8').read())
         except:
             self.bot.gui.put_line('dictionary: No Wordnik API key file: {}'
                                   ''.format(dict_info_filename))

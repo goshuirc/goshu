@@ -28,7 +28,7 @@ class log_display(Module):
         random.seed()
 
         # XXX - debug
-        with open('log.txt', 'a') as log:
+        with open('log.txt', 'a', encoding='utf-8') as log:
             log.write('\n\n\n')
 
     def log_display_listener(self, event):
@@ -46,7 +46,7 @@ class log_display(Module):
                 output += ' <-  '
             output += event['data']
             print(output)
-            with open('log.txt', 'a') as log:
+            with open('log.txt', 'a', encoding='utf-8') as log:
                 log.write(output)
                 log.write('\n')
             return

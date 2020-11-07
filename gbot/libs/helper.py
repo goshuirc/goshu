@@ -473,7 +473,7 @@ class JsonHandler:
                             pass
 
                     # yaml / json
-                    with open(full_name) as js_f:
+                    with open(full_name, encoding='utf-8') as js_f:
                         if self.yaml:
                             try:
                                 info = yaml.load(js_f.read(), Loader=yaml.FullLoader)
