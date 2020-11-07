@@ -59,7 +59,7 @@ class IRC:
     def _handle_kick(self, event):
         user_nick = event['server'].istring(event['params'][0]).lower()
         our_nick = event['server'].nick.lower()
-        channel = event['channel'].lower()
+        channel = event['channel'].name.lower()
 
         if user_nick == our_nick:
             try:

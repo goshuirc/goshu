@@ -333,9 +333,9 @@ class log_display(Module):
         elif event['verb'] in ['kick', ]:
             targets.append(escape(event['channel'].name))
             output += '$c6-$c!$c6-$c10 '
-            output += event['user'].nickmask,
+            output += event['user']
             output += '$c was kicked from '
-            output += escape(event['target'].name)
+            output += escape(event['channel'].name)
             output += ' by '
             output += event['source'].nick
             output += ' $c14[$c'
