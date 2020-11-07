@@ -476,7 +476,7 @@ class JsonHandler:
                     with open(full_name) as js_f:
                         if self.yaml:
                             try:
-                                info = yaml.load(js_f.read())
+                                info = yaml.load(js_f.read(), Loader=yaml.FullLoader)
                             # we should capture this and output errors to stderr
                             except Exception as ex:
                                 print('failed to load YAML file', full_name, ':', ex)
