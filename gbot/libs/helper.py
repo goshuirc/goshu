@@ -486,7 +486,7 @@ class JsonHandler:
 
                     # set module name and info
                     if 'name' not in info:
-                        new_name = name.split('/')[-1]
+                        new_name = name.split('/')[-1].split('\\')[-1]
                         info['name'] = [new_name]
 
                     new_json[info['name'][0]] = info
