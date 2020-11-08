@@ -130,10 +130,14 @@ class log_display(Module):
             selected_mode = ''
             user_nick = event['source'].nick
 
-            if len(event['target'].prefixes[user_nick]):
-                selected_mode = event['target'].prefixes[user_nick][0]
-                output += escape(selected_mode)
-            else:
+            try:
+                if len(event['target'].prefixes[user_nick]):
+                    selected_mode = event['target'].prefixes[user_nick][0]
+                    output += escape(selected_mode)
+                else:
+                    output += ' '
+            except:
+                print('prefixes failed:', user_nick, event['target'].prefixes)
                 output += ' '
 
             output += self.nick_color(event['source'].nick)
