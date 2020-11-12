@@ -18,7 +18,7 @@ class ctcp_reply(Module):
         @listen in ctcp highest
         """
         if event['ctcp_verb'] == 'version':
-            ver = 'Goshu:3:https://github.com/DanielOaks/goshu'
+            ver = 'https://github.com/goshuirc/goshu'
 
             # tell them owner nick(s) if one is online
             server_name = event['server'].name
