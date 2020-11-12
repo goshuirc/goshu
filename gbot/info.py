@@ -572,7 +572,7 @@ class IrcInfo(InfoStore):
         return current_version
 
     # standard menus
-    def add_standard_keys(self):
+    def add_standard_keys(self, autostart=False):
         wrap = self.bot._prompt_wraps
 
         # module settings
@@ -590,9 +590,9 @@ class IrcInfo(InfoStore):
         self.add_key(str, 'default_nick', prompt, repeating_prompt=repeating_prompt)
 
         # so we always modify connections on first run
-        modify_connections = True
+        modify_connections = not autostart
 
-        if self.has_key('servers'):
+        if self.has_key('servers') and modify_connections:
             prompt = wrap['prompt']('Current IRC connections OK? [y]')
             modify_connections = not self.bot.gui.get_bool(prompt, default=True)
 

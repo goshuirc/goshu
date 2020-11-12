@@ -49,7 +49,7 @@ def _success_wrap(name):
 class Bot:
     """Brings all of goshubot together in a nice happy class."""
 
-    def __init__(self, config_path='config', modules_path='modules', debug=False):
+    def __init__(self, config_path='config', modules_path='modules', debug=False, autostart=False):
         self.debug = debug
 
         self._prompt_wraps = {
@@ -95,7 +95,7 @@ class Bot:
 
         self.settings.add_standard_keys()
         self.accounts.add_standard_keys()
-        self.info.add_standard_keys()
+        self.info.add_standard_keys(autostart=autostart)
 
         # load modules
         self.modules.load_init()
