@@ -121,6 +121,7 @@ suggestions/*
 /log.txt
 
 /modules/responses_module/*/
+/goshu.bat
 
 ## 2to3, mainly
 *.bak
